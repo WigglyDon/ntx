@@ -26,8 +26,11 @@ and Save/Yes route. Normal Stop published ordinary generation2; verified old-pro
 absence and a new cold process then loaded directly into the room without the
 opening. Analog movement, normal joined Stop and actual return passed with both
 GameCube profiles unchanged. The core GL0502 flag remains diagnosed before host
-presentation; no renderer/performance fix is claimed. Process-restored scenes and
-supported cross-system continuity still need qualification. Some intro hitches were owner-observed. See
+presentation; no renderer/performance fix is claimed. A subsequent N64 → direct Dolphin WW → N64 switch restored the unsaved N64
+room position/camera after actual capture/join/unload, with independent references
+and current ordinary generation unchanged on return. Normal Stop/actual return,
+unchanged GC cards and untouched TP profile passed. This used one app process;
+fresh-process machine scenes and representative GC/N64/GC return remain pending. Some intro hitches were owner-observed. See
 [the exact migration boundary](IDENTITY_MIGRATION.md).
 
 ## Earned GameCube baseline: preserve, do not replay

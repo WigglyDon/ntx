@@ -1,3 +1,11 @@
+> Continuity increment: installed source1dc7db2 now also passes N64 → direct
+> Dolphin WW → N64 with the unsaved N64 room position/camera restored after
+> actual native capture/join/unload. Game/profile/scene references remain separate;
+> N64 ordinary generation2 was unchanged on restore. Normal final Stop and actual
+> return passed; both GC cards and every untouched TP profile file are unchanged.
+> This used sequential runtimes in one app process. Fresh-process machine scenes
+> and the representative GC/N64/GC return remain the next prepared boundary.
+
 > Latest result: source1dc7db2/APK1cb108de is installed with prior data and all
 > three identities retained. Ocarina now passes in-game pause/Save, normal joined
 > Stop, full-process ordinary-save cold reload directly to its room, analog input

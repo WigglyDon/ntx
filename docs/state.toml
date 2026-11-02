@@ -116,3 +116,9 @@ observed = "Protected update retained every previous data file and all three ide
 graphics = "One GL0502 flag was observed before NTX presentation at the affected pause boundary; host presentation and controls continued. Core renderer error cause and intro hitches remain unmeasured; no broad performance fix"
 audio = "Reuses owner-confirmed clear sound from prior audio-handoff build; current joins report actual host-stack AudioTrack writes, not a new human audibility claim"
 remaining = "Full-process machine restore, supported cross-system switch and alpha comfort; no wider cartridge, Fold or simultaneous-native-instance qualification"
+
+[pixel_cross_system_20261102]
+source = "1dc7db2fe32578e5d50c06cec64fa7624f9ac48c"
+observed = "N64 unsaved room position captured, native Mupen joined/unloaded, direct Dolphin WW frame observed, WW captured/joined, new Mupen runtime restored the unsaved N64 position/camera. Separate game/profile/checkpoint references retained; current N64 ordinary generation2/image unchanged on restore"
+return = "Final normal N64 Stop, client retirement and actual OFF return completed. Both independent GC cards and every untouched TP profile file unchanged; expected WW backend SRAM/cache/new scenes retained"
+limits = "One application process with sequential native runtimes; no simultaneous instances or fresh-process machine-restore result. Next prepared slice covers fresh-process scenes and GC/N64/GC return; ordinary cold reload is already earned"
