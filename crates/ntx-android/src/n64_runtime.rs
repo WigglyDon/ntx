@@ -248,10 +248,13 @@ impl Runtime {
         if let Some(core) = self.core.as_mut() {
             core.stop()?;
             let (video_callbacks, audio_acknowledged) = core.observations();
-            let audio_written = self.resources.borrow().written_audio_frames;
+            let resources = self.resources.borrow();
+            let audio_written = resources.written_audio_frames;
+            let backend_gl_errors = resources.graphics.backend_gl_errors;
             platform::diagnostic(&format!(
-                "N64 joined: {video_callbacks} accepted video callbacks, {audio_acknowledged} acknowledged stereo frames (including muted/background), {audio_written} stereo frames written to AudioTrack on host stack; not audible proof; profile writer retained"
+                "N64 joined: {video_callbacks} accepted video callbacks, {audio_acknowledged} acknowledged stereo frames (including muted/background), {audio_written} stereo frames written to AudioTrack on host stack, {backend_gl_errors} GL flags observed before host presentation; not audible proof; profile writer retained"
             ));
+            drop(resources);
             if !self.failed && self.pending.is_none() {
                 let bytes = core.ordinary_image()?;
                 self.store.commit(&bytes).map_err(|e| e.to_string())?;

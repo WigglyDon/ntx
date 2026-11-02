@@ -17,11 +17,13 @@ and exact ordinary bytes, with unchanged legacy source and verified physical OFF
 return. Both original media grants and a short current-package GameCube boundary
 are verified: WW Start/Pause/Resume/normal Stop and TP native frame/Pause/normal
 Stop, with both ordinary cards unchanged and normal backend SRAM updates retained.
-Home/reentry was not exercised. Actual N64 initialization and execution reached
-an audio callback, then ART aborted a JNI call on the core's alternate stack.
-The bounded Rust PCM handoff repair passes host/Android checks but awaits device
-verification. Controllable N64 play/audio/save/reload and cross-system continuity
-remain unqualified. See
+GameCube Home/reentry was not exercised. The N64 PCM handoff repair now reaches
+first-room analog movement and owner-confirmed clear sound. A new ordinary file
+survived normal Stop/full process exit/cold native reload. Home checkpoint/hot
+return, Pause/normal Stop and actual return also completed with the other profiles
+unchanged. Game Start/pause then exposed GL error0502; in-game Save after play,
+the GL boundary repair, process-restored scenes and cross-system continuity still
+need qualification. Some intro hitches were owner-observed. See
 [the exact migration boundary](IDENTITY_MIGRATION.md).
 
 ## Earned GameCube baseline: preserve, do not replay

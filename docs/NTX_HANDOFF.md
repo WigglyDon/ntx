@@ -1,19 +1,20 @@
-> 2026-11-01 continuation: sourceb62b842/APK67e604e9 is installed on Pixel4.
+> 2026-11-02 continuation: sourcefc6e300/APK87a248ff is installed on Pixel4.
 > Both original media grants and game/profile pairs are verified, both ordinary
 > cards remain byte-identical, and short WW Start/Pause/Resume/Stop plus TP
 > native-frame/Pause/Stop passed. Normal client retirement and actual OFF return
 > are verified. Original installation, signer and recovery material remain.
-> The retained first N64 entry reached actual execution after the GLES3 enum fix,
-> then ART aborted AudioTrack JNI on Mupen's alternate stack. Current source
-> buffers PCM there and delivers it after returning to the host stack;92 portable
-> tests and warnings-denied host/Android checks pass. Device verification remains
-> pending. Same-signer APK87a248ff/sourcefc6e300 is built, audited and privately
-> preserved with matching source; it is not installed. Crash recovery verified
-> native exit, unchanged original cards/SRAM,
-> retained entry/error and actual return. No NTX request or custody remains.
+> The N64 audio handoff repair now reaches actual first-room analog movement,
+> owner-confirmed clear sound and cold native reload of a newly created ordinary
+> file. Home wrote a checkpoint; hot return, Pause/normal Stop and actual return
+> completed with independent profiles unchanged. Opening the game pause menu
+> exposed GL error0502 before in-game Save. Current source separates preexisting
+> backend error flags from host framebuffer-copy/control drawing errors; this
+> graphics change still needs its bound package and affected device check.
+>92 portable tests remain earned; current Android warnings-denied lint passes.
+> Original source/signing/progress/recovery remain retained. No NTX custody remains.
 > Before the next admitted task, reconcile current document access with the same
 > IDs and saves. Private availability and task preparation remain local-only.
-> N64 play/save/continuity is next; no broad lifecycle pass is claimed.
+> Finish N64 game-pause/Save and supported continuity; no broad lifecycle pass.
 
 > Current sole-successor status (2026-10-29): full active identity and linked
 > packages are implemented; direct Dolphin remains direct. Pixel4 app-side data

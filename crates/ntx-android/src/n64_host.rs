@@ -130,6 +130,7 @@ pub struct Graphics {
     color: i32,
     round: i32,
     opacity: f32,
+    pub backend_gl_errors: u64,
 }
 impl Graphics {
     pub fn new(window: &NativeWindow) -> Result<Self> {
@@ -149,6 +150,7 @@ impl Graphics {
             color: 0,
             round: 0,
             opacity: 0.85,
+            backend_gl_errors: 0,
         };
         // SAFETY: EGL outputs point to initialized owned fields, all calls on owner thread.
         unsafe {
@@ -304,6 +306,31 @@ impl Graphics {
         }
         // SAFETY: core has unbound its tracked state before the host video callback.
         unsafe {
+            // Error flags belong to the shared context and survive the core's
+            // state unbind. Diagnose preexisting core flags before attributing
+            // subsequent errors to our own framebuffer copy or overlay.
+            for attempt in 0..16 {
+                let error = glGetError();
+                if error == 0 {
+                    break;
+                }
+                if !matches!(error, 0x0500 | 0x0501 | 0x0502 | 0x0506) {
+                    // OOM/context loss may leave state unusable; never continue.
+                    return Err(format!(
+                        "N64 backend GL failure before presentation {error:x}"
+                    ));
+                }
+                self.backend_gl_errors = self.backend_gl_errors.saturating_add(1);
+                if self.backend_gl_errors <= 8 {
+                    platform::diagnostic(&format!(
+                        "Mupen GL flag {error:x} already present before NTX presentation; backend diagnostic {}",
+                        self.backend_gl_errors
+                    ));
+                }
+                if attempt == 15 {
+                    return Err("N64 backend GL flags did not clear at the host boundary".into());
+                }
+            }
             let (mut w, mut h) = (0, 0);
             if eglQuerySurface(self.display, self.surface, 0x3057, &mut w) == 0
                 || eglQuerySurface(self.display, self.surface, 0x3056, &mut h) == 0
@@ -337,6 +364,10 @@ impl Graphics {
                 0x4000,
                 0x2600,
             );
+            let error = glGetError();
+            if error != 0 {
+                return Err(format!("N64 host framebuffer-copy GL error {error:x}"));
+            }
             glBindFramebuffer(0x8d40, 0);
             glViewport(0, 0, w, h);
             glUseProgram(self.program);
@@ -423,7 +454,7 @@ impl Graphics {
             glBindFramebuffer(0x8d40, 0);
             let error = glGetError();
             if error != 0 {
-                return Err(format!("N64 presentation GL error {error:x}"));
+                return Err(format!("N64 host controls-drawing GL error {error:x}"));
             }
             if eglSwapBuffers(self.display, self.surface) == 0 {
                 return Err("N64 surface presentation failed".into());

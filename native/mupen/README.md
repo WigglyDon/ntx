@@ -11,8 +11,12 @@ owns the libretro adapter, Android EGL/GLES/audio, N64 controls and independent
 profile/save/scene routing. Sourceb62b842/APK67e604e9 reached actual N64 execution
 after correcting the hardware-context enum, then ART aborted AudioTrack JNI on
 the core's alternate stack. Current source hands copied PCM back to the host
-stack before managed delivery; this repair still needs device verification.
-No playable/save/reload/scene or cross-system acceptance is claimed.
+stack before managed delivery. Its signed candidate now reaches first-room play
+with observed analog movement, owner-confirmed clear sound and a cold reload of
+the newly created ordinary file. The game pause transition exposed GL error0502;
+the host now diagnoses flags already present at the core handoff separately from
+its framebuffer-copy/control drawing errors. In-game Save after play and this
+graphics repair still need verification. Cross-system acceptance remains open.
 
 ## Source and reproduction
 
@@ -51,6 +55,13 @@ bindings. The unsigned source-rebuild route needs no private signer.
 | Input | One analog stick, digital C-up/down/left/right, independent digital L/R and Z, D-pad, A/B/Start. Default core mapping is fixed explicitly; pointer capture, quick presses, simultaneous input and cancellation are Rust policy. No GameCube C-stick/analog-shoulder or PS1 mask transplant. |
 | Shutdown | An unopened coroutine is never started just to stop it. Native stopped state is acknowledged before library/context release. Failed join/publication retains native memory, host resources and writer ownership; successful teardown keeps the writer through durable session publication. |
 | Scheduling | Multiple independent SavedSessions/profiles share one foreground runtime policy. Native globals permit one Mupen instance per process until isolation is qualified; that is a runtime capability, not a one-game identity model. Background pause/silence is the default. |
+
+The core and frontend share a GL error flag, which is not cleared by state unbind.
+The host drains and bounds diagnostics for preexisting invalid-command flags before
+its own GL work, then checks framebuffer copy and overlay separately. Memory/context
+failures still stop presentation. This follows the actual
+[GLES error semantics](https://registry.khronos.org/OpenGL-Refpages/es3.0/html/glGetError.xhtml);
+it does not prove that a backend-rendered frame is correct or qualify a game menu.
 
 ## Terms and resources
 
