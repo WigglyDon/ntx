@@ -831,6 +831,42 @@ class PacketTests(unittest.TestCase):
             self.f.driver.execute(tap)
         self.assertFalse(any("input" in c for c in self.f.calls))
 
+    def test_prepared_inspection_window_handles_model_latency_but_stays_single_use(self):
+        self.f.driver.inspection_seconds = 90
+        self.f.driver.execute({"op": "capture", "name": "native.png"})
+        self.f.now += 84
+        tap = {"op": "ntx_tap", "capture": "native.png", "target": "Pause",
+               "bounds": [30, 300, 90, 390]}
+        self.f.driver.execute(tap)
+        self.assertEqual(self.f.calls[-1], ["shell", "input", "tap", "60", "345"])
+        with self.assertRaises(packet.Refused):
+            self.f.driver.execute(tap)
+
+    def test_prepared_inspection_window_still_refuses_expiry_and_focus_change(self):
+        self.f.driver.inspection_seconds = 90
+        self.f.driver.execute({"op": "capture", "name": "native.png"})
+        tap = {"op": "ntx_tap", "capture": "native.png", "target": "Pause",
+               "bounds": [30, 300, 90, 390]}
+        self.f.now += 91
+        with self.assertRaises(packet.Refused):
+            self.f.driver.execute(tap)
+        self.f.now -= 7
+        self.f.windows = WINDOW.replace(OWN, "com.example.other")
+        with self.assertRaises(packet.Refused):
+            self.f.driver.execute(tap)
+        self.assertFalse(any("input" in c for c in self.f.calls))
+
+    def test_inspection_window_must_be_finite_and_explicitly_prepared(self):
+        for value in (0, -1, 91, True, 30.0, "90", None):
+            with self.subTest(value=value), self.assertRaises(packet.Refused):
+                packet.Driver(self.f.driver.root, self.f.budget, self.f.invoke,
+                              inspection_seconds=value)
+        default = packet.Driver(self.f.driver.root, self.f.budget, self.f.invoke)
+        prepared = packet.Driver(self.f.driver.root, self.f.budget, self.f.invoke,
+                                 inspection_seconds=90)
+        self.assertEqual(default.inspection_seconds, 30)
+        self.assertEqual(prepared.receipt["inspection_seconds"], 90)
+
     def test_native_image_age_is_rechecked_at_dispatch_after_slow_focus_queries(self):
         self.f.driver.execute({"op": "capture", "name": "native.png"})
         self.f.now += 10

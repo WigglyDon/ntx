@@ -377,7 +377,8 @@ def hash_arguments(paths):
 
 class Driver:
     def __init__(self, root, budget, invoke, clock=time.monotonic, sleep=time.sleep, *,
-                 capture_limit=8, byte_limit=268435456, stick_ms_limit=1000):
+                 capture_limit=8, byte_limit=268435456, stick_ms_limit=1000,
+                 inspection_seconds=30):
         # These are prepared task bounds, not authority or policy overrides.
         # Existing callers retain their original eight/ten-image and byte caps.
         if type(capture_limit) is not int or not 1 <= capture_limit <= 160:
@@ -386,9 +387,12 @@ class Driver:
             raise Refused("invalid admitted collected-byte ceiling")
         if type(stick_ms_limit) is not int or not 100 <= stick_ms_limit <= 4000:
             raise Refused("invalid admitted stick-contact ceiling")
+        if type(inspection_seconds) is not int or not 1 <= inspection_seconds <= 90:
+            raise Refused("invalid admitted image-inspection bound")
         self.capture_limit = capture_limit
         self.byte_limit = byte_limit
         self.stick_ms_limit = stick_ms_limit
+        self.inspection_seconds = inspection_seconds
         self.root, self.budget, self.invoke = Path(root), budget, invoke
         self.clock, self.sleep = clock, sleep
         self.operation_end = budget.commands_end
@@ -402,6 +406,7 @@ class Driver:
                         "capture_limit": capture_limit,
                         "byte_limit": byte_limit,
                         "stick_ms_limit": stick_ms_limit,
+                        "inspection_seconds": inspection_seconds,
                         "phase": "admitted", "recovery_resolved": False}
 
     def save(self):
@@ -661,7 +666,8 @@ class Driver:
             if cleanup and command["target"] != "Pause":
                 raise Refused("cleanup native input is Pause only")
             capture = self.last_capture
-            if not capture or capture[0] != command["capture"] or self.clock() - capture[1] > 30:
+            if (not capture or capture[0] != command["capture"]
+                    or self.clock() - capture[1] > self.inspection_seconds):
                 age = None if not capture else round(self.clock() - capture[1], 3)
                 raise Refused(f"native tap requires a fresh inspected own capture; age_seconds={age}")
             focus = self.focus()
@@ -672,7 +678,7 @@ class Driver:
             frames = focus[1][2]
             if len(frames) != 1 or tuple(map(int, frames[0][:2])) != capture[3]:
                 raise Refused("native capture/display geometry is not coherent")
-            if self.clock() - capture[1] > 30:
+            if self.clock() - capture[1] > self.inspection_seconds:
                 raise Refused(f"native capture expired during focus verification; age_seconds={self.clock()-capture[1]:.3f}")
             bounds = command["bounds"]
             if len(bounds) != 4 or any(type(v) is not int for v in bounds):
