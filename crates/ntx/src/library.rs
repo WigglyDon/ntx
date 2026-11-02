@@ -199,6 +199,48 @@ impl Collection {
         game.media_relink_required = false;
         Ok(())
     }
+    /// Explicit owner confirmation for an older, stopped entry that never
+    /// recorded its media digest. This establishes a first fingerprint; it
+    /// cannot replace a known fingerprint or rebind a machine continuation.
+    pub fn confirm_legacy_media(
+        &mut self,
+        id: &str,
+        uri: &str,
+        observed: &str,
+        system: crate::backend::System,
+        backend: crate::backend::Backend,
+    ) -> Result<(), &'static str> {
+        let index = self.resolve_game(id)?;
+        let game = &self.entries[index];
+        if !game.media_relink_required
+            || game.media_sha256.is_some()
+            || game.checkpoint.is_some()
+            || game.runtime_incomplete
+            || game.restart_required
+            || !game.stopped
+            || (game.system, game.backend) != (system, backend)
+            || backend.system() != system
+        {
+            return Err(
+                "This game needs verified original media; its progress and recovery are retained.",
+            );
+        }
+        if !valid_media_locator(uri)
+            || !crate::storage::valid_digest(observed)
+            || self
+                .entries
+                .iter()
+                .enumerate()
+                .any(|(i, e)| i != index && e.uri == uri)
+        {
+            return Err("Invalid or already assigned media locator.");
+        }
+        let game = &mut self.entries[index];
+        game.uri = uri.into();
+        game.media_sha256 = Some(observed.into());
+        game.media_relink_required = false;
+        Ok(())
+    }
     /// The host classified the actual freshly granted bytes, not a filename.
     /// Legacy failed imports with no bound scene/media may acquire their real
     /// route without allocating identities. Existing bound progress refuses a
@@ -326,6 +368,91 @@ impl Collection {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn legacy_file_confirmation_preserves_identity_and_current_save_intent() {
+        use crate::backend::{Backend, System};
+        let mut game = entry();
+        game.media_relink_required = true;
+        game.stopped = true;
+        game.paused = true;
+        game.last_error = Some("Retained earlier diagnostic".into());
+        let mut collection = Collection {
+            schema_version: 2,
+            selected: Some(game.game_id.0.clone()),
+            entries: vec![game.clone()],
+        };
+        let chosen = "content://new-provider/original-game";
+        let digest = "e".repeat(64);
+        assert!(
+            collection
+                .relink_game(&game.game_id.0, chosen, &digest)
+                .is_err()
+        );
+        collection
+            .confirm_legacy_media(
+                &game.game_id.0,
+                chosen,
+                &digest,
+                System::GameCube,
+                Backend::Dolphin,
+            )
+            .unwrap();
+        let result = &collection.entries[0];
+        assert_eq!(result.game_id, game.game_id);
+        assert_eq!(result.profile_id.0, game.profile_id.0);
+        assert_eq!(result.last_error, game.last_error);
+        assert_eq!(collection.selected, Some(game.game_id.0));
+        assert!(result.stopped && result.paused && !result.media_relink_required);
+        assert_eq!(result.media_sha256.as_deref(), Some(digest.as_str()));
+        assert!(!result.boot_allowed());
+    }
+    #[test]
+    fn legacy_confirmation_cannot_override_fingerprint_scene_live_owner_or_route() {
+        use crate::backend::{Backend, System};
+        let mut game = entry();
+        game.media_relink_required = true;
+        game.stopped = true;
+        for change in 0..8 {
+            let mut candidate = game.clone();
+            match change {
+                0 => candidate.media_sha256 = Some("f".repeat(64)),
+                1 => candidate.checkpoint = Some("f".repeat(64)),
+                2 => candidate.runtime_incomplete = true,
+                3 => candidate.stopped = false,
+                4 => candidate.restart_required = true,
+                5 => candidate.media_relink_required = false,
+                _ => {}
+            }
+            let mut collection = Collection {
+                schema_version: 2,
+                entries: vec![candidate],
+                selected: None,
+            };
+            let before = serde_json::to_vec(&collection).unwrap();
+            let route = if change == 6 {
+                (System::Nintendo64, Backend::Mupen64PlusNext)
+            } else {
+                (System::GameCube, Backend::Dolphin)
+            };
+            let digest = if change == 7 {
+                "invalid".into()
+            } else {
+                "e".repeat(64)
+            };
+            assert!(
+                collection
+                    .confirm_legacy_media(
+                        &game.game_id.0,
+                        "content://new-provider/original-game",
+                        &digest,
+                        route.0,
+                        route.1
+                    )
+                    .is_err()
+            );
+            assert_eq!(serde_json::to_vec(&collection).unwrap(), before);
+        }
+    }
     #[test]
     fn host_locator_changes_do_not_reidentify_a_game_profile_or_scene() {
         let mut game = entry();

@@ -70,10 +70,16 @@ New package grants are not inferred from old URI strings. Migrated entries remai
 blocked for media access. Selecting the same original document through the new
 picker can durably reacquire access without creating a new game/profile; where a
 checkpoint exists, its media digest must match. Internal game links do not count
-as grant acquisition. A changed locator is accepted only against the preserved media fingerprint;
-otherwise only the exact original locator can be reacquired. Optional protected
-media-identities.json exports or retained checkpoint bindings supply that original
-fingerprint. New successful boots preserve it independently of checkpoints. Package-targeted old
+as grant acquisition. A changed locator normally requires the preserved media
+fingerprint. For an older stopped entry with no recorded fingerprint or active
+checkpoint, the owner can explicitly confirm its original file after fresh byte
+and system inspection. Confirmation establishes the first fingerprint and keeps
+the existing game/profile and ordinary files; it cannot replace a known digest,
+change systems, bypass a live/recovery owner or rebind a saved machine. Android
+rechecks the chosen bytes and current menu/entry before durable publication.
+Canceling leaves the original entry intact. Optional protected
+media-identities.json exports or retained checkpoint bindings can also supply the
+original fingerprint. New successful boots preserve it independently of checkpoints. Package-targeted old
 shortcuts may require re-pinning. No automatic legacy-app forwarding is installed.
 
 Pixel and Fold transfer/rollback, linked package/ABI checks, actual progress and

@@ -200,6 +200,7 @@ pub enum Command {
     PinCurrent,
     Selected(String),
     DocumentSelected(String),
+    ConfirmLegacyMedia(u64),
     Canceled,
     MenuHidden(u64),
     Error(String),
@@ -834,6 +835,23 @@ pub fn relink_menu(app: &AndroidApp, title: &str) {
             ntx::presentation::game_title(title)
         ),
         vec![(12, "Choose game file".into()), (6, "Library".into())],
+        0,
+    );
+}
+pub fn confirm_legacy_media_menu(app: &AndroidApp, title: &str, filename: &str) {
+    render_menu(
+        app,
+        true,
+        format!(
+            "{}\nIs {} the original file for this game? This older entry cannot verify a replacement automatically. Confirming keeps its in-game saves and starts with current progress.",
+            ntx::presentation::game_title(title),
+            ntx::presentation::game_title(filename)
+        ),
+        vec![
+            (17, "Use this game file".into()),
+            (12, "Choose another file".into()),
+            (6, "Library".into()),
+        ],
         0,
     );
 }
@@ -1711,12 +1729,13 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_uiAction(
         }
         11 => push(Command::ControlsBack(menu as u64)),
         13..=16 => push(Command::N64Comfort(menu as u64, action)),
+        17 => push(Command::ConfirmLegacyMedia(menu as u64)),
         20..=25 if controls_ui::action(&mut env, action, menu as u64).is_err() => {
             let _ = env.exception_clear();
         }
         _ => {}
     }
-    if matches!(action, 1..=16 | 20..=25) {
+    if matches!(action, 1..=17 | 20..=25) {
         feedback(&mut env, &activity);
     }
 }

@@ -31,6 +31,13 @@ static OWNER: AtomicBool = AtomicBool::new(false);
 static NEXT_RUNTIME: AtomicU64 = AtomicU64::new(1);
 static UI: Mutex<PlayerView> = Mutex::new(PlayerView::new());
 static MISSING_PRESENT_REPORTED: AtomicBool = AtomicBool::new(false);
+struct MediaConfirmation {
+    game_id: String,
+    uri: String,
+    digest: String,
+    system: ntx::backend::System,
+    backend: ntx::backend::Backend,
+}
 pub(crate) fn haptics_enabled() -> bool {
     UI.lock().is_ok_and(|ui| ui.haptics())
 }
@@ -1076,6 +1083,7 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
     let mut destroyed = false;
     let mut hidden = false;
     let mut picker_pending = false;
+    let mut media_confirmation: Option<MediaConfirmation> = None;
     let mut native_paused = None;
     let mut surface_pending = false;
     let mut surface_traced = false;
@@ -1342,6 +1350,12 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
             }
         });
         for command in platform::commands() {
+            if !matches!(
+                &command,
+                Command::ConfirmLegacyMedia(_) | Command::Notice(_)
+            ) {
+                media_confirmation = None;
+            }
             let command = match command {
                 Command::NativeError {
                     game_id,
@@ -1380,6 +1394,42 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
                         continue;
                     }
                 }
+                Command::ConfirmLegacyMedia(menu) => {
+                    let Some(pending) = media_confirmation.take() else {
+                        continue;
+                    };
+                    if !platform::menu_current(menu)
+                        || runtime.is_some()
+                        || selected
+                            .is_none_or(|i| collection.entries[i].game_id.0 != pending.game_id)
+                    {
+                        continue;
+                    }
+                    let index = collection.resolve_game(&pending.game_id)?;
+                    let observed = platform::open_document(&pending.uri)
+                        .and_then(|file| media_digest(pending.system, file));
+                    if !observed.is_ok_and(|digest| digest == pending.digest) {
+                        platform::notice(app, "The chosen file changed or is unavailable. Choose the original again; your saves are retained.".into());
+                        continue;
+                    }
+                    let earlier = collection.entries[index].clone();
+                    if let Err(error) = collection.confirm_legacy_media(
+                        &pending.game_id,
+                        &pending.uri,
+                        &pending.digest,
+                        pending.system,
+                        pending.backend,
+                    ) {
+                        platform::notice(app, error.into());
+                        continue;
+                    }
+                    if let Err(error) = save_collection(&root, &collection) {
+                        collection.entries[index] = earlier;
+                        platform::notice(app, format!("Could not preserve media access: {error}"));
+                        continue;
+                    }
+                    Command::Selected(pending.uri)
+                }
                 Command::DocumentSelected(uri) => {
                     picker_pending = false;
                     let relink = collection
@@ -1410,6 +1460,38 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
                             }
                         };
                         let earlier = collection.entries[index].clone();
+                        if earlier.media_sha256.is_none() && earlier.uri != uri {
+                            let mut proposed = collection.clone();
+                            if runtime.is_some() {
+                                platform::notice(
+                                    app,
+                                    "Stop the current game before confirming its original file."
+                                        .into(),
+                                );
+                                continue;
+                            }
+                            if let Err(error) = proposed.confirm_legacy_media(
+                                &earlier.game_id.0,
+                                &uri,
+                                &observed,
+                                route.0,
+                                route.1,
+                            ) {
+                                platform::notice(app, error.into());
+                                continue;
+                            }
+                            let filename = platform::display_name(&uri)
+                                .unwrap_or_else(|_| "the selected file".into());
+                            media_confirmation = Some(MediaConfirmation {
+                                game_id: earlier.game_id.0.clone(),
+                                uri,
+                                digest: observed,
+                                system: route.0,
+                                backend: route.1,
+                            });
+                            platform::confirm_legacy_media_menu(app, &earlier.title, &filename);
+                            continue;
+                        }
                         if let Err(error) = collection.relink_game_routed(
                             &earlier.game_id.0,
                             &uri,
@@ -1464,7 +1546,10 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
                 other => other,
             };
             match command {
-                Command::NativeError { .. } | Command::Game(_) | Command::DocumentSelected(_) => {
+                Command::NativeError { .. }
+                | Command::Game(_)
+                | Command::DocumentSelected(_)
+                | Command::ConfirmLegacyMedia(_) => {
                     continue;
                 }
                 Command::Controls(menu, width, height) => {
