@@ -1,9 +1,13 @@
 > Current continuation note: installedb61 reaches the first-room HUD; the affected
 > game-pause/Save check is still pending. A later foreground departure kept the
-> process alive; its cause is unresolved. Source now requests foreground-player
-> screen-on and clears it for menus. This is an app-window change, not a device
-> setting or a claimed fix for the departure. Android warnings-denied lint passes.
-> Actual custody/recovery and next prepared artifacts remain local-only.
+> process alive; its cause is unresolved. Source1dc7db2 requests foreground-player
+> screen-on and clears it for menus. Its signed, audited APK1cb108de and exact source
+> are preserved, uninstalled. This is an app-window change, not a device setting or
+> a claimed fix for the departure. Android warnings-denied lint passes. Source63a7479
+> adds a native-free protected-copy N64 scene inspector with independent binding and
+> current ordinary-data validation; its focused integration test and lint pass.
+> Actual custody/recovery and prepared task inputs remain local-only. Resolve the
+> current return obligation through the installed custodian before new phone work.
 
 > 2026-11-02 continuation: source058df24/APKb61cad8e is installed on Pixel4.
 > Both original media grants and game/profile pairs are verified, both ordinary
@@ -21,7 +25,8 @@
 >92 portable tests remain earned; current Android warnings-denied lint passes.
 >99 offline helper checks pass; prepared image-inspection bounds accommodate
 > actual tool latency while retaining focus, geometry and single-use checks.
-> Original source/signing/progress/recovery remain retained. No NTX custody remains.
+> Original source/signing/progress/recovery remain retained. Earlier completed
+> returns establish only their own task results, not current device availability.
 > Before the next admitted task, reconcile current document access with the same
 > IDs and saves. Private availability and task preparation remain local-only.
 > Finish N64 game-pause/Save and supported continuity; no broad lifecycle pass.

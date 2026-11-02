@@ -23,7 +23,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "GL error-boundary candidateb61cad8e/source058df24 is built/signed/preserved. Qualify the affected N64 game-pause/Save route and supported scene/cross-system continuity. Reuse earned first-room movement, clear sound and ordinary-file cold reload. Prepared helper now supports measured inspection latency; private availability/preparation stay local-only; Fold needs its fresh personal window"
+next_step = "Foreground-window candidate1cb108de/source1dc7db2 is built/signed/preserved but uninstalled; installedb61/source058 reaches the first-room HUD without reaching the affected game-pause/Save check. Resolve actual private return/admission before the protected update, affected game-pause/Save and supported scene/cross-system continuity. Reuse earned first-room movement, clear sound and ordinary-file cold reload; Fold needs its fresh personal window"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["N64 game-pause transition: GL0502 attributed to shared-context presentation; error-boundary repair awaits affected qualification", "N64 intro hitches: owner observed, unmeasured", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -52,6 +52,7 @@ device_actions = "Same-signer APK87a248ff/sourcefc6e300 protected update verifie
 [validation]
 host = "92 portable library tests passed, including GLES3 callback ABI, deferred copied PCM ordering/bounds/silence/failure handling, foreground game identity and frame deadlines; retained 15 decoder and 3 integration checks; host all-targets and ARM64 Android lints deny warnings"
 helpers = "99 offline packet fixtures passed, including bounded prepared inspection, expiry/focus rejection, single-use contacts and empty viewport-read retries"
+n64_inspector = "Protected-copy-only native-free inspector source63a7479 validates the actual N64 container against an independent binding and current ordinary generation/image. Focused integration fixture preserves valid-copy bytes and rejects wrong-core and changed-ordinary inputs; warnings-denied bin/test Clippy passed. No native restore or device result follows"
 lints = "Warnings-denied host all-targets including native declarations and ARM64 Android Clippy passed; no mock native library or fingerprints"
 android_shell = "Java compiler module, DEX namespace and compiled resources/manifest checked; canonical package/activity/label confirmed"
 native = "Full renamed Dolphin build completed; pinned Mupen core compiled with declared patches; actual header/entrypoint/result/yield/shutdown fixtures and exact patch reproduction passed"
@@ -103,5 +104,7 @@ return = "Completed with actual client retirement and physical OFF under the adm
 limits = "Short affected-boundary check only. Historical later-play Pause/reentry remains unresolved; N64 runtime qualification pending."
 
 [foreground_player_window]
+implementation_source = "1dc7db2fe32578e5d50c06cec64fa7624f9ac48c"
+apk_sha256 = "1cb108ded7112147866df531da0bcdf4077eb9ea11c999c31170020347824e44"
 source = "Foreground player requests FLAG_KEEP_SCREEN_ON; menus clear it, and Android background window semantics remain ordinary. No device timeout, service or permission change"
-validation = "ARM64 Android release Clippy denies warnings; source/formats checked. Actual idle-window check and cause of prior departure remain unqualified"
+validation = "ARM64 Android release Clippy denies warnings; package signed with retained signer, audited and preserved with corresponding source. Uninstalled; actual idle-window check and cause of prior departure remain unqualified"
