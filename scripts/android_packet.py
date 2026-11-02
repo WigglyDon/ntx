@@ -484,15 +484,28 @@ class Driver:
 
     def capture_panel(self, focus):
         query = ["shell", "dumpsys display | grep 'DisplayViewport{' "]
-        before = self.call(query)
+        def observe():
+            attempts = []
+            for attempt in range(3):
+                result = self.call(query)
+                attempts.append(result.stdout + b"\nSTDERR\n" + result.stderr)
+                if result.stdout.strip() or attempt == 2:
+                    break
+                # A missing read-only observation supplies no viewport. Retry
+                # only that observation, within the current operation deadline;
+                # a changed/ambiguous viewport is still an immediate refusal.
+                self.sleep(0.1)
+            return result, b"\nREAD_RETRY\n".join(attempts)
+
+        before, before_evidence = observe()
         if before.returncode:
             raise Refused("active viewport query failed")
         panel = active_physical_viewport(before.stdout.decode(), focus[1][0])
         # shell-v2 keeps multi-panel warnings on stderr, outside the PNG stream.
         result = self.call(["shell", "-T", "screencap", "-d", panel, "-p"])
-        after = self.call(query)
+        after, after_evidence = observe()
         evidence = self.root / f"capture-viewport-{self.captures}.private.txt"
-        evidence.write_bytes(before.stdout + b"\nAFTER\n" + after.stdout +
+        evidence.write_bytes(before_evidence + b"\nAFTER\n" + after_evidence +
                              b"\nCAPTURE_STDERR\n" + result.stderr)
         evidence.chmod(0o600)
         try:

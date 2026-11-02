@@ -622,6 +622,42 @@ class PacketTests(unittest.TestCase):
         self.assertEqual(len(self.f.calls),2)
         self.assertFalse(any('input' in call or 'screencap' in call for call in self.f.calls))
 
+    def test_empty_viewport_read_retries_observation_without_replaying_capture(self):
+        invoke = self.f.driver.invoke
+        observations = 0
+        def transient(args, timeout):
+            nonlocal observations
+            if args == ["shell", "dumpsys display | grep 'DisplayViewport{' "]:
+                observations += 1
+                if observations == 2:
+                    self.f.calls.append(args)
+                    return subprocess.CompletedProcess(args, 1, b"", b"")
+            return invoke(args, timeout)
+        self.f.driver.invoke = transient
+        self.f.driver.execute({"op": "capture", "name": "viewport.png"})
+        self.assertEqual(observations, 3)
+        self.assertEqual(sum("screencap" in call for call in self.f.calls), 1)
+        self.assertFalse(self.f.driver.budget.forced_cleanup)
+        self.assertFalse(any("input" in call for call in self.f.calls))
+
+    def test_missing_viewport_retries_remain_bounded_and_do_not_authorize_input(self):
+        invoke = self.f.driver.invoke
+        observations = 0
+        def missing(args, timeout):
+            nonlocal observations
+            if args == ["shell", "dumpsys display | grep 'DisplayViewport{' "]:
+                observations += 1
+                if observations > 1:
+                    self.f.calls.append(args)
+                    return subprocess.CompletedProcess(args, 1, b"", b"")
+            return invoke(args, timeout)
+        self.f.driver.invoke = missing
+        with self.assertRaises(packet.Refused):
+            self.f.driver.execute({"op": "capture", "name": "viewport.png"})
+        self.assertEqual(observations, 4)
+        self.assertTrue(self.f.driver.budget.forced_cleanup)
+        self.assertFalse(any("input" in call for call in self.f.calls))
+
     def test_mismatch_blocks_capture_and_touch_before_mutation(self):
         self.f.windows = f"mCurrentFocus=Window{{1 u0 {OTHER}}}"
         for command in ({"op": "capture", "name": "wrong.png"},
