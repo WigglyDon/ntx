@@ -7,7 +7,9 @@
 > then ART aborted AudioTrack JNI on Mupen's alternate stack. Current source
 > buffers PCM there and delivers it after returning to the host stack;92 portable
 > tests and warnings-denied host/Android checks pass. Device verification remains
-> pending. Crash recovery verified native exit, unchanged original cards/SRAM,
+> pending. Same-signer APK87a248ff/sourcefc6e300 is built, audited and privately
+> preserved with matching source; it is not installed. Crash recovery verified
+> native exit, unchanged original cards/SRAM,
 > retained entry/error and actual return. No NTX request or custody remains.
 > Don is manually rearranging games on the devices: keep work off-device until
 > finished, then reconcile moved document access with the same IDs and saves.
