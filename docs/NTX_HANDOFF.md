@@ -9,7 +9,8 @@
 > completed with independent profiles unchanged. Opening the game pause menu
 > exposed GL error0502 before in-game Save. Current source separates preexisting
 > backend error flags from host framebuffer-copy/control drawing errors; this
-> graphics change still needs its bound package and affected device check.
+> graphics candidateb61cad8e/source058df24 is built/signed/preserved and awaits
+> installation and its affected device check.
 >92 portable tests remain earned; current Android warnings-denied lint passes.
 > Original source/signing/progress/recovery remain retained. No NTX custody remains.
 > Before the next admitted task, reconcile current document access with the same

@@ -23,7 +23,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Package and check the GL error-boundary change, then qualify the affected N64 game-pause/Save route and supported scene/cross-system continuity. Reuse earned first-room movement, clear sound and ordinary-file cold reload. Private availability/preparation stay local-only; Fold needs its fresh personal window"
+next_step = "GL error-boundary candidateb61cad8e/source058df24 is built/signed/preserved. Qualify the affected N64 game-pause/Save route and supported scene/cross-system continuity. Reuse earned first-room movement, clear sound and ordinary-file cold reload. Private availability/preparation stay local-only; Fold needs its fresh personal window"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["N64 game-pause transition: GL0502 attributed to shared-context presentation; error-boundary repair awaits affected qualification", "N64 intro hitches: owner observed, unmeasured", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -65,10 +65,16 @@ engine_sha256 = "15da3bfabf03c27171c37f48773a7c7ee24d5470970746718098ccf566ccab7
 status = "GameCube identity/import candidate signed with retained certificate and privately preserved with exact corresponding source; not installed"
 
 [n64_candidate]
-source = "fc6e300015f558802ed29b6871436ec706efdfc3"
-apk_sha256 = "87a248ffd59240da7e4000e1c625e8b27735393323752f4f32600323126c1ca5"
+source = "058df245e82883ff3b02c9cb976a830ea4bfb3eb"
+apk_sha256 = "b61cad8e8792378a46d531967816c514542710931bc89300f808416ca1d21c51"
 core_sha256 = "af7bab08859b6f8a3d224328d603c60e0d0cd40cfe8a36fa77e668e0b826446f"
-status = "Installed audio repair: observed first-room control, owner-confirmed clear sound and ordinary-file cold reload. Home/hot return and normal join/Stop/actual return verified. Game pause exposed GL0502; next source separates preexisting backend flags from host GL errors. In-game Save after play and supported wider continuity remain pending"
+status = "GL boundary candidate built/signed/audited and preserved with corresponding source; not installed. Diagnoses preexisting backend invalid-command flags separately from host framebuffer-copy/control-drawing failures; memory/context failures remain fatal. Actual game-pause/Save check remains required"
+
+[pixel_n64_play_20261102]
+installed_source = "fc6e300015f558802ed29b6871436ec706efdfc3"
+installed_apk_sha256 = "87a248ffd59240da7e4000e1c625e8b27735393323752f4f32600323126c1ca5"
+observed = "First-room analog movement, owner-confirmed clear sound, created ordinary file and full-process cold reload. Home/checkpoint/hot return and normal Stop/actual return completed. All independent GameCube profile files unchanged"
+remaining = "Game Start/pause raised GL0502 before in-game Save after play. Classify/fix the actual GL boundary and qualify the affected menu/Save route; process-restored scene and cross-system acceptance remain open"
 
 [pixel_n64_initialization_20261101]
 installed_source = "b62b8422ee395382e825752024805e55bdfd75a7"
