@@ -2040,6 +2040,20 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
             && window.width() > 32
             && window.height() > 32
         {
+            // A moved document or expired host grant needs access reacquisition,
+            // not another game/profile or an execution attempt. Keep any scene
+            // and its original media fingerprint until the verified relink.
+            if platform::open_document(&collection.entries[index].uri).is_err() {
+                collection.entries[index].media_relink_required = true;
+                hidden = false;
+                if save_collection(&root, &collection).is_ok() {
+                    platform::relink_menu(app, &collection.entries[index].title);
+                } else {
+                    collection.entries[index].media_relink_required = false;
+                    platform::menu(app, true, Some("Could not preserve the request for game-file access. Your progress and retained scene are kept.".into()));
+                }
+                continue;
+            }
             collection.entries[index].runtime_incomplete = true;
             if save_collection(&root, &collection).is_err() {
                 collection.entries[index]

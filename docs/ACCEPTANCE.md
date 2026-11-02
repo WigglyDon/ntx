@@ -14,9 +14,14 @@ relevant warnings-denied lints support this increment. The renamed GameCube APK
 and subsequent combined N64 package were linked, signed with the retained
 identity and privately preserved with exact corresponding source. Pixel4 app-side data migration now preserves both original game/profile pairs
 and exact ordinary bytes, with unchanged legacy source and verified physical OFF/
-return. Media regrant, affected current-package gameplay, actual playable N64/
-save/reload and cross-system continuity remain unqualified. No new guest input
-or source mutation occurred. See
+return. Both original media grants and a short current-package GameCube boundary
+are verified: WW Start/Pause/Resume/normal Stop and TP native frame/Pause/normal
+Stop, with both ordinary cards unchanged and normal backend SRAM updates retained.
+Home/reentry was not exercised. Actual N64 initialization and execution reached
+an audio callback, then ART aborted a JNI call on the core's alternate stack.
+The bounded Rust PCM handoff repair passes host/Android checks but awaits device
+verification. Controllable N64 play/audio/save/reload and cross-system continuity
+remain unqualified. See
 [the exact migration boundary](IDENTITY_MIGRATION.md).
 
 ## Earned GameCube baseline: preserve, do not replay

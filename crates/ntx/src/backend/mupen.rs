@@ -33,10 +33,49 @@ pub trait Host {
     fn framebuffer(&self) -> usize;
     fn proc_address(&self, name: &CStr) -> *const c_void;
     fn present(&mut self, width: u32, height: u32) -> Result<()>;
+    /// May run on the core's alternate coroutine stack. Buffer PCM here;
+    /// managed-runtime delivery must wait until the core returns to its host.
     fn audio(&mut self, interleaved_stereo: &[i16]) -> Result<usize>;
     fn poll_input(&mut self);
     fn input(&self, port: u32, device: u32, index: u32, id: u32) -> i16;
     fn silence(&mut self);
+}
+/// Instance-owned callback handoff, bounded to one second of 44.1 kHz stereo.
+/// It owns copied samples, never a borrowed core buffer or Android reference.
+#[derive(Default)]
+pub struct AudioQueue {
+    samples: Vec<i16>,
+}
+impl AudioQueue {
+    const LIMIT: usize = 44100 * 2;
+    pub fn push(&mut self, samples: &[i16]) -> Result<usize> {
+        if !samples.len().is_multiple_of(2) {
+            return Err("Invalid stereo audio callback length".into());
+        }
+        if samples.len() > Self::LIMIT - self.samples.len() {
+            return Err("N64 audio handoff exceeded its bounded capacity".into());
+        }
+        self.samples.extend_from_slice(samples);
+        Ok(samples.len() / 2)
+    }
+    pub fn clear(&mut self) {
+        self.samples.clear();
+    }
+    /// Invoke only after returning to the ordinary host stack. A delivery error
+    /// never replays an already-partly-written batch on a later frame.
+    pub fn drain(&mut self, write: impl FnOnce(&[i16]) -> Result<usize>) -> Result<usize> {
+        if self.samples.is_empty() {
+            return Ok(0);
+        }
+        let frames = self.samples.len() / 2;
+        let result = write(&self.samples);
+        self.samples.clear();
+        match result {
+            Ok(written) if written == frames => Ok(written),
+            Ok(_) => Err("Incomplete stereo audio delivery".into()),
+            Err(error) => Err(error),
+        }
+    }
 }
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
@@ -724,6 +763,64 @@ impl Drop for Core {
 #[cfg(all(test, target_pointer_width = "64"))]
 mod tests {
     use super::*;
+    #[test]
+    fn audio_callbacks_copy_in_order_and_deliver_only_on_explicit_host_drain() {
+        let mut queue = AudioQueue::default();
+        let mut source = [1, -1, 2, -2];
+        assert_eq!(queue.push(&source), Ok(2));
+        source.fill(99);
+        assert_eq!(queue.push(&[3, -3]), Ok(1));
+        let mut writes = 0;
+        assert_eq!(
+            queue.drain(|samples| {
+                writes += 1;
+                assert_eq!(samples, &[1, -1, 2, -2, 3, -3]);
+                Ok(3)
+            }),
+            Ok(3)
+        );
+        assert_eq!(writes, 1);
+        assert_eq!(
+            queue.drain(|_| panic!("empty queue must not call the device")),
+            Ok(0)
+        );
+        queue.push(&[4, -4]).unwrap();
+        assert!(
+            queue
+                .drain(|_| Err("partly written device failure".into()))
+                .is_err()
+        );
+        assert_eq!(
+            queue.drain(|_| panic!("failed batch must not replay")),
+            Ok(0)
+        );
+        queue.push(&[5, -5, 6, -6]).unwrap();
+        assert!(queue.drain(|_| Ok(1)).is_err());
+        assert_eq!(
+            queue.drain(|_| panic!("partly delivered batch must not replay")),
+            Ok(0)
+        );
+    }
+    #[test]
+    fn audio_handoff_bounds_and_silence_preserve_stereo_without_old_batch_replay() {
+        let mut queue = AudioQueue::default();
+        queue.push(&[5, -5]).unwrap();
+        assert!(queue.push(&[1]).is_err());
+        assert!(queue.push(&vec![0; AudioQueue::LIMIT]).is_err());
+        assert_eq!(
+            queue.drain(|samples| {
+                assert_eq!(samples, &[5, -5]);
+                Ok(1)
+            }),
+            Ok(1)
+        );
+        queue.push(&[6, -6]).unwrap();
+        queue.clear();
+        assert_eq!(
+            queue.drain(|_| panic!("silenced PCM must not reach the device")),
+            Ok(0)
+        );
+    }
     struct ContextHost;
     impl Host for ContextHost {
         fn framebuffer(&self) -> usize {

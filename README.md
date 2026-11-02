@@ -17,7 +17,9 @@ controls and independent profile/save/scene routing implemented. A combined Game
 source. Pixel4 data migration now preserves both original game/profile pairs and exact
 ordinary data, with source retained and return verified. Pixel4 media grants and a
 short canonical-package GameCube boundary are also verified. Playable N64/save/continuity
-acceptance remains unfinished. See the
+acceptance remains unfinished: actual N64 execution exposed an Android audio
+callback crash; the Rust host now defers managed audio delivery until the core
+returns. This fix still needs device verification. See the
 [migration boundary](docs/IDENTITY_MIGRATION.md) and [N64 pin/audit](native/mupen/README.md).
 
 Read [AGENTS.md](AGENTS.md), [successor handoff](docs/NTX_HANDOFF.md),

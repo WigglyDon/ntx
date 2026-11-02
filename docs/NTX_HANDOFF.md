@@ -1,8 +1,16 @@
-> 2026-11-01 continuation: source180b968/APK4d683b5e is installed on Pixel4.
+> 2026-11-01 continuation: sourceb62b842/APK67e604e9 is installed on Pixel4.
 > Both original media grants and game/profile pairs are verified, both ordinary
 > cards remain byte-identical, and short WW Start/Pause/Resume/Stop plus TP
 > native-frame/Pause/Stop passed. Normal client retirement and actual OFF return
 > are verified. Original installation, signer and recovery material remain.
+> The retained first N64 entry reached actual execution after the GLES3 enum fix,
+> then ART aborted AudioTrack JNI on Mupen's alternate stack. Current source
+> buffers PCM there and delivers it after returning to the host stack;92 portable
+> tests and warnings-denied host/Android checks pass. Device verification remains
+> pending. Crash recovery verified native exit, unchanged original cards/SRAM,
+> retained entry/error and actual return. No NTX request or custody remains.
+> Don is manually rearranging games on the devices: keep work off-device until
+> finished, then reconcile moved document access with the same IDs and saves.
 > N64 play/save/continuity is next; no broad lifecycle pass is claimed.
 
 > Current sole-successor status (2026-10-29): full active identity and linked

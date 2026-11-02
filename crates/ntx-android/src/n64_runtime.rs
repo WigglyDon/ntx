@@ -148,6 +148,11 @@ impl Runtime {
         }
         if let Err(e) = self.core().and_then(Core::run_frame) {
             self.report(e);
+            return;
+        }
+        let delivered = self.resources.borrow_mut().deliver_audio();
+        if let Err(error) = delivered {
+            self.report(error);
         }
     }
     pub fn poll_timeout(&self) -> Duration {
@@ -243,8 +248,9 @@ impl Runtime {
         if let Some(core) = self.core.as_mut() {
             core.stop()?;
             let (video_callbacks, audio_acknowledged) = core.observations();
+            let audio_written = self.resources.borrow().written_audio_frames;
             platform::diagnostic(&format!(
-                "N64 joined: {video_callbacks} accepted video callbacks, {audio_acknowledged} acknowledged stereo frames; includes muted/background acknowledgments, not physical presentation or audible proof; profile writer retained"
+                "N64 joined: {video_callbacks} accepted video callbacks, {audio_acknowledged} acknowledged stereo frames (including muted/background), {audio_written} stereo frames written to AudioTrack on host stack; not audible proof; profile writer retained"
             ));
             if !self.failed && self.pending.is_none() {
                 let bytes = core.ordinary_image()?;

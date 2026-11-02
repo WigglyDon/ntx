@@ -5,12 +5,14 @@ Selected core: [Mupen64Plus-Next at 15bada85906593376e8fd697f1b0b3af3a20f512](ht
 optional gitlink. The pin has no .gitmodules; no dependency URL is invented for
 its excluded gnulib gitlink. No RetroArch frontend is imported.
 
-The ARM64 GLES3/HLE core compiles and a combined Android package was linked,
-signed with the retained identity, checked and privately preserved from source
-36e9b732 (APK f946d3c9). Rust owns the libretro adapter, Android EGL/GLES/audio,
-N64 controls and independent profile/save/scene routing. Subsequent source edits
-need their own bound candidate. No device playable/save/reload/scene or
-cross-system acceptance is claimed by these build results.
+The ARM64 GLES3/HLE core compiles and combined Android packages are signed with
+the retained identity and privately preserved with corresponding source. Rust
+owns the libretro adapter, Android EGL/GLES/audio, N64 controls and independent
+profile/save/scene routing. Sourceb62b842/APK67e604e9 reached actual N64 execution
+after correcting the hardware-context enum, then ART aborted AudioTrack JNI on
+the core's alternate stack. Current source hands copied PCM back to the host
+stack before managed delivery; this repair still needs device verification.
+No playable/save/reload/scene or cross-system acceptance is claimed.
 
 ## Source and reproduction
 
@@ -45,7 +47,7 @@ bindings. The unsigned source-rebuild route needs no private signer.
 | Ordinary storage | RETRO_MEMORY_SAVE_RAM is 296960 bytes: EEPROM2048, four32768-byte Controller Paks, SRAM32768 and FlashRAM131072. Rust owns immutable image generations and an atomic ordinary reference under the profile writer. This is not a universal external native-save converter. |
 | Initialization | The core formats saved_memory at load. Rust injects the current image after formatting and before execution; a pending restore reseeds that exact bound generation after cold initialization and validates again. |
 | Capture/restore | Selected state includes device protocol and FlashRAM page-buffer/mode/status. Completed jobs yield after clearing the job and before further guest execution. Capture commits ordinary bytes from that boundary before publishing a scene. Restore requires exact core/options/architecture/media/game/profile and actual current ordinary generation; failed mutation is quarantined from publication. |
-| Graphics/audio | Android owns a retained EGL3 context, offscreen framebuffer, aspect composition, replacement window surfaces and PCM stereo AudioTrack. The core's threaded renderer is explicitly disabled; callbacks and core calls stay on the native owner thread. Android handles never enter durable game identity. |
+| Graphics/audio | Android owns a retained EGL3 context, offscreen framebuffer, aspect composition, replacement window surfaces and PCM stereo AudioTrack. The core's threaded renderer is explicitly disabled; callbacks and core calls stay on the native owner thread. Libco callbacks may use an alternate stack: PCM is copied into a bounded Rust queue and AudioTrack JNI runs only after returning to the outer host stack. Android handles never enter durable game identity. |
 | Input | One analog stick, digital C-up/down/left/right, independent digital L/R and Z, D-pad, A/B/Start. Default core mapping is fixed explicitly; pointer capture, quick presses, simultaneous input and cancellation are Rust policy. No GameCube C-stick/analog-shoulder or PS1 mask transplant. |
 | Shutdown | An unopened coroutine is never started just to stop it. Native stopped state is acknowledged before library/context release. Failed join/publication retains native memory, host resources and writer ownership; successful teardown keeps the writer through durable session publication. |
 | Scheduling | Multiple independent SavedSessions/profiles share one foreground runtime policy. Native globals permit one Mupen instance per process until isolation is qualified; that is a runtime capability, not a one-game identity model. Background pause/silence is the default. |

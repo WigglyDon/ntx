@@ -8,7 +8,7 @@ use jni::{
 };
 use ndk::native_window::NativeWindow;
 use ntx::{
-    backend::mupen::Host,
+    backend::mupen::{AudioQueue, Host},
     n64_touch::{Target, View},
 };
 use std::{
@@ -561,6 +561,8 @@ impl Drop for Audio {
 pub struct Resources {
     pub graphics: Graphics,
     audio: Audio,
+    pending_audio: AudioQueue,
+    pub written_audio_frames: u64,
     pub muted: bool,
 }
 impl Resources {
@@ -568,8 +570,22 @@ impl Resources {
         Ok(Self {
             graphics: Graphics::new(window)?,
             audio: Audio::new()?,
+            pending_audio: AudioQueue::default(),
+            written_audio_frames: 0,
             muted: true,
         })
+    }
+    /// JNI may enter managed code only on the outer Android owner stack, after
+    /// retro_run has returned from Mupen's libco/dynarec stack.
+    pub fn deliver_audio(&mut self) -> Result<()> {
+        if self.muted {
+            self.pending_audio.clear();
+            return Ok(());
+        }
+        let audio = &mut self.audio;
+        let written = self.pending_audio.drain(|samples| audio.write(samples))?;
+        self.written_audio_frames = self.written_audio_frames.saturating_add(written as u64);
+        Ok(())
     }
 }
 pub struct Adapter(pub Rc<RefCell<Resources>>);
@@ -613,7 +629,8 @@ impl Host for Adapter {
         if r.muted {
             Ok(bytes.len() / 2)
         } else {
-            r.audio.write(bytes)
+            // No JNI on this callback's alternate coroutine stack.
+            r.pending_audio.push(bytes)
         }
     }
     fn poll_input(&mut self) {
@@ -628,6 +645,7 @@ impl Host for Adapter {
     }
     fn silence(&mut self) {
         let mut r = self.0.borrow_mut();
+        r.pending_audio.clear();
         r.audio.silence();
         if let Ok(mut view) = view().lock() {
             view.cancel();

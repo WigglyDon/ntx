@@ -1,6 +1,6 @@
 schema_version = 1
 product = "ntx"
-classification = "NTX5_PIXEL_IDENTITY_MEDIA_MIGRATED_N64_PLAY_PENDING"
+classification = "NTX5_PIXEL_MIGRATED_N64_AUDIO_HANDOFF_VERIFICATION_PENDING"
 repository = "WigglyDon/ntx"
 repository_id = 1429193278
 branch = "main"
@@ -8,7 +8,7 @@ pre_succession_head = "b3a02e570e9f63e94d897c688a2f5f850b054ae6"
 active_issue = "https://github.com/WigglyDon/ntx/issues/5"
 architecture_amendment = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6505289270"
 handoff = "docs/NTX_HANDOFF.md"
-source_status = "Full active identity and protected import/relink implemented; renamed GameCube APK built/signed/preserved; pinned N64 core compiled with Rust GLES/audio/input/runtime/save/scene routing in source; device acceptance pending"
+source_status = "Full active identity/migration and short canonical GameCube boundary verified. N64 reached execution but hit ART JNI audio callback abort; bounded Rust PCM handoff moves managed delivery to the host stack. Device verification pending"
 active_systems = ["GameCube: retained direct Dolphin and renamed linked package", "Nintendo64: pinned core compiled, Rust libretro/Android resource and per-profile continuity implementation; no device playable claim"]
 axes = "Host platform/device, emulated system and execution backend are independent"
 session_model = "Many independent open/resumable games; one foreground runtime initially is scheduling policy, not permanent architecture"
@@ -23,10 +23,10 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Canonical Pixel4 package/data/media migration and short GameCube boundary are verified. Qualify actual N64 play/audio/save/reload/scene/cross-system continuity in the same collection. Fold needs a fresh personal window; no retired campaigns"
+next_step = "Build/preserve the audio handoff repair off-device. Don is manually rearranging games; wait until finished, then reconcile moved documents with the same game/profile identities and qualify N64 play/audio/save/reload/scene/cross-system continuity. No pending NTX request or held custody; Fold still needs its fresh personal window"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
-open_defects = ["Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
+open_defects = ["N64 AudioTrack JNI abort on alternate core stack: Rust host handoff repair awaits device qualification", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
 resources = "No outstanding gcx return obligation at succession reconciliation; no phone test or new reservation authorized by relocation; normal installed policy remains authoritative"
 legacy_detail = "docs/history/gcx-state.toml and docs/history/GCX_ACCEPTANCE.md are historical evidence, never active priorities or proof retired inputs exist"
 
@@ -45,18 +45,18 @@ collection_schema = 2
 migration = "Pixel4 Rust app-side migration verified: schema2, both GameId/profile pairs retained, exact ordinary profile files, unchanged legacy source. Ready incoming and partial stages plus source installation/rollback retained; original document grants now reacquired"
 signer = "Canonical reference copies retained key; original/recovery retained; independent recovery and installed-candidate certificate binding verified"
 n64_revision = "15bada85906593376e8fd697f1b0b3af3a20f512"
-n64_status = "Pinned ARM64 GLES3/HLE core compiled; small Rust libretro adapter, EGL surface/context retention, audio, N64 controls, packed-save generations and exact-bound scene implementation; combined APK4d683b5e built/signed/preserved from source180b968; actual N64 play/save/resume validation pending"
+n64_status = "Pinned ARM64 GLES3/HLE core and per-game Rust host/save/scene implementation packaged. Installed sourceb62b842/APK67e604e9 accepts the GLES3 context and executes N64, then hits managed AudioTrack JNI on libco's alternate stack. Current Rust source buffers PCM for delivery after retro_run returns; playable/save/resume validation pending"
 resume_limit = "Checked native restore results and state-job yields implemented; exact core/options/architecture/media/profile/current ordinary generation required; failed native restore quarantined, failed shutdown retains ownership"
-device_actions = "Combined APK4d683b5e/source180b968 installed after protected backup and compatible update. Both original game/profile pairs and scoped media grants verified. Both memory cards unchanged; native console SRAM updates retained. WW Start/Pause/Resume/normal Stop and TP native frame/Pause/normal Stop observed. Custodian verified physical OFF and actual return. No Home/reentry or N64 guest result yet; Fold untouched"
+device_actions = "Combined APK67e604e9/sourceb62b842 installed after protected backup and compatible update. Both original GameCube pairs plus the first N64 game/profile retained. Earlier WW/TP boundary verified. N64 executed then aborted at JNI audio; diagnostic recovery verified native process absence, unchanged original cards/SRAM, retained collection/error, no N64 ordinary/scene files and actual client/OFF return. No pending NTX task; owner is rearranging games. No N64 playable result; Fold untouched"
 
 [validation]
-host = "89 portable library tests passed, including foreground game identity/background policy and fractional frame deadlines; retained 15 decoder and 3 integration checks; host all-targets and ARM64 Android lints deny warnings"
+host = "92 portable library tests passed, including GLES3 callback ABI, deferred copied PCM ordering/bounds/silence/failure handling, foreground game identity and frame deadlines; retained 15 decoder and 3 integration checks; host all-targets and ARM64 Android lints deny warnings"
 helpers = "94 offline packet fixtures passed"
 lints = "Warnings-denied host all-targets including native declarations and ARM64 Android Clippy passed; no mock native library or fingerprints"
 android_shell = "Java compiler module, DEX namespace and compiled resources/manifest checked; canonical package/activity/label confirmed"
 native = "Full renamed Dolphin build completed; pinned Mupen core compiled with declared patches; actual header/entrypoint/result/yield/shutdown fixtures and exact patch reproduction passed"
 retained = "8 critical inputs retain exact recorded SHA256/inode/size; baseline patch SHA256 retained; same signer independently verified"
-limits = "No current-package media regrant/affected gameplay result, playable N64, N64 save/reload/scene/cross-system acceptance or Fold migration claim; no public binary release"
+limits = "Current-package media regrant/short GameCube boundary verified. N64 execution before audio crash is not controllable play/audio/save/reload/scene/cross-system acceptance. Host audio repair awaits actual verification; no Fold migration or public binary release"
 
 [linked_candidate]
 source = "22f0f147426d23d6d619c375b1ab8ceb5d75e650"
@@ -65,10 +65,10 @@ engine_sha256 = "15da3bfabf03c27171c37f48773a7c7ee24d5470970746718098ccf566ccab7
 status = "GameCube identity/import candidate signed with retained certificate and privately preserved with exact corresponding source; not installed"
 
 [n64_candidate]
-source = "ee271cdf653ec36c79a6bd8e3021d87ae734d444"
-apk_sha256 = "8dcfad2a8732cf71996a9e1ed78dcaf60496635868c1059e2c9d012aa0890b46"
+source = "b62b8422ee395382e825752024805e55bdfd75a7"
+apk_sha256 = "67e604e9746da00da7218e5112409c4d00b29671c69c91f536d9265f2de32c63"
 core_sha256 = "af7bab08859b6f8a3d224328d603c60e0d0cd40cfe8a36fa77e668e0b826446f"
-status = "Combined package built/signed/audited and preserved with complete corresponding source; not installed or playable-qualified. Includes portable foreground/frame scheduling, dynamic timing validation, truthful callback-only diagnostics, separated touch targets and verified legacy failed-cartridge relink. Lab regrant/boundary needs restored qualified connectivity. The interactive request was canceled without acquisition while the link was absent, preserving its ready recipe/artifacts; no guest result or held custody"
+status = "Combined package built/signed/audited, preserved with corresponding source and installed. GLES3 context accepted and N64 executed, then ART aborted managed audio on libco's alternate stack. Actual diagnostic recovery/return verified; no playable/save/reload acceptance. Off-device Rust PCM handoff repair is next candidate, not yet installed"
 
 [pixel_migration]
 installed_source = "5d2246c0b82690a004e970eaf0dea75041e1ae8b"

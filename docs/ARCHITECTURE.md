@@ -5,8 +5,8 @@ Binding authority: [NTX-5](https://github.com/WigglyDon/ntx/issues/5) and
 These are required current contracts. Active identity, schema-2 routing and
 offline staged import are implemented. A renamed GameCube package is built and
 preserved; Pixel4 app-side data migration is verified with the original IDs and
-ordinary bytes retained. Its document regrant and current-package gameplay remain
-unqualified. The pinned N64 core compiles
+ordinary bytes retained. Document regrant and a short current-package GameCube
+boundary are verified. The pinned N64 core compiles
 and the Rust execution/Android resource/save/scene implementation is in source;
 A combined package is linked/audited; device acceptance remains unfinished. The preserved GameCube baseline is documented in
 [historical architecture](history/GCX_ARCHITECTURE.md) and native/README.md.
@@ -93,6 +93,11 @@ now live under backend::dolphin; N64 cartridge/input/save-format policy lives in
 n64. The small backend::mupen adapter uses a qualified process slot, callback ABI
 and instance-owned backend directories. Android supplies EGL3/offscreen drawing,
 surface replacement, AudioTrack delivery and measured system-correct touch input.
+Mupen's libco callbacks can run on an alternate stack on that same owner thread.
+The audio callback only copies PCM into an instance-owned bounded Rust queue;
+Android drains it through AudioTrack JNI after the core returns to the host stack.
+Pause clears queued samples before silencing output. This repairs the observed
+managed-runtime boundary; actual device qualification remains required.
 N64 ordinary generations and checkpoints have their own Rust owners and do not
 reuse Dolphin cards or machine containers. Exact native/options/architecture/
 media/profile/ordinary bindings are checked; failed restores cannot publish native
