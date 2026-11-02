@@ -15,8 +15,9 @@ installed with migrated data. A renamed GameCube APK has been built, signed and 
 source. The pinned ARM64 N64 core now compiles, with Rust host, graphics/audio,
 controls and independent profile/save/scene routing implemented. A combined GameCube/N64 package is also built and privately preserved with its
 source. Pixel4 data migration now preserves both original game/profile pairs and exact
-ordinary data, with source retained and return verified. Media regrant and
-playable N64/save/continuity acceptance remain unfinished. See the
+ordinary data, with source retained and return verified. Pixel4 media grants and a
+short canonical-package GameCube boundary are also verified. Playable N64/save/continuity
+acceptance remains unfinished. See the
 [migration boundary](docs/IDENTITY_MIGRATION.md) and [N64 pin/audit](native/mupen/README.md).
 
 Read [AGENTS.md](AGENTS.md), [successor handoff](docs/NTX_HANDOFF.md),

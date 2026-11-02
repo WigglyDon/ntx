@@ -1,3 +1,10 @@
+> 2026-11-01 continuation: source180b968/APK4d683b5e is installed on Pixel4.
+> Both original media grants and game/profile pairs are verified, both ordinary
+> cards remain byte-identical, and short WW Start/Pause/Resume/Stop plus TP
+> native-frame/Pause/Stop passed. Normal client retirement and actual OFF return
+> are verified. Original installation, signer and recovery material remain.
+> N64 play/save/continuity is next; no broad lifecycle pass is claimed.
+
 > Current sole-successor status (2026-10-29): full active identity and linked
 > packages are implemented; direct Dolphin remains direct. Pixel4 app-side data
 > migration is verified on source5d2246c/APK577616e6: both original game/profile

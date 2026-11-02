@@ -1,6 +1,6 @@
 schema_version = 1
 product = "ntx"
-classification = "NTX5_PIXEL_DATA_MIGRATED_MEDIA_REGRANT_AND_N64_PLAY_PENDING"
+classification = "NTX5_PIXEL_IDENTITY_MEDIA_MIGRATED_N64_PLAY_PENDING"
 repository = "WigglyDon/ntx"
 repository_id = 1429193278
 branch = "main"
@@ -23,7 +23,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Protect and update current package if needed, reacquire Pixel4 media grants and perform one affected GameCube boundary check; qualify actual N64 play/audio/save/reload/scene/cross-system continuity. Fold needs a fresh personal window; no retired campaigns"
+next_step = "Canonical Pixel4 package/data/media migration and short GameCube boundary are verified. Qualify actual N64 play/audio/save/reload/scene/cross-system continuity in the same collection. Fold needs a fresh personal window; no retired campaigns"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -42,15 +42,15 @@ launch = "Installed Codex CLI0.165.0 help verifies fresh interactive -C director
 [implementation]
 source_identity = "Active crates, direct Dolphin hooks/exports, JNI/activity, resources, tooling and new writes use ntx; explicit residual audit and immutable baseline patch retained"
 collection_schema = 2
-migration = "Pixel4 Rust app-side migration verified: schema2, both GameId/profile pairs retained, exact ordinary profile files, unchanged legacy source. Ready incoming and partial stages plus source installation/rollback retained; document grants still require reacquisition"
+migration = "Pixel4 Rust app-side migration verified: schema2, both GameId/profile pairs retained, exact ordinary profile files, unchanged legacy source. Ready incoming and partial stages plus source installation/rollback retained; original document grants now reacquired"
 signer = "Canonical reference copies retained key; original/recovery retained; independent recovery and installed-candidate certificate binding verified"
 n64_revision = "15bada85906593376e8fd697f1b0b3af3a20f512"
-n64_status = "Pinned ARM64 GLES3/HLE core compiled; small Rust libretro adapter, EGL surface/context retention, audio, N64 controls, packed-save generations and exact-bound scene implementation; linked N64 APK built/signed/preserved from source01676729; actual play/save/resume validation pending"
+n64_status = "Pinned ARM64 GLES3/HLE core compiled; small Rust libretro adapter, EGL surface/context retention, audio, N64 controls, packed-save generations and exact-bound scene implementation; combined APK4d683b5e built/signed/preserved from source180b968; actual N64 play/save/resume validation pending"
 resume_limit = "Checked native restore results and state-job yields implemented; exact core/options/architecture/media/profile/current ordinary generation required; failed native restore quarantined, failed shutdown retains ownership"
-device_actions = "Combined APK577616e6/source5d2246c installed; library-only atomic import completed and identities/ordinary bytes/source unchanged verified. Custodian confirmed physical OFF and actual return. No guest input or media regrant yet; Fold untouched"
+device_actions = "Combined APK4d683b5e/source180b968 installed after protected backup and compatible update. Both original game/profile pairs and scoped media grants verified. Both memory cards unchanged; native console SRAM updates retained. WW Start/Pause/Resume/normal Stop and TP native frame/Pause/normal Stop observed. Custodian verified physical OFF and actual return. No Home/reentry or N64 guest result yet; Fold untouched"
 
 [validation]
-host = "87 portable library tests passed, including foreground game identity/background policy and fractional frame deadlines; retained 15 decoder and 3 integration checks; host all-targets and ARM64 Android lints deny warnings"
+host = "89 portable library tests passed, including foreground game identity/background policy and fractional frame deadlines; retained 15 decoder and 3 integration checks; host all-targets and ARM64 Android lints deny warnings"
 helpers = "94 offline packet fixtures passed"
 lints = "Warnings-denied host all-targets including native declarations and ARM64 Android Clippy passed; no mock native library or fingerprints"
 android_shell = "Java compiler module, DEX namespace and compiled resources/manifest checked; canonical package/activity/label confirmed"
@@ -80,3 +80,10 @@ legacy_source_unchanged = true
 media_regrant_verified = false
 return = "Custodian completed and verified physical display OFF/actual return after library-only migration"
 issue_outcome = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6512681530"
+
+[pixel_media_regrant_20261101]
+source = "180b968ca62e9fccced39d68df1f7c173dd3beeb"
+apk_sha256 = "4d683b5ee42675146ed5f26c16f4f1f74ffedf8cef63c4ff896110992e35439d"
+result = "Both original scoped documents reacquired through explicit stopped-entry confirmation; original game/profile identities and byte-identical ordinary cards retained. No known fingerprint or active machine continuation replaced."
+return = "Completed with actual client retirement and physical OFF under the admitted USB lease; original installation and all recovery candidates retained"
+limits = "Short affected-boundary check only. Historical later-play Pause/reentry remains unresolved; N64 runtime qualification pending."
