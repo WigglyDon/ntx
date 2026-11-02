@@ -23,7 +23,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Audio handoff candidate87a248ff/sourcefc6e300 is built/signed/preserved. Don is still rearranging games; wait until finished, then reconcile moved documents with the same game/profile identities and qualify N64 play/audio/save/reload/scene/cross-system continuity. No pending NTX request or held custody; Fold still needs its fresh personal window"
+next_step = "Audio handoff candidate87a248ff/sourcefc6e300 is built/signed/preserved. Under the next admitted task, reconcile current documents with the same game/profile identities and qualify N64 play/audio/save/reload/scene/cross-system continuity. Private availability and exact preparation remain local-only; Fold still needs its fresh personal window"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["N64 AudioTrack JNI abort on alternate core stack: Rust host handoff repair awaits device qualification", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -47,7 +47,7 @@ signer = "Canonical reference copies retained key; original/recovery retained; i
 n64_revision = "15bada85906593376e8fd697f1b0b3af3a20f512"
 n64_status = "Pinned ARM64 GLES3/HLE core and per-game Rust host/save/scene implementation packaged. Installed sourceb62b842/APK67e604e9 accepts the GLES3 context and executes N64, then hits managed AudioTrack JNI on libco's alternate stack. Current Rust source buffers PCM for delivery after retro_run returns; playable/save/resume validation pending"
 resume_limit = "Checked native restore results and state-job yields implemented; exact core/options/architecture/media/profile/current ordinary generation required; failed native restore quarantined, failed shutdown retains ownership"
-device_actions = "Combined APK67e604e9/sourceb62b842 installed after protected backup and compatible update. Both original GameCube pairs plus the first N64 game/profile retained. Earlier WW/TP boundary verified. N64 executed then aborted at JNI audio; diagnostic recovery verified native process absence, unchanged original cards/SRAM, retained collection/error, no N64 ordinary/scene files and actual client/OFF return. No pending NTX task; owner is rearranging games. No N64 playable result; Fold untouched"
+device_actions = "Combined APK67e604e9/sourceb62b842 installed after protected backup and compatible update. Both original GameCube pairs plus the first N64 game/profile retained. Earlier WW/TP boundary verified. N64 executed then aborted at JNI audio; diagnostic recovery verified native process absence, unchanged original cards/SRAM, retained collection/error, no N64 ordinary/scene files and actual client/OFF return. No N64 playable result; Fold untouched"
 
 [validation]
 host = "92 portable library tests passed, including GLES3 callback ABI, deferred copied PCM ordering/bounds/silence/failure handling, foreground game identity and frame deadlines; retained 15 decoder and 3 integration checks; host all-targets and ARM64 Android lints deny warnings"
@@ -68,7 +68,7 @@ status = "GameCube identity/import candidate signed with retained certificate an
 source = "fc6e300015f558802ed29b6871436ec706efdfc3"
 apk_sha256 = "87a248ffd59240da7e4000e1c625e8b27735393323752f4f32600323126c1ca5"
 core_sha256 = "af7bab08859b6f8a3d224328d603c60e0d0cd40cfe8a36fa77e668e0b826446f"
-status = "Audio handoff repair built/signed/audited and privately preserved with corresponding source; not installed. Core callback only copies bounded PCM; AudioTrack JNI follows retro_run return. Silence/failure cannot replay queued samples. Lost document access requests verified relink with the same game/profile/hash/scene. Device verification waits for owner's media rearrangement to finish; no playable/save/reload acceptance"
+status = "Audio handoff repair built/signed/audited and privately preserved with corresponding source; not installed. Core callback only copies bounded PCM; AudioTrack JNI follows retro_run return. Silence/failure cannot replay queued samples. Lost document access requests verified relink with the same game/profile/hash/scene. Device verification remains required; no playable/save/reload acceptance"
 
 [pixel_n64_initialization_20261101]
 installed_source = "b62b8422ee395382e825752024805e55bdfd75a7"
@@ -76,7 +76,7 @@ installed_apk_sha256 = "67e604e9746da00da7218e5112409c4d00b29671c69c91f536d9265f
 entries = 3
 result = "First N64 game/profile retained alongside both original GameCube pairs. Correct GLES3 hardware context accepted; N64 dynarec reached audio callback, then ART aborted AudioTrack JNI on libco alternate stack. No controllable play, audible output or N64 ordinary/scene file was earned"
 return = "Diagnostic-only recovery completed with native process absent, original cards/SRAM and collection/error unchanged, clients retired and actual physical OFF return verified. No queued NTX request or held custody"
-availability = "Owner is still manually rearranging device media. No phone work until finished; reconcile actual moved documents without recreating games or old paths"
+next_boundary = "Reconcile actual document access under normal admission without recreating games or old paths; availability and exact preparation stay private"
 
 [pixel_migration]
 installed_source = "5d2246c0b82690a004e970eaf0dea75041e1ae8b"

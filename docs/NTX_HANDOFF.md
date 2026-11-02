@@ -11,8 +11,8 @@
 > preserved with matching source; it is not installed. Crash recovery verified
 > native exit, unchanged original cards/SRAM,
 > retained entry/error and actual return. No NTX request or custody remains.
-> Don is manually rearranging games on the devices: keep work off-device until
-> finished, then reconcile moved document access with the same IDs and saves.
+> Before the next admitted task, reconcile current document access with the same
+> IDs and saves. Private availability and task preparation remain local-only.
 > N64 play/save/continuity is next; no broad lifecycle pass is claimed.
 
 > Current sole-successor status (2026-10-29): full active identity and linked
