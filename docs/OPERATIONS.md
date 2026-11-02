@@ -32,6 +32,14 @@ cleanup/recovery verification independent from native boot fixtures or relocated
 cached executables. N64 has its own container/ordinary owner; this tool does not
 reinterpret an N64 checkpoint as a Dolphin scene.
 
+`cargo build --offline --locked -p ntx --bin ntx-n64-checkpoint-inspect`
+builds the separate native-free N64 inspector. Pass a protected local profile
+copy, checkpoint ID and independently trusted N64 binding JSON. The copy must
+retain its existing N64 directory and writer.lock; the inspector takes only that
+copy's lock and validates the actual container and current ordinary generation.
+It never boots/restores a core or publishes save data. Inspection alone proves
+neither native quiescence/join nor permission to retire a device process.
+
 Canonical Android package is com.machinerhythm.ntx, activity NtxActivity, private
 root files/ntx and links machinerhythm-ntx://play/GameId. Legacy installations
 remain recovery sources. New package identity confers no old private data or
