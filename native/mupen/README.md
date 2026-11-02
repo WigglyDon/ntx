@@ -15,8 +15,13 @@ stack before managed delivery. Its signed candidate now reaches first-room play
 with observed analog movement, owner-confirmed clear sound and a cold reload of
 the newly created ordinary file. The game pause transition exposed GL error0502;
 the host now diagnoses flags already present at the core handoff separately from
-its framebuffer-copy/control drawing errors. In-game Save after play and this
-graphics repair still need verification. Cross-system acceptance remains open.
+its framebuffer-copy/control drawing errors. Installed source1dc7db2/APK1cb108de
+now passes the affected in-game pause/Save route, normal joined Stop, verified
+full-process ordinary-save cold reload directly into the room, and analog movement.
+One preexisting backend GL0502 flag was observed at game pause while host
+presentation continued; its renderer cause is not claimed fixed. Independent
+GameCube profiles were unchanged and actual return passed. Supported machine
+restore and cross-system acceptance remain open.
 
 ## Source and reproduction
 
