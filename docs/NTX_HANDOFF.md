@@ -1,3 +1,13 @@
+> Latest result: source1dc7db2/APK1cb108de is installed with prior data and all
+> three identities retained. Ocarina now passes in-game pause/Save, normal joined
+> Stop, full-process ordinary-save cold reload directly to its room, analog input
+> and actual OFF return. Both GameCube profiles remain unchanged. One backend
+> GL0502 flag was diagnosed before successful host presentation; no renderer or
+> performance fix is claimed. Prior human clear-audio evidence retains its build
+> limits. Next: supported checkpoint/cross-system continuity and alpha comfort.
+> Current custody and task preparation remain private; older notes below keep
+> their historical bounds and do not establish device availability.
+
 > Current continuation note: installedb61 reaches the first-room HUD; the affected
 > game-pause/Save check is still pending. A later foreground departure kept the
 > process alive; its cause is unresolved. Source1dc7db2 requests foreground-player

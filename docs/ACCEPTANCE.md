@@ -21,9 +21,13 @@ GameCube Home/reentry was not exercised. The N64 PCM handoff repair now reaches
 first-room analog movement and owner-confirmed clear sound. A new ordinary file
 survived normal Stop/full process exit/cold native reload. Home checkpoint/hot
 return, Pause/normal Stop and actual return also completed with the other profiles
-unchanged. Game Start/pause then exposed GL error0502; in-game Save after play,
-the GL boundary repair, process-restored scenes and cross-system continuity still
-need qualification. Some intro hitches were owner-observed. See
+unchanged. The later installed source1dc7db2/APK1cb108de passes the affected game Start/pause
+and Save/Yes route. Normal Stop published ordinary generation2; verified old-process
+absence and a new cold process then loaded directly into the room without the
+opening. Analog movement, normal joined Stop and actual return passed with both
+GameCube profiles unchanged. The core GL0502 flag remains diagnosed before host
+presentation; no renderer/performance fix is claimed. Process-restored scenes and
+supported cross-system continuity still need qualification. Some intro hitches were owner-observed. See
 [the exact migration boundary](IDENTITY_MIGRATION.md).
 
 ## Earned GameCube baseline: preserve, do not replay
@@ -59,8 +63,9 @@ instances are not inferred from the earned bounded results.
    actual GameCube progress; representative affected controls/library/lifecycle
    check, without repeating quest progression or earned save/timing campaigns.
 2. Real N64 cartridge in the same collection: controllable graphics/audio,
-   system-correct input, ordinary save/reload and joined Stop. No playable claim
-   until observed; use an easy save point/isolated fixtures rather than a bot quest.
+   system-correct input, ordinary save/reload and joined Stop. Earned for Ocarina
+   on source1dc7db2/APK1cb108de, retaining prior clear-audio evidence at its bounds;
+   this is one cartridge, not a compatibility campaign.
 3. Backend-supported checkpoint return, GameCube → N64 → GameCube switch,
    independent same-system and cross-system progress, stale/failed restore
    protection and comfortable picture/control/menu layout. Report unsupported

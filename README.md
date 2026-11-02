@@ -5,7 +5,7 @@
 ntx continues the same Rust-first public project and repository history formerly
 named gcx. It is the Nintendo member of Machine Rhythm's five emulator products.
 GameCube works through the maintained direct Dolphin adapter. Nintendo 64 through
-Mupen64Plus-Next is the next active implementation, not yet a playable claim.
+Mupen64Plus-Next now has a verified playable Ocarina slice on Pixel4.
 
 Active crates/native/JNI/build/branding now use ntx and com.machinerhythm.ntx.
 An offline staged migration tool preserves identities, ordinary progress and
@@ -16,11 +16,10 @@ source. The pinned ARM64 N64 core now compiles, with Rust host, graphics/audio,
 controls and independent profile/save/scene routing implemented. A combined GameCube/N64 package is also built and privately preserved with its
 source. Pixel4 data migration now preserves both original game/profile pairs and exact
 ordinary data, with source retained and return verified. Pixel4 media grants and a
-short canonical-package GameCube boundary are also verified. Playable N64/save/continuity
+short canonical-package GameCube boundary are also verified. Supported N64 machine/cross-system continuity
 acceptance remains unfinished. The audio handoff repair now reaches first-room
-N64 control with clear sound and an observed ordinary-file cold reload. Opening
-the game's pause menu exposed a shared-GL error attribution problem; the affected
-menu/Save check remains pending. See the
+N64 control with clear sound and an observed ordinary-file cold reload. The GL error attribution repair now passes the affected in-game pause/Save route;
+ordinary saves survive a full-process cold reload into the room and controls respond. See the
 [migration boundary](docs/IDENTITY_MIGRATION.md) and [N64 pin/audit](native/mupen/README.md).
 
 Read [AGENTS.md](AGENTS.md), [successor handoff](docs/NTX_HANDOFF.md),

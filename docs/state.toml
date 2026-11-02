@@ -1,6 +1,6 @@
 schema_version = 1
 product = "ntx"
-classification = "NTX5_N64_FIRSTROOM_AUDIO_ORDINARY_RELOAD_GAMEPAUSE_GL_PENDING"
+classification = "NTX5_N64_PLAYABLE_SAVE_COLD_RELOAD_CONTINUITY_PENDING"
 repository = "WigglyDon/ntx"
 repository_id = 1429193278
 branch = "main"
@@ -8,8 +8,8 @@ pre_succession_head = "b3a02e570e9f63e94d897c688a2f5f850b054ae6"
 active_issue = "https://github.com/WigglyDon/ntx/issues/5"
 architecture_amendment = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6505289270"
 handoff = "docs/NTX_HANDOFF.md"
-source_status = "Full active identity/migration and short canonical GameCube boundary verified. N64 audio repair reaches first-room control, clear sound and ordinary-file cold reload. Game pause exposed GL0502; source now separates backend error flags from host copy/draw errors, with affected verification pending"
-active_systems = ["GameCube: retained direct Dolphin and renamed linked package", "Nintendo64: pinned core compiled, Rust libretro/Android resource and per-profile continuity implementation; no device playable claim"]
+source_status = "Full active identity/migration and canonical GameCube boundary verified. Installed source1dc7db2/APK1cb108de now passes N64 in-game pause/Save, ordinary-save cold reload, analog movement and normal joined Stop. Supported machine/cross-system continuity remains unfinished"
+active_systems = ["GameCube: retained direct Dolphin and canonical package", "Nintendo64: pinned Mupen Rust host; one-cartridge play/Save/cold reload verified on Pixel4"]
 axes = "Host platform/device, emulated system and execution backend are independent"
 session_model = "Many independent open/resumable games; one foreground runtime initially is scheduling policy, not permanent architecture"
 canonical_android_package = "com.machinerhythm.ntx"
@@ -23,10 +23,10 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Foreground-window candidate1cb108de/source1dc7db2 is built/signed/preserved but uninstalled; installedb61/source058 reaches the first-room HUD without reaching the affected game-pause/Save check. Resolve actual private return/admission before the protected update, affected game-pause/Save and supported scene/cross-system continuity. Reuse earned first-room movement, clear sound and ordinary-file cold reload; Fold needs its fresh personal window"
+next_step = "Supported per-game checkpoint return and cross-system switching, preserving current ordinary saves. Reuse earned N64 play/audio/Save/cold reload and earlier GameCube campaigns. Actual custody and prepared task inputs remain private; Fold needs its fresh personal window"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
-open_defects = ["N64 game-pause transition: GL0502 attributed to shared-context presentation; error-boundary repair awaits affected qualification", "N64 intro hitches: owner observed, unmeasured", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
+open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 intro hitches: owner observed, unmeasured", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
 resources = "No outstanding gcx return obligation at succession reconciliation; no phone test or new reservation authorized by relocation; normal installed policy remains authoritative"
 legacy_detail = "docs/history/gcx-state.toml and docs/history/GCX_ACCEPTANCE.md are historical evidence, never active priorities or proof retired inputs exist"
 
@@ -45,7 +45,7 @@ collection_schema = 2
 migration = "Pixel4 Rust app-side migration verified: schema2, both GameId/profile pairs retained, exact ordinary profile files, unchanged legacy source. Ready incoming and partial stages plus source installation/rollback retained; original document grants now reacquired"
 signer = "Canonical reference copies retained key; original/recovery retained; independent recovery and installed-candidate certificate binding verified"
 n64_revision = "15bada85906593376e8fd697f1b0b3af3a20f512"
-n64_status = "Installed sourcefc6e300/APK87a248ff repairs audio delivery and reaches first-room control, clear sound and ordinary-file cold reload. Home/hot return and normal N64 join/Stop completed. Game Start/pause raised GL0502 before the in-game Save command. Source separates preexisting backend flags from host copy/draw failures; affected graphics/Save and wider continuity pending"
+n64_status = "Installed source1dc7db2/APK1cb108de passes in-game pause/Save, ordinary-save cold reload, analog movement and normal joined Stop. Prior audio-handoff build earned human clear sound. Process-restored scenes and cross-system continuity remain open"
 resume_limit = "Checked native restore results and state-job yields implemented; exact core/options/architecture/media/profile/current ordinary generation required; failed native restore quarantined, failed shutdown retains ownership"
 device_actions = "Same-signer APK87a248ff/sourcefc6e300 protected update verified unchanged data/all three identities and current relinked cartridge. N64 title/file controls, first-room analog movement, clear sound and ordinary-file cold reload observed. Home/checkpoint/hot return and normal Stop/actual return completed; independent GameCube profiles unchanged. Game pause graphics fault remains; Fold untouched"
 
@@ -57,7 +57,7 @@ lints = "Warnings-denied host all-targets including native declarations and ARM6
 android_shell = "Java compiler module, DEX namespace and compiled resources/manifest checked; canonical package/activity/label confirmed"
 native = "Full renamed Dolphin build completed; pinned Mupen core compiled with declared patches; actual header/entrypoint/result/yield/shutdown fixtures and exact patch reproduction passed"
 retained = "8 critical inputs retain exact recorded SHA256/inode/size; baseline patch SHA256 retained; same signer independently verified"
-limits = "Current-package migration/short GameCube boundary and N64 first-room control/clear audio/ordinary-file cold reload verified. N64 game-pause/Save after play, process-restored scenes and cross-system acceptance remain pending. Intro hitches are unmeasured; no Fold migration or public binary release"
+limits = "Current-package migration/short GameCube boundary and N64 first-room control/clear audio/ordinary-file cold reload verified. N64 game-pause/Save after play and ordinary cold reload are now verified; process-restored scenes and cross-system acceptance remain pending. Intro hitches are unmeasured; no Fold migration or public binary release"
 
 [linked_candidate]
 source = "22f0f147426d23d6d619c375b1ab8ceb5d75e650"
@@ -69,7 +69,7 @@ status = "GameCube identity/import candidate signed with retained certificate an
 source = "058df245e82883ff3b02c9cb976a830ea4bfb3eb"
 apk_sha256 = "b61cad8e8792378a46d531967816c514542710931bc89300f808416ca1d21c51"
 core_sha256 = "af7bab08859b6f8a3d224328d603c60e0d0cd40cfe8a36fa77e668e0b826446f"
-status = "GL boundary candidate built/signed/audited, preserved with corresponding source and installed with unchanged data/all three identities. Diagnoses preexisting backend invalid-command flags separately from host framebuffer-copy/control-drawing failures; memory/context failures remain fatal. Actual game-pause/Save check remains required"
+status = "Historical graphics candidate, superseded by installed1cb/source1dc below. Source058 separates backend invalid-command flags from host copy/draw failures; its affected pause/Save route is now verified on the successor candidate, retaining fatal memory/context handling"
 
 [pixel_n64_play_20261102]
 installed_source = "fc6e300015f558802ed29b6871436ec706efdfc3"
@@ -107,4 +107,12 @@ limits = "Short affected-boundary check only. Historical later-play Pause/reentr
 implementation_source = "1dc7db2fe32578e5d50c06cec64fa7624f9ac48c"
 apk_sha256 = "1cb108ded7112147866df531da0bcdf4077eb9ea11c999c31170020347824e44"
 source = "Foreground player requests FLAG_KEEP_SCREEN_ON; menus clear it, and Android background window semantics remain ordinary. No device timeout, service or permission change"
-validation = "ARM64 Android release Clippy denies warnings; package signed with retained signer, audited and preserved with corresponding source. Uninstalled; actual idle-window check and cause of prior departure remain unqualified"
+validation = "ARM64 Android release Clippy denies warnings; package signed with retained signer, audited and preserved with corresponding source. Installed; the affected play/Save/cold reload and normal menu/Stop passed. Dedicated idle-window check and cause of prior departure remain unqualified"
+
+[pixel_n64_playable_20261102]
+source = "1dc7db2fe32578e5d50c06cec64fa7624f9ac48c"
+apk_sha256 = "1cb108ded7112147866df531da0bcdf4077eb9ea11c999c31170020347824e44"
+observed = "Protected update retained every previous data file and all three identities. Ocarina in-game Start/pause and Save/Yes completed; normal Stop published ordinary generation2. Old process absence verified, new cold process loaded the ordinary file directly into the room without the opening, then analog movement responded. Both native joins and final actual OFF return verified; both GameCube profiles unchanged"
+graphics = "One GL0502 flag was observed before NTX presentation at the affected pause boundary; host presentation and controls continued. Core renderer error cause and intro hitches remain unmeasured; no broad performance fix"
+audio = "Reuses owner-confirmed clear sound from prior audio-handoff build; current joins report actual host-stack AudioTrack writes, not a new human audibility claim"
+remaining = "Full-process machine restore, supported cross-system switch and alpha comfort; no wider cartridge, Fold or simultaneous-native-instance qualification"
