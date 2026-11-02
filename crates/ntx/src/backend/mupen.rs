@@ -16,6 +16,13 @@ use std::{
 type Result<T> = std::result::Result<T, String>;
 type Void = unsafe extern "C" fn();
 static LIVE: AtomicBool = AtomicBool::new(false);
+/// Includes a failed native join: the process slot stays occupied until all
+/// callbacks, executable code and host resources have actually retired.
+pub fn native_owner_present() -> bool {
+    LIVE.load(Ordering::Acquire)
+}
+const HW_CONTEXT_OPENGLES3: u32 = 4;
+const HW_CONTEXT_OPENGLES_VERSION: u32 = 5;
 thread_local! { static CONTEXT: Cell<*mut Context> = const { Cell::new(ptr::null_mut()) }; }
 
 /// Implementations stay on the owner thread and must not unwind from callbacks.
@@ -228,8 +235,10 @@ unsafe extern "C" fn environment(command: u32, data: *mut c_void) -> bool {
                 11 | 18 | 35 | 55 => true,
                 14 => {
                     let hw = &mut *data.cast::<Hardware>();
-                    if hw.context_type != 3
-                        && !(hw.context_type == 5 && hw.major == 3 && hw.minor == 0)
+                    if hw.context_type != HW_CONTEXT_OPENGLES3
+                        && !(hw.context_type == HW_CONTEXT_OPENGLES_VERSION
+                            && hw.major == 3
+                            && hw.minor == 0)
                     {
                         return false;
                     }
@@ -715,6 +724,78 @@ impl Drop for Core {
 #[cfg(all(test, target_pointer_width = "64"))]
 mod tests {
     use super::*;
+    struct ContextHost;
+    impl Host for ContextHost {
+        fn framebuffer(&self) -> usize {
+            7
+        }
+        fn proc_address(&self, _: &CStr) -> *const c_void {
+            ptr::null()
+        }
+        fn present(&mut self, _: u32, _: u32) -> Result<()> {
+            Ok(())
+        }
+        fn audio(&mut self, _: &[i16]) -> Result<usize> {
+            Ok(0)
+        }
+        fn poll_input(&mut self) {}
+        fn input(&self, _: u32, _: u32, _: u32, _: u32) -> i16 {
+            0
+        }
+        fn silence(&mut self) {}
+    }
+    #[test]
+    fn actual_hardware_callback_accepts_pinned_gles3_and_refuses_desktop_gl() {
+        let mut context = Box::new(Context {
+            host: Box::new(ContextHost),
+            system: CString::new("system").unwrap(),
+            cache: CString::new("cache").unwrap(),
+            options: BTreeMap::new(),
+            hardware: None,
+            av: AvInfo::default(),
+            error: None,
+            frames: 0,
+            audio_frames: 0,
+        });
+        CONTEXT.with(|slot| {
+            assert!(slot.get().is_null());
+            slot.set(&mut *context);
+        });
+        for (kind, major, minor, accepted) in [
+            (4, 0, 0, true),
+            (5, 3, 0, true),
+            (3, 3, 0, false),
+            (2, 2, 0, false),
+            (5, 3, 1, false),
+        ] {
+            context.hardware = None;
+            let mut hw = Hardware {
+                context_type: kind,
+                reset: None,
+                framebuffer: None,
+                proc_address: None,
+                depth: true,
+                stencil: false,
+                bottom_left: true,
+                major,
+                minor,
+                cache: false,
+                destroy: None,
+                debug: false,
+            };
+            // SAFETY: the actual selected ABI callback receives a valid Hardware
+            // payload and thread-local host, without loading/executing a core.
+            assert_eq!(
+                unsafe { environment(14, (&mut hw as *mut Hardware).cast()) },
+                accepted
+            );
+            assert_eq!(context.hardware.is_some(), accepted);
+            if accepted {
+                assert!(hw.framebuffer.is_some() && hw.proc_address.is_some());
+            }
+        }
+        CONTEXT.with(|slot| slot.set(ptr::null_mut()));
+    }
     #[test]
     fn selected_libretro_ffi_layout_matches_64_bit_header_contract() {
         assert_eq!(std::mem::size_of::<Hardware>(), 64);

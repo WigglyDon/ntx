@@ -287,6 +287,9 @@ fn boot(
     entry: &SavedSession,
     window: &NativeWindow,
 ) -> Result<LiveRuntime> {
+    if ntx::backend::mupen::native_owner_present() {
+        return Err("N64 execution still owns native resources in this process. Complete its recovery before opening another game.".into());
+    }
     match (entry.system, entry.backend) {
         (ntx::backend::System::GameCube, ntx::backend::Backend::Dolphin) => Ok(
             LiveRuntime::Dolphin(Box::new(boot_dolphin(root, sys, entry, window)?)),
@@ -2059,6 +2062,18 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
                     native_paused = None;
                 }
                 Err(error) => {
+                    if collection.entries[index].backend == ntx::backend::Backend::Mupen64PlusNext
+                        && !ntx::backend::mupen::native_owner_present()
+                    {
+                        // Core::load has returned through completion-bearing
+                        // Drop. A refused graphics/content request owns no live
+                        // writer; keep its identity/error and explicit restart.
+                        collection.entries[index].runtime_incomplete = false;
+                        collection.entries[index].stopped = true;
+                        platform::diagnostic(
+                            "N64 start failed after complete native teardown; current saves retained",
+                        );
+                    }
                     collection.entries[index].fail(error.to_string());
                     let retained = save_collection(&root, &collection).is_ok();
                     hidden = false;
