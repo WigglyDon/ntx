@@ -1,3 +1,10 @@
+> Current continuation note: installedb61 reaches the first-room HUD; the affected
+> game-pause/Save check is still pending. A later foreground departure kept the
+> process alive; its cause is unresolved. Source now requests foreground-player
+> screen-on and clears it for menus. This is an app-window change, not a device
+> setting or a claimed fix for the departure. Android warnings-denied lint passes.
+> Actual custody/recovery and next prepared artifacts remain local-only.
+
 > 2026-11-02 continuation: source058df24/APKb61cad8e is installed on Pixel4.
 > Both original media grants and game/profile pairs are verified, both ordinary
 > cards remain byte-identical, and short WW Start/Pause/Resume/Stop plus TP
@@ -12,7 +19,7 @@
 > graphics candidateb61cad8e/source058df24 is installed with unchanged data and
 > all three identities. Its affected game-pause/Save check remains pending.
 >92 portable tests remain earned; current Android warnings-denied lint passes.
->97 offline helper checks pass; prepared image-inspection bounds accommodate
+>99 offline helper checks pass; prepared image-inspection bounds accommodate
 > actual tool latency while retaining focus, geometry and single-use checks.
 > Original source/signing/progress/recovery remain retained. No NTX custody remains.
 > Before the next admitted task, reconcile current document access with the same

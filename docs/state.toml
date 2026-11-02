@@ -26,7 +26,7 @@ legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe
 next_step = "GL error-boundary candidateb61cad8e/source058df24 is built/signed/preserved. Qualify the affected N64 game-pause/Save route and supported scene/cross-system continuity. Reuse earned first-room movement, clear sound and ordinary-file cold reload. Prepared helper now supports measured inspection latency; private availability/preparation stay local-only; Fold needs its fresh personal window"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
-open_defects = ["N64 game-pause transition: GL0502 attributed to shared-context presentation; error-boundary repair awaits affected qualification", "N64 intro hitches: owner observed, unmeasured", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
+open_defects = ["N64 game-pause transition: GL0502 attributed to shared-context presentation; error-boundary repair awaits affected qualification", "N64 intro hitches: owner observed, unmeasured", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
 resources = "No outstanding gcx return obligation at succession reconciliation; no phone test or new reservation authorized by relocation; normal installed policy remains authoritative"
 legacy_detail = "docs/history/gcx-state.toml and docs/history/GCX_ACCEPTANCE.md are historical evidence, never active priorities or proof retired inputs exist"
 
@@ -51,7 +51,7 @@ device_actions = "Same-signer APK87a248ff/sourcefc6e300 protected update verifie
 
 [validation]
 host = "92 portable library tests passed, including GLES3 callback ABI, deferred copied PCM ordering/bounds/silence/failure handling, foreground game identity and frame deadlines; retained 15 decoder and 3 integration checks; host all-targets and ARM64 Android lints deny warnings"
-helpers = "97 offline packet fixtures passed, including bounded prepared inspection, expiry/focus rejection and single-use contacts"
+helpers = "99 offline packet fixtures passed, including bounded prepared inspection, expiry/focus rejection, single-use contacts and empty viewport-read retries"
 lints = "Warnings-denied host all-targets including native declarations and ARM64 Android Clippy passed; no mock native library or fingerprints"
 android_shell = "Java compiler module, DEX namespace and compiled resources/manifest checked; canonical package/activity/label confirmed"
 native = "Full renamed Dolphin build completed; pinned Mupen core compiled with declared patches; actual header/entrypoint/result/yield/shutdown fixtures and exact patch reproduction passed"
@@ -101,3 +101,7 @@ apk_sha256 = "4d683b5ee42675146ed5f26c16f4f1f74ffedf8cef63c4ff896110992e35439d"
 result = "Both original scoped documents reacquired through explicit stopped-entry confirmation; original game/profile identities and byte-identical ordinary cards retained. No known fingerprint or active machine continuation replaced."
 return = "Completed with actual client retirement and physical OFF under the admitted USB lease; original installation and all recovery candidates retained"
 limits = "Short affected-boundary check only. Historical later-play Pause/reentry remains unresolved; N64 runtime qualification pending."
+
+[foreground_player_window]
+source = "Foreground player requests FLAG_KEEP_SCREEN_ON; menus clear it, and Android background window semantics remain ordinary. No device timeout, service or permission change"
+validation = "ARM64 Android release Clippy denies warnings; source/formats checked. Actual idle-window check and cause of prior departure remain unqualified"

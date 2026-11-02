@@ -347,6 +347,15 @@ fn playing_window(env: &mut JNIEnv<'_>, activity: &JObject<'_>, playing: bool) -
     let window = env
         .call_method(activity, "getWindow", "()Landroid/view/Window;", &[])?
         .l()?;
+    // Keep the foreground player drawable visible during cutscenes or idle
+    // controller input. Android ignores this window flag in the background;
+    // showing the paused/library menu restores the normal display timeout.
+    env.call_method(
+        &window,
+        if playing { "addFlags" } else { "clearFlags" },
+        "(I)V",
+        &[JValue::Int(0x80)], // FLAG_KEEP_SCREEN_ON; no wake-lock permission.
+    )?;
     let decor = env
         .call_method(&window, "getDecorView", "()Landroid/view/View;", &[])?
         .l()?;
