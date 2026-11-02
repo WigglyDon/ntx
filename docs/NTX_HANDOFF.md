@@ -1,4 +1,4 @@
-> 2026-11-02 continuation: sourcefc6e300/APK87a248ff is installed on Pixel4.
+> 2026-11-02 continuation: source058df24/APKb61cad8e is installed on Pixel4.
 > Both original media grants and game/profile pairs are verified, both ordinary
 > cards remain byte-identical, and short WW Start/Pause/Resume/Stop plus TP
 > native-frame/Pause/Stop passed. Normal client retirement and actual OFF return
@@ -9,9 +9,11 @@
 > completed with independent profiles unchanged. Opening the game pause menu
 > exposed GL error0502 before in-game Save. Current source separates preexisting
 > backend error flags from host framebuffer-copy/control drawing errors; this
-> graphics candidateb61cad8e/source058df24 is built/signed/preserved and awaits
-> installation and its affected device check.
+> graphics candidateb61cad8e/source058df24 is installed with unchanged data and
+> all three identities. Its affected game-pause/Save check remains pending.
 >92 portable tests remain earned; current Android warnings-denied lint passes.
+>97 offline helper checks pass; prepared image-inspection bounds accommodate
+> actual tool latency while retaining focus, geometry and single-use checks.
 > Original source/signing/progress/recovery remain retained. No NTX custody remains.
 > Before the next admitted task, reconcile current document access with the same
 > IDs and saves. Private availability and task preparation remain local-only.

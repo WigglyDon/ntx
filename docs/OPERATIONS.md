@@ -50,7 +50,11 @@ actual client/lease release. Failed cleanup stays pending with its original erro
 
 The renamed scripts/android_packet.py remains a finite product test helper;
 it grants no custody. Its NTX_* environment and exact package/geometry/source
-bindings require a fresh prepared task for the new candidate. Old private GCX
+bindings require a fresh prepared task for the new candidate. An explicitly
+prepared image-inspection bound may be 1..90 seconds (default30) to accommodate
+measured model/tool turnaround. Current focus/display/geometry checks and
+single-use contacts still apply; an expired image must be captured and inspected
+again. This local helper supplies neither custody nor a device-use window. Old private GCX
 recipes are dormant evidence, not runnable commands or renewed authority.
 Detailed [prior helper gates](history/GCX_OPERATIONS.md) remain safety evidence;
 current installed procedure and actual admission govern device operations.
