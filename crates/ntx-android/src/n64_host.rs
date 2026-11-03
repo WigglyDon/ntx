@@ -665,13 +665,19 @@ impl Host for Adapter {
         self.0.borrow().graphics.fbo as usize
     }
     fn proc_address(&self, name: &CStr) -> *const c_void {
-        // SAFETY: trusted EGL resolver supplies the exact named GL ABI. The
-        // probe changes neither arguments/results nor GL state/error flags.
+        // These four base functions already belong to this host's GLES3 ABI;
+        // base-function lookup through EGL is not required to expose them.
+        // SAFETY: exact imported GL types or the trusted EGL resolver supply the
+        // named ABI. Probes preserve arguments/results and GL state/error flags.
         unsafe {
-            self.0
-                .borrow()
-                .shader_probe
-                .intercept(name, eglGetProcAddress(name.as_ptr()))
+            let address = match name.to_bytes() {
+                b"glCompileShader" => glCompileShader as *const c_void,
+                b"glLinkProgram" => glLinkProgram as *const c_void,
+                b"glGetShaderiv" => glGetShaderiv as *const c_void,
+                b"glGetProgramiv" => glGetProgramiv as *const c_void,
+                _ => eglGetProcAddress(name.as_ptr()),
+            };
+            self.0.borrow().shader_probe.intercept(name, address)
         }
     }
     fn present(&mut self, w: u32, h: u32) -> Result<()> {
