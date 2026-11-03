@@ -17,8 +17,9 @@ fix is claimed for the diagnosed backend GL flag or owner-observed intro hitches
 
 Next: finish Master’s alpha-controls boundary. Source now adds N64 drag/resize
 layouts with independent per-screen N64 targets, shared Rust editor views and an
-isolated input preview. Host tests/lints support it; its new package and actual
-target simultaneous-input/layout-persistence checks are still required. Reuse all
+isolated input preview. Host tests/lints and signed package/source audits pass. Source87f3641/APK97930edd
+is privately retained; actual-target simultaneous-input/layout-persistence checks
+are queued through normal custody and remain unearned. Reuse all
 earned game/save/scene/switch results. Do not restart boot/save/timing/quest work.
 Keep direct Dolphin, signer, opaque identities, real progress and all recovery.
 No Fold qualification, concurrent native instances or public binary release.
