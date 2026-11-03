@@ -23,6 +23,14 @@ Pause/Resume/Stop route is also observed, with current cards unchanged. See the
 [migration boundary](docs/IDENTITY_MIGRATION.md), [acceptance](docs/ACCEPTANCE.md)
 and [N64 pin/audit](native/mupen/README.md).
 
+Controller editing now uses a play-size canvas with grouped movement, corner
+resize, snapping, mirror, undo and scoped reset. The game field has the same
+selection and editing priority as controls, with aspect-correct preferences used
+by both renderers. Pixel4 observes GC field move/resize/undo/Save and N64 paused
+image/resize/Save/native-picture mapping. The short-screen group repair and larger
+N64 default field are source/package checked; their focused target check remains
+queued. See [current state](docs/state.toml) for exact build and verification bounds.
+
 Read [AGENTS.md](AGENTS.md), [successor handoff](docs/NTX_HANDOFF.md),
 [NTX-5](https://github.com/WigglyDon/ntx/issues/5) and its
 [architecture amendment](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6505289270).

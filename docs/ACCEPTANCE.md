@@ -90,3 +90,19 @@ Host tests, native/package/signature/resource/license checks, visible gameplay,
 audible sound, ordinary saves, machine resume, residency and measured performance
 remain distinct. Public binary/store release and all-platform qualification retain
 separate gates. Keep issues open for acceptance.
+
+
+## Requested controller/game-field editing increment
+
+Source6e80b99/APKf809ee02 has actual Pixel4 observations for the play-size GC/N64
+canvas, GC field corner/move/undo/Save, N64 paused-picture preview/corner resize/
+Save and live renderer picture mapping. Normal Stop, exact original preferences,
+protected ordinary data/cards/untouched second profile and actual OFF return pass.
+This is editing/presentation evidence, not a new gameplay or persistence campaign.
+
+Source75e73ae/ready APKaa2f2933 repairs the observed832x328 GC group minimum and
+moves landscape N64 Pause/Start away from the game field.100 portable tests and
+warnings-denied host/ARM64 checks pass, as do signed package/source checks. The
+focused target repair check remains queued; no physical result is inferred from
+host fixtures. Broader PSX frontend/bindings, Fold and concurrent native execution
+are not qualified by this increment. Acceptance issues stay open.
