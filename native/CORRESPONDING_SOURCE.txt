@@ -32,7 +32,7 @@ In a new, capacity-admitted directory:
    mkdir -p .local/source .local/source-archives
    tar -xzf /candidate/mupen-active-source.tar.gz -C .local/source
    cp /candidate/mupen-upstream-15bada85.tar.gz .local/source-archives/mupen64plus-next-15bada85.tar.gz
-   The active archive already contains both maintained patches; do not reapply.
+   The active archive already contains all declared maintained patches; do not reapply.
 5. With the separately installed licensed SDK/NDK/toolchain identified by
    binding.json, set ANDROID_HOME and ANDROID_NDK_HOME as native/README.md explains.
    cargo xtask source-check
