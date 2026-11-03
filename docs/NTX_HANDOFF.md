@@ -9,14 +9,14 @@ No second worker, sibling change, donor reset or retired campaign.
 Canonical ntx identity/package/data migration is implemented and verified on
 Pixel4 with original GameCube identities/progress and source installation retained.
 First-playable source1dc7db2/APK1cb108de verified Ocarina alongside both GameCube
-games; the current installed successor is source87f3641/APK97930edd below.
+games; source87f3641/APK97930edd below earned the earlier alpha boundaries.
 In-game Save, ordinary cold reload and analog movement passed. Sequential native
 scene return, fresh-process GameCube and N64 scene restores, and GC/N64/GC passed.
 Normal Stop/actual return were verified after USB reconnection; original GCcards,
 N64 ordinary data and untouched TP profile were unchanged. No renderer/performance
 fix is claimed for the diagnosed backend GL flag or owner-observed intro hitches.
 
-Installed source87f3641/APK97930edd also verifies N64 drag/resize Save/Cancel,
+Earlier source87f3641/APK97930edd also verifies N64 drag/resize Save/Cancel,
 fresh-process runtime layout, shared GC editor and actual two-pointer input in the
 isolated N64 preview: stick+A, independent A release, then cancellation to neutral.
 Temporary input resources, exact preferences, current ordinary data/cards and
@@ -47,15 +47,13 @@ protected update: GC field corner/move/undo/Save, N64 paused image/field resize/
 and native picture mapping passed. Original preferences/current ordinary progress
 and actual physical return were verified. Short-screen GC group validation and
 N64 landscape auxiliary-control picture crowding were found and repaired in
-source with focused fixtures; the repair's new target check is pending.
+source with focused fixtures; the subsequent repair check passed below.
 
 Owner's latest steering supersedes the earlier clear-picture default: maximize
 uncropped native-aspect game real estate first (height in landscape, width in
 portrait), then fit controls in unused space without overlap. This is a default
 for every game, not an opt-in. Existing PSX/PCX/XBX/FN64/Pokémon owners were informed;
-only NTX is implemented here. The new game-first source has104 portable fixtures;
-its signed build and bounded Pixel4 verification are the next unfinished work.
-Installed75e73ae/APKaa2f2933 already passed GC grouped move/Save/reopen/Cancel/cold
+only NTX is implemented here. Source75e73ae/APKaa2f2933 passed GC grouped move/Save/reopen/Cancel/cold
 process, real GC paused image and movable dock; larger-but-not-edge N64 field and
 relocated Pause were observed. That field prompted the correction. Exact test
 preferences/protected ordinary data and actual return passed; no NTX hold remains.
@@ -73,10 +71,25 @@ out of Git. [Historical handoff](history/NTX_HANDOFF_BASELINE_20261102.md) retai
 baseline and intermediate evidence, never current work priority.
 
 
-The next candidate also fits the game in screen space before independent native
+The installed candidate also fits the game in screen space before independent native
 buffer scaling, preventing pixel-aspect distortion without changing core options.
 Source3f2303c/APK97cbeadd was protected-installed by the first queued check, which
 was retired at an acquired safe boundary before gameplay so the buffer correction
 could be packaged. Its actual return passed; no native picture qualification is
-claimed. The current installed artifact is97cbeadd; next preparation must use it
-as the compatible-update/rollback baseline and the latest returned collection.
+claimed for that intermediate artifact.
+
+Current installed source63e5e11/APK6854b394 passed the bounded Pixel4 check:
+full-height 4:3 Ocarina picture, controls clear in side bars, actual Pause and
+paused-image editor, grouped C-button move/Save, native resumed mapping, reopened
+placement and a second draft Cancel preserving exact saved bytes. Runtime geometry
+reported1440x1080 inside2280x1080. Normal joined Stop, exact original preferences,
+protected ordinary data/cards/untouched second GC profile and physical OFF return
+were verified; no NTX custody or recovery remains.104 portable tests and relevant
+warnings-denied host/ARM64 checks pass; signed corresponding source is retained.
+GameCube's new default, portrait and scaled-buffer cases have model coverage;
+this new physical full-height observation is N64. No new save/scene/timing campaign,
+Fold operation or renderer-performance fix follows. Review the
+[reported outcomes](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6597417040)
+and disclosed defects with acceptance issues open; do not automatically replay
+earned tests. Future preparation must bind the actual installed artifact and
+latest returned collection, never an earlier rollback baseline.

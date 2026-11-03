@@ -100,9 +100,19 @@ Save and live renderer picture mapping. Normal Stop, exact original preferences,
 protected ordinary data/cards/untouched second profile and actual OFF return pass.
 This is editing/presentation evidence, not a new gameplay or persistence campaign.
 
-Source75e73ae/ready APKaa2f2933 repairs the observed832x328 GC group minimum and
-moves landscape N64 Pause/Start away from the game field.100 portable tests and
-warnings-denied host/ARM64 checks pass, as do signed package/source checks. The
-focused target repair check remains queued; no physical result is inferred from
-host fixtures. Broader PSX frontend/bindings, Fold and concurrent native execution
-are not qualified by this increment. Acceptance issues stay open.
+Source75e73ae/APKaa2f2933 passed GC grouped move/Save/reopen, Cancel retaining exact
+saved bytes, cold editor reload, actual paused image and movable dock. The larger
+clear N64 field prompted the owner's clarified default: complete native-aspect
+picture first, full height in landscape/full width in portrait, with controls in
+unused space without overlap.
+
+Installed source63e5e11/APK6854b394 verifies that default on Pixel4 N64:1440x1080
+field inside2280x1080, clear side-bar controls, actual Pause/paused-image editor,
+C-button grouped move/Save, native resumed mapping, reopened placement and Cancel
+retaining exact saved preference bytes. Joined Stop, exact original preferences,
+protected ordinary/cards/untouched GC profile and actual OFF return pass.
+104 portable tests and warnings-denied host/ARM64 checks pass, as do signed
+package/source checks. GameCube's new default, portrait and scaled-buffer cases
+have model coverage; the new physical full-height result is N64. No new gameplay,
+save/scene/timing campaign or sibling/Fold/concurrent-native qualification follows.
+Acceptance issues stay open. [Outcome report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6597417040).
