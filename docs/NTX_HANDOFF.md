@@ -15,15 +15,19 @@ Normal Stop/actual return were verified after USB reconnection; original GCcards
 N64 ordinary data and untouched TP profile were unchanged. No renderer/performance
 fix is claimed for the diagnosed backend GL flag or owner-observed intro hitches.
 
-Next: finish Master’s actual-target simultaneous-input preview boundary using
-installed source87f3641/APK97930edd. N64 drag/resize Save/Cancel, fresh-process
-native layout loading and the shared GameCube editor open/Cancel are now verified.
-The protected update retained all prior files/three identities. Both backends
-joined normally; exact original preferences and current ordinary data/cards were
-verified at actual OFF return. The corrected finite input task uses the visible
-neutral test-only hint and inspected blank-margin scrolling. No two-pointer result
-is earned yet. Reuse all other evidence; no new package, save/scene/quest/timing
-campaign, second worker or sibling change. No Fold/concurrent-native/release claim.
+Installed source87f3641/APK97930edd also verifies N64 drag/resize Save/Cancel,
+fresh-process runtime layout, shared GC editor and actual two-pointer input in the
+isolated N64 preview: stick+A, independent A release, then cancellation to neutral.
+Temporary input resources, exact preferences, current ordinary data/cards and
+actual OFF return were verified; no NTX hold or recovery remained.
+
+Next: one still-unperformed NTX-5 step1 boundary. docs/ACCEPTANCE.md explicitly
+records canonical-package GameCube Home/reentry as untested. Qualify one short
+current-progress play/Home/return/Pause/Resume/joined-Stop route through normal
+custody. Preserve all earned N64/save/scene/layout/input evidence; no repeated
+campaign, quest, timing, new Save, package change or historical-freeze cure claim.
+After that report the finite outcomes and retained defects for review, keeping
+acceptance issues open. No Fold/concurrent-native/release claim.
 
 Read docs/state.toml for exact source/artifact and earned-result bounds. Installed
 android-device admission/return is authoritative; older returns establish no

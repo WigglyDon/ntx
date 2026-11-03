@@ -31,8 +31,12 @@ room position/camera after actual capture/join/unload, with independent referenc
 and current ordinary generation unchanged on return. Normal Stop/actual return,
 unchanged GC cards and untouched TP profile passed. This used one app process;
 later fresh-process GameCube and N64 scene restores and GC/N64/GC also passed,
-with native joins, current saves and actual return verified. N64 drag/resize
-layout and actual-target simultaneous-input/layout-persistence checks remain due. Some intro hitches were owner-observed. See
+with native joins, current saves and actual return verified. Installed source87f3641/APK97930edd additionally passes N64 drag/resize Save/Cancel,
+fresh-process native layout loading and shared GC editor open/Cancel. The actual
+isolated preview shows stick+A, independent A release with stick retained, and
+cancellation to neutral. Original preferences, current ordinary data/cards and
+actual OFF return are verified. The still-unperformed canonical GameCube
+Home/reentry route above remains a focused step1 check. Some intro hitches were owner-observed. See
 [the exact migration boundary](IDENTITY_MIGRATION.md).
 
 ## Earned GameCube baseline: preserve, do not replay

@@ -25,7 +25,8 @@ verified sequential native-unloaded scene return, fresh-process N64 and GameCube
 scenes, and GameCube/N64/GameCube switching with independent ordinary saves.
 Installed source87f3641/APK97930edd passes N64 layout drag/resize, Save/Cancel
 and fresh-process native mapping, plus the shared GameCube editor boundary.
-Actual-target simultaneous-input preview remains pending. Concurrent native instances, broader
+Actual-target isolated stick+A input, independent A release and cancellation to
+neutral are observed; current ordinary data and actual return were verified. Concurrent native instances, broader
 compatibility and performance are not inferred.
 
 ## Source and reproduction
