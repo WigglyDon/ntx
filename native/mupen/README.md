@@ -71,6 +71,15 @@ Candidate preservation retains original and complete patched Mupen source,
 first-party/Dolphin/dependency bundles, Rust vendor inputs and exact tool/build
 bindings. The unsigned source-rebuild route needs no private signer.
 
+The optional compiler-observer bridge wraps the existing `new_recompile_block`
+entry without changing its retained implementation, arguments or results. A
+nullable callback reports only begin/end; it exports no guest addresses or bytes.
+Rust owns first4096-call correlation and a131072-event cap, rejects incomplete or
+nested scopes, and unregisters between native calls after its bound. Timing is
+elapsed host time, not proof of CPU/GPU attribution or a compiler remedy. The
+actual wrapper/registrar fixture checks both returned results and callback
+retirement; reproduction checks the original compiler body byte for byte.
+
 ## Actual backend boundaries
 
 | Boundary | Implemented ownership and limit |

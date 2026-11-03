@@ -2,7 +2,10 @@
 //! Small host for the pinned Mupen64Plus-Next libretro ABI. The host owns
 //! presentation/audio resources; this adapter owns console calls and quiescence.
 //! Native globals permit one instance per process until isolation is qualified.
-use crate::n64::{Cartridge, SaveImage};
+use crate::{
+    backend::jit_probe::CompileProbe,
+    n64::{Cartridge, SaveImage},
+};
 use std::{
     cell::Cell,
     collections::BTreeMap,
@@ -12,6 +15,7 @@ use std::{
     ptr,
     rc::Rc,
     sync::atomic::{AtomicBool, Ordering},
+    time::Instant,
 };
 type Result<T> = std::result::Result<T, String>;
 type Void = unsafe extern "C" fn();
@@ -169,6 +173,7 @@ struct Context {
     error: Option<String>,
     frames: u64,
     audio_frames: u64,
+    compilation: CompileProbe,
 }
 impl Context {
     fn fail(&mut self, error: String) {
@@ -188,6 +193,9 @@ fn with_context<T>(default: T, f: impl FnOnce(&mut Context) -> T) -> T {
             f(unsafe { &mut *p })
         }
     })
+}
+unsafe extern "C" fn compilation_event(entering: u32) {
+    with_context((), |c| c.compilation.event(entering));
 }
 unsafe extern "C" fn framebuffer() -> usize {
     with_context(0, |c| c.host.framebuffer())
@@ -413,6 +421,7 @@ struct Api {
     set_audio_batch: unsafe extern "C" fn(unsafe extern "C" fn(*const i16, usize) -> usize),
     set_poll: unsafe extern "C" fn(unsafe extern "C" fn()),
     set_input: unsafe extern "C" fn(unsafe extern "C" fn(u32, u32, u32, u32) -> i16),
+    set_compile_observer: unsafe extern "C" fn(Option<unsafe extern "C" fn(u32)>),
     api_version: unsafe extern "C" fn() -> u32,
     init: Void,
     deinit: Void,
@@ -445,6 +454,7 @@ impl Api {
             set_audio_batch: sym!("retro_set_audio_sample_batch"),
             set_poll: sym!("retro_set_input_poll"),
             set_input: sym!("retro_set_input_state"),
+            set_compile_observer: sym!("retro_ntx_set_compile_observer"),
             api_version: sym!("retro_api_version"),
             init: sym!("retro_init"),
             deinit: sym!("retro_deinit"),
@@ -479,6 +489,7 @@ pub struct Core {
     initialized: bool,
     loaded: bool,
     quarantined: bool,
+    compile_observer_active: bool,
     _library: Option<Library>,
     _slot: Slot,
     _owner: PhantomData<Rc<()>>,
@@ -545,6 +556,7 @@ impl Core {
             error: None,
             frames: 0,
             audio_frames: 0,
+            compilation: CompileProbe::default(),
         });
         CONTEXT.with(|p| p.set(&mut *context));
         let mut core = Self {
@@ -553,6 +565,7 @@ impl Core {
             initialized: false,
             loaded: false,
             quarantined: false,
+            compile_observer_active: false,
             _library: Some(library),
             _slot: slot,
             _owner: PhantomData,
@@ -565,6 +578,8 @@ impl Core {
             (core.api.set_audio_batch)(audio);
             (core.api.set_poll)(poll);
             (core.api.set_input)(input);
+            (core.api.set_compile_observer)(Some(compilation_event));
+            core.compile_observer_active = true;
             let mut info = SystemInfo {
                 name: ptr::null(),
                 version: ptr::null(),
@@ -626,6 +641,9 @@ impl Core {
     pub fn observations(&self) -> (u64, u64) {
         (self.context.frames, self.context.audio_frames)
     }
+    pub fn compilation_summary(&self) -> String {
+        self.context.compilation.to_string()
+    }
     pub fn options_sha256(&self) -> String {
         let mut bytes = Vec::new();
         for (k, v) in &self.context.options {
@@ -640,7 +658,20 @@ impl Core {
         if !self.loaded || self.quarantined {
             return Err("N64 runtime is stopped or requires recovery".into());
         }
+        let observing = self.context.compilation.collecting();
+        if self.compile_observer_active && !observing {
+            // The qualified owner thread is quiescent between retro_run calls.
+            unsafe { (self.api.set_compile_observer)(None) };
+            self.compile_observer_active = false;
+        }
+        if observing {
+            self.context.compilation.begin_frame();
+        }
+        let start = observing.then(Instant::now);
         unsafe { (self.api.run)() };
+        if let Some(start) = start {
+            self.context.compilation.end_frame(start.elapsed());
+        }
         self.check()
     }
     pub fn silence(&mut self) {
@@ -751,6 +782,7 @@ impl Drop for Core {
         }
         // Shared-library destructors finish while host graphics/audio and the
         // callback context are still alive. No native owner outlives the slot.
+        unsafe { (self.api.set_compile_observer)(None) };
         drop(self._library.take());
         CONTEXT.with(|c| c.set(ptr::null_mut()));
         // SAFETY: completed stop, DLL destructors and callback retirement precede
@@ -854,6 +886,7 @@ mod tests {
             error: None,
             frames: 0,
             audio_frames: 0,
+            compilation: CompileProbe::default(),
         });
         CONTEXT.with(|slot| {
             assert!(slot.get().is_null());
@@ -892,7 +925,22 @@ mod tests {
                 assert!(hw.framebuffer.is_some() && hw.proc_address.is_some());
             }
         }
+        context.compilation.begin_frame();
+        // SAFETY: this exact C callback uses only the live thread-local owner.
+        unsafe {
+            compilation_event(1);
+            compilation_event(0);
+        }
+        context.compilation.end_frame(std::time::Duration::MAX);
+        let summary = context.compilation.to_string();
+        assert!(summary.contains("frames=1 events=2 scopes=1 invalid_frames=0"));
         CONTEXT.with(|slot| slot.set(ptr::null_mut()));
+        // A retired owner is a no-op, not a stale native-to-Rust reference.
+        unsafe {
+            compilation_event(1);
+            compilation_event(0);
+        }
+        assert_eq!(context.compilation.to_string(), summary);
     }
     #[test]
     fn selected_libretro_ffi_layout_matches_64_bit_header_contract() {

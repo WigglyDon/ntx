@@ -105,14 +105,53 @@ print('Actual libretro ABI, checked state admission/results and completed-job yi
 patch_temporary = tempfile.TemporaryDirectory(prefix='ntx-mupen-patch-')
 patch_root = Path(patch_temporary.name)
 with tarfile.open(ROOT / '.local/source-archives/mupen64plus-next-15bada85.tar.gz') as archive:
-    for name in ['libretro/libretro.c', 'mupen64plus-core/src/main/savestates.c', 'GLideN64/src/Graphics/OpenGLContext/GLFunctions.cpp', 'custom/GLideN64/mupenplus/CommonAPIImpl_mupenplus.cpp']:
+    for name in ['libretro/libretro.c', 'mupen64plus-core/src/main/savestates.c', 'GLideN64/src/Graphics/OpenGLContext/GLFunctions.cpp', 'custom/GLideN64/mupenplus/CommonAPIImpl_mupenplus.cpp', 'mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c']:
         member = next(m for m in archive.getmembers() if m.name.endswith('/' + name))
         destination = patch_root / name
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(archive.extractfile(member).read())
-for name in ['0001-checked-state-result.patch', '0002-coherent-state-boundary.patch', '0003-host-shader-dispatch.patch', '0004-profile-shader-cache.patch']:
+for name in ['0001-checked-state-result.patch', '0002-coherent-state-boundary.patch', '0003-host-shader-dispatch.patch', '0004-profile-shader-cache.patch', '0005-compile-observer.patch']:
     subprocess.run(['git', 'apply', '--no-index', str(ROOT / 'native/mupen' / name)], cwd=patch_root, check=True)
-for name in ['libretro/libretro.c', 'mupen64plus-core/src/main/savestates.c', 'GLideN64/src/Graphics/OpenGLContext/GLFunctions.cpp', 'custom/GLideN64/mupenplus/CommonAPIImpl_mupenplus.cpp']:
+for name in ['libretro/libretro.c', 'mupen64plus-core/src/main/savestates.c', 'GLideN64/src/Graphics/OpenGLContext/GLFunctions.cpp', 'custom/GLideN64/mupenplus/CommonAPIImpl_mupenplus.cpp', 'mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c']:
     assert hashlib.sha256((patch_root / name).read_bytes()).digest() == hashlib.sha256((SOURCE / name).read_bytes()).digest()
 print('All maintained patches reproduce the exact active source bytes')
 patch_temporary.cleanup()
+
+# Check the exact wrapper and registrar; native compilation remains untouched.
+compiler_path = 'mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c'
+compiler = (SOURCE / compiler_path).read_text()
+with tarfile.open(ROOT / '.local/source-archives/mupen64plus-next-15bada85.tar.gz') as archive:
+    member = next(m for m in archive.getmembers() if m.name.endswith('/' + compiler_path))
+    original = archive.extractfile(member).read().decode()
+# This pinned compiler is the final function; preprocessing alternatives contain
+# unmatched braces before preprocessing, so compare its complete retained tail.
+original_body = original[original.index('int new_recompile_block(int addr)\n{'):].split('{', 1)[1].strip()
+active_body = compiler[compiler.index('static int ntx_recompile_block(int addr)\n{'):compiler.index('/* Mechanical boundary:')].split('{', 1)[1].strip()
+assert original_body == active_body
+bridge_start = libretro.index('typedef void (*ntx_compile_observer_t)')
+bridge_end = libretro.index('static bool ntx_shutdown_complete', bridge_start)
+compile_fixture = r"""
+#include <assert.h>
+#include <stddef.h>
+#define RETRO_API
+static int answer, seen_address, begins, ends;
+static int ntx_recompile_block(int addr) { seen_address=addr; return answer; }
+""" + libretro[bridge_start:bridge_end] + function(compiler, 'int new_recompile_block(int addr)\n{') + r"""
+static void observe(unsigned entering) { if (entering) begins++; else ends++; }
+int main(void) {
+ retro_ntx_set_compile_observer(observe);
+ answer=0; assert(new_recompile_block(123)==0 && seen_address==123);
+ answer=1; assert(new_recompile_block(-71)==1 && seen_address==-71);
+ assert(begins==2 && ends==2);
+ retro_ntx_set_compile_observer(NULL);
+ answer=-9; assert(new_recompile_block(56)==-9 && seen_address==56);
+ assert(begins==2 && ends==2);
+ return 0;
+}
+"""
+path = OUT / 'compile-observer.c'
+path.write_text(compile_fixture)
+executable = OUT / 'compile-observer'
+subprocess.run(['cc', '-std=c11', '-Wall', '-Wextra', '-Werror', '-D__LIBRETRO__', str(path), '-o', str(executable)], check=True)
+subprocess.run([str(executable)], check=True)
+print('Original compiler body unchanged; exact observer ABI preserves arguments/results and nullable retirement')

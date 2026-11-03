@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 pub mod dolphin;
 #[cfg(any(target_os = "linux", target_os = "android"))]
 pub mod gl_probe;
+pub mod jit_probe;
 #[cfg(any(target_os = "linux", target_os = "android"))]
 pub mod mupen;
 pub mod mupen_cache;

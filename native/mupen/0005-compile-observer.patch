@@ -1,0 +1,61 @@
+NTX mechanical compilation observer boundary; compiler behavior/results unchanged.
+Upstream15bada85906593376e8fd697f1b0b3af3a20f512; original licenses retained.
+
+--- a/libretro/libretro.c
++++ b/libretro/libretro.c
+@@ -712,6 +712,19 @@
+     }
+ }
+ 
++/* Modified by ntx 2026-11-03: optional compiler observation ABI; timing policy is Rust. */
++typedef void (*ntx_compile_observer_t)(unsigned);
++static ntx_compile_observer_t ntx_compile_observer;
++RETRO_API void retro_ntx_set_compile_observer(ntx_compile_observer_t observer)
++{
++    ntx_compile_observer = observer;
++}
++void retro_ntx_compile_event(unsigned entering)
++{
++    if (ntx_compile_observer)
++        ntx_compile_observer(entering);
++}
++
+ static bool ntx_shutdown_complete = true;
+ RETRO_API bool retro_ntx_shutdown_complete(void) { return ntx_shutdown_complete; }
+ 
+--- a/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
++++ b/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
+@@ -1,3 +1,4 @@
++/* Modified by ntx 2026-11-03: optional host observer around the unchanged compiler implementation. */
+ /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  *   Mupen64plus - new_dynarec.c                                           *
+  *   Copyright (C) 2009-2011 Ari64                                         *
+@@ -8853,7 +8854,7 @@
+ #endif
+ }
+ 
+-int new_recompile_block(int addr)
++static int ntx_recompile_block(int addr)
+ {
+ #if defined(RECOMPILER_DEBUG) && !defined(RECOMP_DBG)
+   recomp_dbg_block(addr);
+@@ -11985,3 +11986,19 @@
+   }
+   return 0;
+ }
++
++/* Mechanical boundary: preserve the compiler argument and every returned result. */
++#ifdef __LIBRETRO__
++extern void retro_ntx_compile_event(unsigned entering);
++#endif
++int new_recompile_block(int addr)
++{
++#ifdef __LIBRETRO__
++  retro_ntx_compile_event(1);
++#endif
++  int result = ntx_recompile_block(addr);
++#ifdef __LIBRETRO__
++  retro_ntx_compile_event(0);
++#endif
++  return result;
++}
