@@ -91,3 +91,11 @@ campaign, Fold operation or renderer-performance fix follows. Review the
 and disclosed defects with acceptance issues open; do not automatically replay
 earned tests. Future preparation must bind the actual installed artifact and
 latest returned collection, never an earlier rollback baseline.
+
+Active unfinished work: N64 hitch diagnosis. Source7bfad42 fixes deterministic
+frame-clock drift from repeated wake-up jitter and adds bounded elapsed-host
+phase aggregates;109 portable tests and host/ARM64 warnings-denied checks pass.
+Signed/private source-bound APK40e77e2c is ready for a short queued title/intro
+diagnostic, with no gameplay inputs or game Save. Do not infer a hitch cure or
+reopen closed GC timing/save/scene campaigns. Current admission/return and exact
+private preparation govern continuation; waiting is not custody.
