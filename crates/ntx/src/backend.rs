@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "native-engine")]
 pub mod dolphin;
 #[cfg(any(target_os = "linux", target_os = "android"))]
+pub mod gl_probe;
+#[cfg(any(target_os = "linux", target_os = "android"))]
 pub mod mupen;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

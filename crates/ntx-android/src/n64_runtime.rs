@@ -152,9 +152,12 @@ impl Runtime {
             self.report(error.into());
             return;
         }
+        self.resources.borrow().shader_probe.begin_frame();
         let core_start = Instant::now();
         let run = self.core().and_then(Core::run_frame);
-        self.timings.core.record(core_start.elapsed());
+        let core_elapsed = core_start.elapsed();
+        self.resources.borrow().shader_probe.end_frame(core_elapsed);
+        self.timings.core.record(core_elapsed);
         if let Err(e) = run {
             self.report(e);
             return;
@@ -272,6 +275,10 @@ impl Runtime {
                     resources.graphics.present_timing,
                     resources.graphics.swap_timing,
                     self.timings.audio,
+                ));
+                platform::diagnostic(&format!(
+                    "N64 core shader timing (first4096 core calls; elapsed, not GPU/CPU attribution): {}",
+                    resources.shader_probe.summary()
                 ));
             }
             platform::diagnostic(&format!(

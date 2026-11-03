@@ -8,6 +8,7 @@ use jni::{
 };
 use ndk::native_window::NativeWindow;
 use ntx::{
+    backend::gl_probe::ShaderProbe,
     backend::mupen::{AudioQueue, Host},
     frame_timing::DurationStats,
     n64_touch::{Target, View},
@@ -609,6 +610,7 @@ pub struct Resources {
     pending_audio: AudioQueue,
     pub written_audio_frames: u64,
     pub muted: bool,
+    pub shader_probe: ShaderProbe,
 }
 impl Resources {
     pub fn new(window: &NativeWindow) -> Result<Self> {
@@ -618,6 +620,7 @@ impl Resources {
             pending_audio: AudioQueue::default(),
             written_audio_frames: 0,
             muted: true,
+            shader_probe: ShaderProbe::new().map_err(str::to_owned)?,
         })
     }
     /// JNI may enter managed code only on the outer Android owner stack, after
@@ -662,7 +665,14 @@ impl Host for Adapter {
         self.0.borrow().graphics.fbo as usize
     }
     fn proc_address(&self, name: &CStr) -> *const c_void {
-        unsafe { eglGetProcAddress(name.as_ptr()) }
+        // SAFETY: trusted EGL resolver supplies the exact named GL ABI. The
+        // probe changes neither arguments/results nor GL state/error flags.
+        unsafe {
+            self.0
+                .borrow()
+                .shader_probe
+                .intercept(name, eglGetProcAddress(name.as_ptr()))
+        }
     }
     fn present(&mut self, w: u32, h: u32) -> Result<()> {
         let start = Instant::now();

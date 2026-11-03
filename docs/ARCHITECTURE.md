@@ -62,6 +62,11 @@ audio delivery. Core duration includes its presentation callbacks; callback and
 dispatch counts need not match. Pause gaps are excluded from active intervals.
 These observations include startup and are not display-frame, audible-output or
 measured speed claims. No per-frame logs or game data are collected by them.
+The narrower core shader probe passes through compile/link and status-query
+addresses resolved by the existing host ABI. It changes no GL state/error flags,
+core options or checkpoint fingerprints. Each slow core call is correlated with
+its own shader-call elapsed time; unrelated maxima are never subtracted. The
+probe follows the non-Send runtime owner thread and retires after native join.
 Neither decision embeds Android handles or changes durable identities.
 
 ## Ordinary progress and machine state
