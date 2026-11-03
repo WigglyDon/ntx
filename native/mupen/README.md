@@ -23,8 +23,9 @@ presentation continued; its renderer cause is not claimed fixed. Independent
 GameCube profiles were unchanged and actual return passed. Later focused checks
 verified sequential native-unloaded scene return, fresh-process N64 and GameCube
 scenes, and GameCube/N64/GameCube switching with independent ordinary saves.
-The ready source87f3641 N64 layout editor still needs actual-target simultaneous
-input and layout-persistence qualification. Concurrent native instances, broader
+Installed source87f3641/APK97930edd passes N64 layout drag/resize, Save/Cancel
+and fresh-process native mapping, plus the shared GameCube editor boundary.
+Actual-target simultaneous-input preview remains pending. Concurrent native instances, broader
 compatibility and performance are not inferred.
 
 ## Source and reproduction

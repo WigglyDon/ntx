@@ -15,9 +15,9 @@ Save, ordinary cold reload, fresh-process scene return and sequential cross-syst
 switching are verified. Clear sound retains its prior human-observed build bounds;
 intro hitches and historical lifecycle incidents remain disclosed.
 
-The N64 Rust layout editor is implemented and its signed candidate/source are
-privately preserved. Actual-target drag/resize, simultaneous input and layout
-persistence remain the next alpha check through normal custody. See the
+The installed N64 Rust editor now passes drag/resize, Save/Cancel and fresh-process
+layout persistence, with the shared GameCube editor preserved. Actual-target
+simultaneous-input preview remains the next alpha check through normal custody. See the
 [migration boundary](docs/IDENTITY_MIGRATION.md), [acceptance](docs/ACCEPTANCE.md)
 and [N64 pin/audit](native/mupen/README.md).
 

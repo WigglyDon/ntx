@@ -1,6 +1,6 @@
 schema_version = 1
 product = "ntx"
-classification = "NTX5_N64_PLAYABLE_FRESH_SCENES_CROSS_SYSTEM_ALPHA_CONTROLS_PENDING"
+classification = "NTX5_PIXEL_ALPHA_LAYOUT_VERIFIED_MULTI_INPUT_PENDING"
 repository = "WigglyDon/ntx"
 repository_id = 1429193278
 branch = "main"
@@ -8,7 +8,7 @@ pre_succession_head = "b3a02e570e9f63e94d897c688a2f5f850b054ae6"
 active_issue = "https://github.com/WigglyDon/ntx/issues/5"
 architecture_amendment = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6505289270"
 handoff = "docs/NTX_HANDOFF.md"
-source_status = "Canonical identity/migration verified. Installed1cb/source1dc passes N64 play/Save/cold reload, native-unloaded scene return, fresh-process GC and N64 scenes and GC/N64/GC switching; independent saves retained. N64 drag/resize editor is implemented in source87f3641; its signed candidate and exact corresponding source are retained. Actual-target multi-input/layout-persistence qualification remains pending"
+source_status = "Canonical identity/migration verified. Installed1cb/source1dc passes N64 play/Save/cold reload, native-unloaded scene return, fresh-process GC and N64 scenes and GC/N64/GC switching; independent saves retained. Installed source87f3641/APK97930ed passes N64 drag/resize Save, Cancel, fresh-process runtime layout and shared GameCube editor boundaries; protected update and exact preference undo verified. Actual-target simultaneous-input preview is the remaining alpha check"
 active_systems = ["GameCube: retained direct Dolphin and canonical package", "Nintendo64: pinned Mupen Rust host; one-cartridge play/Save/cold reload verified on Pixel4"]
 axes = "Host platform/device, emulated system and execution backend are independent"
 session_model = "Many independent open/resumable games; one foreground runtime initially is scheduling policy, not permanent architecture"
@@ -23,7 +23,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Qualify the ready N64 layout-editor candidate with focused actual-target simultaneous-input and layout-persistence checks through normal custody. Reuse all earned play/save/scene/switch evidence. No repeated campaigns; actual capacity/custody required"
+next_step = "Finish the focused N64 actual-target simultaneous-input preview check through normal custody using installed97930/source87f. Layout persistence/Save/Cancel/fresh runtime and affected GameCube editor are earned; no new package or replay required. Reuse all earned play/save/scene/switch evidence. No repeated campaigns; actual capacity/custody required"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 intro hitches: owner observed, unmeasured", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -45,7 +45,7 @@ collection_schema = 2
 migration = "Pixel4 Rust app-side migration verified: schema2, both GameId/profile pairs retained, exact ordinary profile files, unchanged legacy source. Ready incoming and partial stages plus source installation/rollback retained; original document grants now reacquired"
 signer = "Canonical reference copies retained key; original/recovery retained; independent recovery and installed-candidate certificate binding verified"
 n64_revision = "15bada85906593376e8fd697f1b0b3af3a20f512"
-n64_status = "Installed source1dc7db2/APK1cb108de passes play/ordinary Save/cold reload, fresh-process N64 and GameCube scenes, sequential native-unloaded cross-system scene return and normal joined Stop. Prior audio-handoff build earned human clear sound. New editor candidate requires its affected alpha check"
+n64_status = "Installed source1dc7db2/APK1cb108de passes play/ordinary Save/cold reload, fresh-process N64 and GameCube scenes, sequential native-unloaded cross-system scene return and normal joined Stop. Prior audio-handoff build earned human clear sound. Installed editor passes drag/resize, Save/Cancel, fresh runtime layout and shared GC editor. Simultaneous-input preview remains pending"
 resume_limit = "Checked native restore results and state-job yields implemented; exact core/options/architecture/media/profile/current ordinary generation required; failed native restore quarantined, failed shutdown retains ownership"
 device_actions = "Same-signer APK87a248ff/sourcefc6e300 protected update verified unchanged data/all three identities and current relinked cartridge. N64 title/file controls, first-room analog movement, clear sound and ordinary-file cold reload observed. Home/checkpoint/hot return and normal Stop/actual return completed; independent GameCube profiles unchanged. Game pause graphics fault remains; Fold untouched"
 
@@ -57,7 +57,7 @@ lints = "Warnings-denied host all-targets including native declarations and ARM6
 android_shell = "Java compiler module, DEX namespace and compiled resources/manifest checked; canonical package/activity/label confirmed"
 native = "Full renamed Dolphin build completed; pinned Mupen core compiled with declared patches; actual header/entrypoint/result/yield/shutdown fixtures and exact patch reproduction passed"
 retained = "8 critical inputs retain exact recorded SHA256/inode/size; baseline patch SHA256 retained; same signer independently verified"
-limits = "Current-package migration/short GameCube boundary and N64 first-room control/clear audio/ordinary-file cold reload verified. N64 game-pause/Save after play, ordinary cold reload, fresh-process scenes and sequential cross-system return are verified. New alpha layout/input target checks remain pending. Intro hitches are unmeasured; no Fold migration or public binary release"
+limits = "Current-package migration/short GameCube boundary and N64 first-room control/clear audio/ordinary-file cold reload verified. N64 game-pause/Save after play, ordinary cold reload, fresh-process scenes and sequential cross-system return are verified. New alpha layout persistence is verified; actual-target simultaneous-input preview remains pending. Intro hitches are unmeasured; no Fold migration or public binary release"
 
 [linked_candidate]
 source = "22f0f147426d23d6d619c375b1ab8ceb5d75e650"
@@ -132,6 +132,13 @@ controls = "N64-specific controls/menu and picture inspected; no setting changes
 [alpha_controls_candidate]
 source = "87f364167bd5b34f299dc785b410a370c3132a2d"
 apk_sha256 = "97930edd49b514a8cd215e2dbd35e653483033a4c473afb7b03ec7a489d7f4a1"
-status = "Same-signer package and exact corresponding source retained; unchanged emulator cores. Actual-target drag/resize, Save/Cancel/restart persistence and simultaneous input await normal admission; no installed-candidate qualification inferred"
+status = "Installed through protected same-signer update with all prior files and three identities unchanged; emulator cores unchanged. Actual N64 drag/resize, Save/Cancel, new-process native layout and shared GC editor pass. Both native joins, exact preference undo and actual OFF return verified; actual-target two-pointer preview remains pending"
 checks = "94 portable library tests; 3 bounded transport tests; host all-targets and ARM64 Android Clippy with warnings denied; native/package/source/signer audits"
 issue_update = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6591929288"
+
+[pixel_alpha_layout_20261102]
+installed_source = "87f364167bd5b34f299dc785b410a370c3132a2d"
+installed_apk_sha256 = "97930edd49b514a8cd215e2dbd35e653483033a4c473afb7b03ec7a489d7f4a1"
+observed = "N64 Z moved and enlarged, Save reopened the layout, a second draft Cancel retained exact saved bytes, old process absent and new process displayed saved layout in native N64. Direct Dolphin title and system-correct shared editor open/Cancel passed. No new game saves or prior play/scene campaigns"
+return = "Normal joined Stop for N64 and Dolphin; original preference state restored exactly after frontend retirement; current N64 ordinary data, both GameCube cards and untouched second profile unchanged; actual physical OFF return verified"
+remaining = "Actual two-pointer preview with independent button release and cancellation. Prepared guard corrected off-device to use visible neutral test-only hint and an inspected blank margin for scrolling; no service/input result inferred"

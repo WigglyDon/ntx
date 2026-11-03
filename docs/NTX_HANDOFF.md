@@ -15,14 +15,15 @@ Normal Stop/actual return were verified after USB reconnection; original GCcards
 N64 ordinary data and untouched TP profile were unchanged. No renderer/performance
 fix is claimed for the diagnosed backend GL flag or owner-observed intro hitches.
 
-Next: finish Master’s alpha-controls boundary. Source now adds N64 drag/resize
-layouts with independent per-screen N64 targets, shared Rust editor views and an
-isolated input preview. Host tests/lints and signed package/source audits pass. Source87f3641/APK97930edd
-is privately retained; actual-target simultaneous-input/layout-persistence checks
-are queued through normal custody and remain unearned. Reuse all
-earned game/save/scene/switch results. Do not restart boot/save/timing/quest work.
-Keep direct Dolphin, signer, opaque identities, real progress and all recovery.
-No Fold qualification, concurrent native instances or public binary release.
+Next: finish Master’s actual-target simultaneous-input preview boundary using
+installed source87f3641/APK97930edd. N64 drag/resize Save/Cancel, fresh-process
+native layout loading and the shared GameCube editor open/Cancel are now verified.
+The protected update retained all prior files/three identities. Both backends
+joined normally; exact original preferences and current ordinary data/cards were
+verified at actual OFF return. The corrected finite input task uses the visible
+neutral test-only hint and inspected blank-margin scrolling. No two-pointer result
+is earned yet. Reuse all other evidence; no new package, save/scene/quest/timing
+campaign, second worker or sibling change. No Fold/concurrent-native/release claim.
 
 Read docs/state.toml for exact source/artifact and earned-result bounds. Installed
 android-device admission/return is authoritative; older returns establish no
