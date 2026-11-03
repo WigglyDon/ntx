@@ -8,6 +8,7 @@ pub mod dolphin;
 pub mod gl_probe;
 #[cfg(any(target_os = "linux", target_os = "android"))]
 pub mod mupen;
+pub mod mupen_cache;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum System {

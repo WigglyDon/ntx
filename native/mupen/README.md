@@ -42,6 +42,15 @@ GLES wrappers otherwise import these base calls directly, bypassing host probes.
 All measurement/correlation policy remains Rust. Modified files retain dated
 change notices and upstream terms.
 
+The cache-directory bridge uses the existing host save-directory callback for
+derived renderer caches. Rust supplies each profile's `N64/backend` directory;
+system inputs and ordinary committed images remain separate. The host requests
+shader storage explicitly for this selected GLES3 pin and checks its bounded
+v5 key/v0x3B binary envelopes before native use. Malformed derivatives are retained
+in a fresh recovery directory. GPU/option checks and binary loading remain native;
+options and core fingerprints change honestly, without reidentifying games or
+forcing older machine scenes to load. Cache effectiveness still needs target proof.
+
 `cargo xtask mupen-source-check` verifies the complete active graph.
 `python3 native/mupen/check_boundary.py` compiles the actual selected header,
 state entrypoints and deinit against bounded fixtures, and reproduces all patches

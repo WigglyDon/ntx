@@ -1,0 +1,26 @@
+NTX mechanical directory bridge: renderer caches use the existing host-owned backend directory.
+Upstream15bada85906593376e8fd697f1b0b3af3a20f512; original licenses retained.
+
+--- a/custom/GLideN64/mupenplus/CommonAPIImpl_mupenplus.cpp
++++ b/custom/GLideN64/mupenplus/CommonAPIImpl_mupenplus.cpp
+@@ -1,3 +1,4 @@
++// Modified by ntx 2026-11-03: bridge renderer cache to the host-owned backend directory.
+ #include "GLideN64_mupenplus.h"
+ #include <algorithm>
+ #include <string>
+@@ -76,6 +77,15 @@
+ 
+ void PluginAPI::GetUserCachePath(wchar_t * _strPath)
+ {
++	// Directory ownership is supplied by the Rust host through the existing ABI.
++	const char * cacheDir = nullptr;
++	if (environ_cb(RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY, &cacheDir) && cacheDir && *cacheDir) {
++		std::string path(cacheDir);
++		if (path.back() != '/' && path.back() != '\\')
++			path += "/";
++		_getWSPath(path.c_str(), _strPath);
++		return;
++	}
+ 	getRetroArchDir(_strPath);
+ }
+ 

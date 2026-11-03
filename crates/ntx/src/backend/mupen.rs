@@ -518,6 +518,7 @@ impl Core {
             ("rsp-plugin", "hle"),
             ("cpucore", "dynamic_recompiler"),
             ("ThreadedRenderer", "False"),
+            ("EnableShadersStorage", "True"),
             ("alt-map", "False"),
             ("astick-deadzone", "0"),
             ("astick-sensitivity", "100"),

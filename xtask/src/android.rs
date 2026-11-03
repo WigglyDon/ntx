@@ -225,6 +225,7 @@ pub fn prepare(root: &Path, source: &Path) -> Result<()> {
         "0001-checked-state-result.patch",
         "0002-coherent-state-boundary.patch",
         "0003-host-shader-dispatch.patch",
+        "0004-profile-shader-cache.patch",
     ] {
         copy(
             &root.join("native/mupen").join(name),

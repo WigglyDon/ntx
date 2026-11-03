@@ -59,6 +59,13 @@ impl Runtime {
         let path = root.join("profiles").join(&entry.profile_id.0);
         let store = SaveStore::open(&path).map_err(|e| e.to_string())?;
         let ordinary = store.load().map_err(|e| e.to_string())?;
+        let cache = ntx::backend::mupen_cache::prepare(&path.join("N64/backend")).map_err(|e| {
+            format!("Could not prepare graphics cache; your progress is retained: {e}")
+        })?;
+        platform::diagnostic(&format!(
+            "N64 shader cache: {} accepted files, {} invalid derivatives retained for recovery",
+            cache.accepted, cache.retained_invalid
+        ));
         let resources = Rc::new(RefCell::new(Resources::new(window)?));
         let core = Core::load(
             Box::new(Adapter(resources.clone())),
