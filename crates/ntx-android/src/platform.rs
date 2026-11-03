@@ -27,6 +27,19 @@ unsafe extern "C" {
 /// NDK motion timestamps use System.nanoTime's CLOCK_MONOTONIC time base.
 /// This is foreground event age, not physical touch or display latency.
 pub fn motion_age(event_nanos: i64) -> Option<std::time::Duration> {
+    let now = clock_time(1)?; // CLOCK_MONOTONIC, from the selected NDK headers.
+    let event = u64::try_from(event_nanos).ok()?;
+    if event == 0 {
+        return None;
+    }
+    now.checked_sub(std::time::Duration::from_nanos(event))
+}
+/// Calling-thread CPU counter, read on the qualified native owner thread. Clock
+/// failure is missing diagnostic evidence; it never changes emulation policy.
+pub fn thread_cpu_time() -> Option<std::time::Duration> {
+    clock_time(3) // CLOCK_THREAD_CPUTIME_ID, selected NDK linux/time.h.
+}
+fn clock_time(clock: i32) -> Option<std::time::Duration> {
     #[repr(C)]
     struct Timespec {
         seconds: std::ffi::c_long,
@@ -39,19 +52,18 @@ pub fn motion_age(event_nanos: i64) -> Option<std::time::Duration> {
         seconds: 0,
         nanos: 0,
     };
-    // SAFETY: initialized timespec output; CLOCK_MONOTONIC is1 on stock Android.
-    if unsafe { clock_gettime(1, &mut time) } != 0 {
+    // SAFETY: initialized NDK timespec output and an existing Android clock ID.
+    if unsafe { clock_gettime(clock, &mut time) } != 0 {
         return None;
     }
-    let now = u64::try_from(time.seconds)
-        .ok()?
-        .checked_mul(1_000_000_000)?
-        .checked_add(u64::try_from(time.nanos).ok()?)?;
-    let event = u64::try_from(event_nanos).ok()?;
-    if event == 0 {
+    let nanos = u32::try_from(time.nanos).ok()?;
+    if nanos >= 1_000_000_000 {
         return None;
     }
-    Some(std::time::Duration::from_nanos(now.checked_sub(event)?))
+    Some(std::time::Duration::new(
+        u64::try_from(time.seconds).ok()?,
+        nanos,
+    ))
 }
 pub fn diagnostic(message: &str) {
     let message: String = message.chars().filter(|c| *c != '\0').take(4096).collect();

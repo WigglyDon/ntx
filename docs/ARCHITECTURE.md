@@ -67,6 +67,11 @@ addresses resolved by the existing host ABI. It changes no GL state/error flags,
 core options or checkpoint fingerprints. Each slow core call is correlated with
 its own shader-call elapsed time; unrelated maxima are never subtracted. The
 probe follows the non-Send runtime owner thread and retires after native join.
+A second bounded Rust observation pairs each core call’s elapsed interval with
+Android’s calling-thread CPU clock. Only matched slow-call aggregates are kept;
+missing/backward/invalid readings are disclosed. Elapsed time outside that thread’s
+CPU time includes blocking/descheduling and does not identify GPU work. Collection
+stops at4096 calls and changes no scheduling or native/checkpoint bindings.
 Neither decision embeds Android handles or changes durable identities.
 
 ## Ordinary progress and machine state

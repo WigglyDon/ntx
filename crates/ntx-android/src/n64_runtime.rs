@@ -161,8 +161,17 @@ impl Runtime {
         }
         self.resources.borrow().shader_probe.begin_frame();
         let core_start = Instant::now();
+        let collecting = self.timings.work.collecting();
+        let cpu_start = collecting.then(platform::thread_cpu_time).flatten();
         let run = self.core().and_then(Core::run_frame);
+        let cpu_end = collecting.then(platform::thread_cpu_time).flatten();
         let core_elapsed = core_start.elapsed();
+        self.timings.work.record(
+            core_elapsed,
+            cpu_start
+                .zip(cpu_end)
+                .and_then(|(start, end)| end.checked_sub(start)),
+        );
         self.resources.borrow().shader_probe.end_frame(core_elapsed);
         self.timings.core.record(core_elapsed);
         if let Err(e) = run {
@@ -286,6 +295,10 @@ impl Runtime {
                 platform::diagnostic(&format!(
                     "N64 core shader timing (first4096 core calls; elapsed, not GPU/CPU attribution): {}",
                     resources.shader_probe.summary()
+                ));
+                platform::diagnostic(&format!(
+                    "N64 core work (first4096; matched slow calls; calling-thread CPU; off-thread includes blocking/descheduling, not GPU attribution): {}",
+                    self.timings.work
                 ));
             }
             platform::diagnostic(&format!(

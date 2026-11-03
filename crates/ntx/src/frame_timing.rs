@@ -46,6 +46,64 @@ impl fmt::Display for DurationStats {
     }
 }
 
+/// Compare clocks from the same core call, never unrelated stage maxima. CPU
+/// time belongs to the calling thread; the remainder includes blocking and
+/// descheduling, not a claim about a GPU or other worker's execution.
+#[derive(Default)]
+pub struct CoreWorkTimings {
+    frames: u32,
+    unavailable: u32,
+    invalid: u32,
+    slow_calls: u32,
+    cpu_majority: u32,
+    wall: DurationStats,
+    cpu: DurationStats,
+    off_thread: DurationStats,
+}
+impl CoreWorkTimings {
+    pub fn collecting(&self) -> bool {
+        self.frames < DurationStats::LIMIT
+    }
+    pub fn record(&mut self, wall: Duration, cpu: Option<Duration>) {
+        if !self.collecting() {
+            return;
+        }
+        self.frames += 1;
+        let slow = wall > Duration::from_millis(40);
+        self.slow_calls += u32::from(slow);
+        let Some(cpu) = cpu else {
+            self.unavailable += 1;
+            return;
+        };
+        let Some(off_thread) = wall.checked_sub(cpu) else {
+            self.invalid += 1;
+            return;
+        };
+        if slow {
+            self.cpu_majority += u32::from(cpu.saturating_mul(2) >= wall);
+            self.wall.record(wall);
+            self.cpu.record(cpu);
+            self.off_thread.record(off_thread);
+        }
+    }
+}
+impl fmt::Display for CoreWorkTimings {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "frames={} unavailable={} invalid={} slow_calls={} slow_cpu_majority={} matched_wall[{}] thread_cpu[{}] off_thread[{}]",
+            self.frames,
+            self.unavailable,
+            self.invalid,
+            self.slow_calls,
+            self.cpu_majority,
+            self.wall,
+            self.cpu,
+            self.off_thread
+        )
+    }
+}
+
 #[derive(Default)]
 pub struct FrameTimings {
     previous_start: Option<Instant>,
@@ -53,6 +111,7 @@ pub struct FrameTimings {
     pub lateness: DurationStats,
     /// Includes callbacks and any presentation blocking inside the core call.
     pub core: DurationStats,
+    pub work: CoreWorkTimings,
     /// Host-stack audio delivery after returning from the core.
     pub audio: DurationStats,
 }
@@ -77,6 +136,42 @@ impl FrameTimings {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn core_cpu_comparison_uses_matched_slow_calls_and_reports_missing_clocks() {
+        let mut work = CoreWorkTimings::default();
+        let ms = Duration::from_millis;
+        for (wall, cpu) in [
+            (40, Some(40)),
+            (100, Some(90)),
+            (80, Some(10)),
+            (60, None),
+            (50, Some(51)),
+        ] {
+            work.record(ms(wall), cpu.map(ms));
+        }
+        assert_eq!((work.frames, work.slow_calls, work.cpu_majority), (5, 4, 1));
+        assert_eq!((work.unavailable, work.invalid), (1, 1));
+        assert_eq!(
+            (work.wall.samples, work.cpu.samples, work.off_thread.samples),
+            (2, 2, 2)
+        );
+        assert_eq!(
+            (
+                work.wall.total_us,
+                work.cpu.total_us,
+                work.off_thread.total_us
+            ),
+            (180_000, 100_000, 80_000)
+        );
+        assert_eq!(work.off_thread.max_us, 70_000);
+        for _ in work.frames..DurationStats::LIMIT {
+            work.record(Duration::ZERO, Some(Duration::ZERO));
+        }
+        let frozen = work.to_string();
+        assert!(!work.collecting());
+        work.record(Duration::MAX, None);
+        assert_eq!(work.to_string(), frozen);
+    }
     #[test]
     fn thresholds_are_strict_and_collection_stops_at_its_fixed_bound() {
         let mut stats = DurationStats::default();
