@@ -71,25 +71,23 @@ out of Git. [Historical handoff](history/NTX_HANDOFF_BASELINE_20261102.md) retai
 baseline and intermediate evidence, never current work priority.
 
 
-The installed candidate also fits the game in screen space before independent native
-buffer scaling, preventing pixel-aspect distortion without changing core options.
-Source3f2303c/APK97cbeadd was protected-installed by the first queued check, which
-was retired at an acquired safe boundary before gameplay so the buffer correction
-could be packaged. Its actual return passed; no native picture qualification is
-claimed for that intermediate artifact.
+Source63e5e11/APK6854b394 earned the bounded Pixel4 N64 game-first check:
+full-height 4:3 picture, clear side-bar controls, Pause/paused-image editor,
+grouped C-button move/Save, native resumed mapping, reopen and exact-byte Cancel.
 
-Current installed source63e5e11/APK6854b394 passed the bounded Pixel4 check:
-full-height 4:3 Ocarina picture, controls clear in side bars, actual Pause and
-paused-image editor, grouped C-button move/Save, native resumed mapping, reopened
-placement and a second draft Cancel preserving exact saved bytes. Runtime geometry
-reported1440x1080 inside2280x1080. Normal joined Stop, exact original preferences,
-protected ordinary data/cards/untouched second GC profile and physical OFF return
-were verified; no NTX custody or recovery remains.104 portable tests and relevant
-warnings-denied host/ARM64 checks pass; signed corresponding source is retained.
-GameCube's new default, portrait and scaled-buffer cases have model coverage;
-this new physical full-height observation is N64. No new save/scene/timing campaign,
-Fold operation or renderer-performance fix follows. Review the
-[reported outcomes](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6597417040)
+Current installed source9c9608c/APK551b14a3 adds a focused GameCube fix: saved-field
+admission now uses the same buffer-adjusted aspect as presentation. The valid
+rounded-buffer fixture fails before and passes after; all105 portable tests and
+warnings-denied host/ARM64 checks pass. Signed corresponding source is retained.
+Pixel4 Wind Waker title/attract verifies the full-height default at Dolphin's
+reported aspect, clear side-bar controls, actual Pause/paused image, anchored field
+resize/Save, native mapping, reopen and Cancel. Original preferences were restored
+to absence after joined Stop; protected cards/N64 ordinary/untouched TP, existing
+IDs/source installation and physical OFF return passed. No NTX hold or recovery.
+Portrait and rounded-buffer cases have model coverage; the phone observed a
+2280x1080 buffer and Android remains landscape-only. No new save/scene/timing
+campaign, Fold operation or renderer-performance fix follows. Review the
+[reported outcomes](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6610661291)
 and disclosed defects with acceptance issues open; do not automatically replay
 earned tests. Future preparation must bind the actual installed artifact and
 latest returned collection, never an earlier rollback baseline.

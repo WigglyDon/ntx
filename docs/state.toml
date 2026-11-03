@@ -1,6 +1,6 @@
 schema_version = 1
 product = "ntx"
-classification = "NTX5_GAME_FIRST_N64_PIXEL_OBSERVED_REVIEW_OPEN"
+classification = "NTX5_GAME_FIRST_BOTH_RENDERERS_PIXEL_OBSERVED_REVIEW_OPEN"
 repository = "WigglyDon/ntx"
 repository_id = 1429193278
 branch = "main"
@@ -9,10 +9,10 @@ active_issue = "https://github.com/WigglyDon/ntx/issues/5"
 architecture_amendment = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6505289270"
 handoff = "docs/NTX_HANDOFF.md"
 source_status = "Canonical identity/migration verified. Baseline1cb/source1dc earned N64 play/Save/cold reload, native-unloaded scene return, fresh-process GC and N64 scenes and GC/N64/GC switching; independent saves retained. Earlier source87f3641/APK97930ed passes N64 drag/resize Save, Cancel, fresh-process runtime layout and shared GameCube editor boundaries; protected update and exact preference undo verified. Actual-target simultaneous stick/A, independent release and cancellation pass. Canonical GC title/attract Home/HOT return/Pause/Resume/joined Stop is now observed with current cards unchanged; review and disclosed limits remain open"
-current_editor_source = "63e5e1146d1f64f6be999ff373c5febd858a03b8"
-installed_editor_source = "63e5e1146d1f64f6be999ff373c5febd858a03b8"
-installed_editor_apk_sha256 = "6854b3945e01bf52fc89f029d0d2071349861fbc9034d486ffd74347455d7bf1"
-ready_editor_apk_sha256 = "6854b3945e01bf52fc89f029d0d2071349861fbc9034d486ffd74347455d7bf1"
+current_editor_source = "9c9608c3a4ba72e6da2a85812203b104c370f09b"
+installed_editor_source = "9c9608c3a4ba72e6da2a85812203b104c370f09b"
+installed_editor_apk_sha256 = "551b14a364328dc9bdc42aff89fbaa98e97a5bfcc8a9d9c01a724a73a293b4dc"
+ready_editor_apk_sha256 = "551b14a364328dc9bdc42aff89fbaa98e97a5bfcc8a9d9c01a724a73a293b4dc"
 active_systems = ["GameCube: retained direct Dolphin and canonical package", "Nintendo64: pinned Mupen Rust host; one-cartridge play/Save/cold reload verified on Pixel4"]
 axes = "Host platform/device, emulated system and execution backend are independent"
 session_model = "Many independent open/resumable games; one foreground runtime initially is scheduling policy, not permanent architecture"
@@ -27,7 +27,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Review reported bounded Pixel4 NTX-5 outcomes and disclosed defects with acceptance issues open. The clarified game-first N64 default and grouped editor pass on target. Ocarina playable/save/cold reload, supported per-game scenes/switches, layout persistence/input and GC title/attract Home return retain their recorded build bounds. No pending NTX device task or recovery. Retain historical incidents, unmeasured hitches and backend GL origin; no automatic campaign repeat, new console/Fold port, concurrent native instances or public binary release"
+next_step = "Review reported bounded Pixel4 NTX-5 outcomes and disclosed defects with acceptance issues open. Both active renderers have physical game-first default observations; GC saved-field rounded-buffer validation is repaired and covered by a failing-before/passing-after fixture. Ocarina playable/save/cold reload, supported scenes/switches, input and GC Home return retain their build bounds. No pending NTX device task or recovery. Retain historical incidents, unmeasured hitches and backend GL origin; no automatic campaign repeat, new console/Fold port, concurrent native instances or public binary release"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 intro hitches: owner observed, unmeasured", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -54,7 +54,7 @@ resume_limit = "Checked native restore results and state-job yields implemented;
 device_actions = "Installed87f3641/APK97930ed protected update retains original signer, all three identities and every prior file. N64 layout Save/Cancel/cold native loading, actual isolated two-pointer release/cancel and shared GC editor verified. Canonical GC title/attract Home return/Pause/Resume/Stop observed; exact preferences/current cards/N64 ordinary/untouched profile and actual OFF return verified. No Fold operation or outstanding NTX custody"
 
 [validation]
-host = "94 portable library tests passed, including N64 layout/persistence/independent-input fixtures and GLES3 callback ABI, deferred copied PCM ordering/bounds/silence/failure handling, foreground game identity and frame deadlines; retained 15 decoder and 3 integration checks; host all-targets and ARM64 Android lints deny warnings"
+host = "105 portable library tests passed, including N64 layout/persistence/independent-input fixtures and GLES3 callback ABI, deferred copied PCM ordering/bounds/silence/failure handling, foreground game identity and frame deadlines; retained 15 decoder and 3 integration checks; host all-targets and ARM64 Android lints deny warnings"
 helpers = "99 offline packet fixtures passed, including bounded prepared inspection, expiry/focus rejection, single-use contacts and empty viewport-read retries"
 n64_inspector = "Protected-copy-only native-free inspector source63a7479 validates the actual N64 container against an independent binding and current ordinary generation/image. Focused integration fixture preserves valid-copy bytes and rejects wrong-core and changed-ordinary inputs; warnings-denied bin/test Clippy passed. No native restore or device result follows"
 lints = "Warnings-denied host all-targets including native declarations and ARM64 Android Clippy passed; no mock native library or fingerprints"
@@ -169,7 +169,7 @@ status = "PIXEL_GAME_FIELD_GROUPED_EDITOR_OBSERVED_REVIEW_OPEN"
 reference = "PSX public MIT ac74cc06602a3e5c00b14d77404a93c94cebb6bc; docs/PSX_TRANSFER.md"
 features = "Full play-size canvas; top/bottom floating dock; game-field select/move/aspect-preserving corner resize; grouped controls; grid/alignment guides; explicit mirror; scoped reset; 32-entry gesture undo; isolated Test inputs; Done/Cancel"
 persistence = "Optional normalized full-drawable picture per system/display in version1 control preferences; backward compatible; both direct Dolphin and N64 host render actual picture preferences"
-validation = "104 portable library tests; short-screen GC grouped move/reload, game-first layout and buffer mapping fixtures; retained decoder/integration/motion-probe and xtask suites; warnings-denied host all-targets and ARM64 Android checks; signed package/source preservation"
+validation = "105 portable library tests; short-screen GC grouped move/reload, game-first layout, buffer mapping and saved-picture admission fixtures; retained decoder/integration/motion-probe and xtask suites; warnings-denied host all-targets and ARM64 Android checks; signed package/source preservation"
 limits = "Affected device checks recorded below. Earlier layout/play/save/scene/Home evidence remains bound to its prior source/APK. No sibling source change, native core rebuild, new gameplay campaign or Fold operation"
 
 [layout_editor_increment.pixel_v21]
@@ -188,16 +188,16 @@ return = "Normal native Stop, original preferences restored, all protected ordin
 owner_feedback = "Field still not edge-to-edge. Default must maximize complete native-aspect image first: height in landscape, width in portrait; controls use remaining space without overlap. Important consistency across emulators"
 
 [game_first_default]
-status = "SIGNED_INSTALLED_N64_PIXEL_OBSERVED_REVIEW_OPEN"
-validation = "104 library tests: full-height picture, non-overlapping typed controls, exact runtime/editor density/origin mapping, portrait fixtures, legacy policy compatibility, explicit no-space alternatives, aspect-change cancellation, prior storage/input/scene fixtures"
+status = "BOTH_RENDERERS_PIXEL_OBSERVED_REVIEW_OPEN"
+validation = "105 library tests: full-height picture, non-overlapping typed controls, exact runtime/editor density/origin mapping, portrait fixtures, saved-picture admission through rounded buffers, legacy policy compatibility, explicit no-space alternatives, aspect-change cancellation, prior storage/input/scene fixtures"
 policy = "GameFirst default; full drawable, preserved aspect and complete picture; touch controls occupy actual free space. Compact layout preserves semantic groups. Keep-clear and overlap are explicit alternatives"
 coordination = "Clarification delivered to existing sibling owners at the owner's explicit request; receipt is private. Their implementation/runtime uptake is not inferred"
 
 
 [game_first_default.buffer_mapping]
-status = "SOURCE_CHECKED_N64_NATIVE_SCREEN_OBSERVED"
+status = "SOURCE_CHECKED_BOTH_NATIVE_RENDERERS_OBSERVED"
 contract = "Fit aspect in physical screen coordinates before mapping each axis to a native buffer. Scaled or inherited buffers must not distort the physical game picture"
-validation = "104 portable tests, including 2280x1080 screen with1140x507/1140x540 buffers and a coherent rounded GC buffer"
+validation = "105 portable tests; N64 independent buffer axes and coherent GC rounding. Saved full-size GameFirst profile falsely rejected at1125x540 before the admission fix; it passes afterward at1125/1140/1155x540. Physical checks observed2280x1080 buffers"
 retired_candidate = "Source3f2303c/APK97cbeadd installed through protected update, then task retired at safe boundary before game execution. Normal original-preference/protected-data/physicalOFF return verified; no native picture result claimed"
 
 [game_first_default.pixel_v24]
@@ -207,3 +207,11 @@ observed = "Complete full-height 4:3 N64 field1440x1080 inside2280x1080; control
 return = "Normal joined Stop, exact original preferences, protected ordinary data/cards/untouched second GC profile, identities/source installation and actual OFF return verified. No NTX hold/request/recovery"
 limits = "N64 title/attract presentation/editor boundary only. GameCube new default, portrait and scaled-buffer cases have model coverage, not new physical qualification. No new save/scene/timing campaign; hitches/backend GL origin/historical incidents remain open"
 report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6597417040"
+
+[game_first_default.pixel_v25]
+source = "9c9608c3a4ba72e6da2a85812203b104c370f09b"
+apk_sha256 = "551b14a364328dc9bdc42aff89fbaa98e97a5bfcc8a9d9c01a724a73a293b4dc"
+observed = "Wind Waker title/attract full-height field at Dolphin-reported1.2534287 aspect; side-bar controls clear; actual Pause and real paused-image editor; anchored field resize/Save, native resumed mapping and reopened placement; Cancel retains exact saved preference bytes"
+return = "Normal joined Stop, exact original preferences restored to absence, protected cards/N64 ordinary/untouched TP, IDs/source installation and actual OFF return verified. Custodian completed/returnedtrue; no NTX hold/request/recovery"
+limits = "GameCube presentation/editor only; no save/scene/timing campaign. Rounded-buffer repair has host regression coverage; physical buffer was2280x1080. Android remains landscape-only; portable portrait fixtures do not qualify a portrait player. Prior N64 observations remain bound to63e5e11"
+report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6610661291"

@@ -1,4 +1,6 @@
-> NTX-5 now includes pinned Mupen64Plus-Next N64 integration. Audit its selected component licenses/resources and corresponding-source graph before packaging; no Mupen playable/license-audit result is claimed by this handoff.
+> NTX-5 includes pinned Mupen64Plus-Next N64 integration. Current selected-source,
+> license/resource and package checks are recorded in [the N64 audit](../native/mupen/README.md)
+> and [state](state.toml). Public binary release remains separately gated.
 
 # Distribution and provenance
 

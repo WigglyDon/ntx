@@ -106,13 +106,21 @@ clear N64 field prompted the owner's clarified default: complete native-aspect
 picture first, full height in landscape/full width in portrait, with controls in
 unused space without overlap.
 
-Installed source63e5e11/APK6854b394 verifies that default on Pixel4 N64:1440x1080
+Source63e5e11/APK6854b394 verifies that default on Pixel4 N64:1440x1080
 field inside2280x1080, clear side-bar controls, actual Pause/paused-image editor,
 C-button grouped move/Save, native resumed mapping, reopened placement and Cancel
 retaining exact saved preference bytes. Joined Stop, exact original preferences,
 protected ordinary/cards/untouched GC profile and actual OFF return pass.
-104 portable tests and warnings-denied host/ARM64 checks pass, as do signed
-package/source checks. GameCube's new default, portrait and scaled-buffer cases
-have model coverage; the new physical full-height result is N64. No new gameplay,
-save/scene/timing campaign or sibling/Fold/concurrent-native qualification follows.
-Acceptance issues stay open. [Outcome report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6597417040).
+
+Installed source9c9608c/APK551b14a3 adds the direct Dolphin observation: full-height
+Wind Waker title/attract at the actual reported aspect, controls in side bars,
+Pause/paused-image editor and anchored game-field resize/Save/native mapping/
+reopen/Cancel. Joined Stop, exact original preferences restored to absence,
+protected cards/N64 ordinary/untouched TP and actual OFF return pass. The source
+also repairs saved-picture admission through coherent native-buffer rounding;
+the valid1125x540 fixture fails before and passes after.105 portable tests and
+warnings-denied host/ARM64 checks pass, as do signed package/source checks.
+The phone observed2280x1080; rounded buffers and portrait have model coverage.
+Android remains landscape-only. No new gameplay/save/scene/timing campaign or
+sibling/Fold/concurrent-native qualification follows. Acceptance issues stay open.
+[Latest outcome](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6610661291).

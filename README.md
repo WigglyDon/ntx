@@ -30,10 +30,11 @@ by both renderers. Pixel4 observes GC field move/resize/undo/Save and N64 paused
 image/resize/Save/native-picture mapping. The short-screen group repair,
 Save/Cancel/cold editor reload and movable tools dock are observed on Pixel4.
 The default maximizes the complete native-aspect picture first—height in landscape,
-width in portrait—then fits controls in unused space without overlap. The installed
-candidate verifies the full-height N64 picture, grouped editing, saved native
-placement and Cancel. See [current state](docs/state.toml) for exact build and
-verification bounds.
+width in portrait—then fits controls in unused space without overlap. Pixel4
+checks verify full-height pictures through both active renderers, N64 grouped
+editing, GameCube field resize, saved native placement and Cancel. See
+[current state](docs/state.toml) for exact build and verification bounds. Android
+currently requests landscape; portrait geometry has portable model coverage.
 
 Read [AGENTS.md](AGENTS.md), [successor handoff](docs/NTX_HANDOFF.md),
 [NTX-5](https://github.com/WigglyDon/ntx/issues/5) and its

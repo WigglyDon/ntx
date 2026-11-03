@@ -144,10 +144,13 @@ and never enters game persistence. The tools dock overlays the play-size surface
 
 Optional `picture` rectangles in each system's per-display controls profile are
 normalized against the full drawable, independently of control-safe margins.
-Both backend presentation paths fit their aspect inside that box. Automatic
-picture placement maximizes the clear area around real targets. Controls, ordinary
-saves and machine checkpoints remain separate. Version1 preferences without a
-picture member keep their existing behavior and are never rewritten at load.
+Both backend presentation paths fit their aspect inside that box. The default
+maximizes the complete picture before placing controls in unused space;
+keep-clear fitting around controls remains an explicit alternative. Controls,
+ordinary saves and machine checkpoints remain separate. Existing version1
+profiles without a policy keep their earlier behavior and are never rewritten
+at load. GameCube saved-picture admission uses the same buffer-adjusted aspect
+as presentation, including coherent drawable rounding.
 
 
 The owner clarified the family-wide default on2026-11-03: maximize the complete
@@ -167,3 +170,7 @@ space opens the existing editor with Save disabled until a valid choice. Native
 video delivery waits through missing measured geometry instead of treating a
 transient host measurement as a console execution failure. None of these host
 preferences changes a GameId, SaveProfile or checkpoint fingerprint.
+
+The portable geometry includes portrait fixtures; the current Android activity
+requests landscape orientation. Those fixtures do not establish a portrait
+Android player or device qualification.
