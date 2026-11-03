@@ -36,11 +36,15 @@ archive's single Windows project CRLF expansion was normalized to the exact Git
 blob; source-files.sha256 records that original content. Maintained patches and
 patched-files.sha256 separately record checked buffers/results, optional logger
 fallback, owned directories, completion-bearing shutdown and coherent state-job
-yields. Modified files retain dated change notices and upstream terms.
+yields. The mechanical shader-dispatch patch routes four GL calls through the
+existing host resolver, retaining their original direct fallback. The selected
+GLES wrappers otherwise import these base calls directly, bypassing host probes.
+All measurement/correlation policy remains Rust. Modified files retain dated
+change notices and upstream terms.
 
 `cargo xtask mupen-source-check` verifies the complete active graph.
 `python3 native/mupen/check_boundary.py` compiles the actual selected header,
-state entrypoints and deinit against bounded fixtures, and reproduces both patches
+state entrypoints and deinit against bounded fixtures, and reproduces all patches
 from the retained original archive. It checks ABI layouts, failed results, buffer
 admission, completed-job yields, unopened-core shutdown and failed-join retention.
 These checks do not execute a console or GPU.
