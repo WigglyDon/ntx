@@ -49,7 +49,10 @@ shader storage explicitly for this selected GLES3 pin and checks its bounded
 v5 key/v0x3B binary envelopes before native use. Malformed derivatives are retained
 in a fresh recovery directory. GPU/option checks and binary loading remain native;
 options and core fingerprints change honestly, without reidentifying games or
-forcing older machine scenes to load. Cache effectiveness still needs target proof.
+forcing older machine scenes to load. One Pixel4 same-build title pair verifies cache creation/warm admission and
+reduces slow core calls above40ms from24 to7 in the first4096 window. Seven
+residual stalls remain; driver warmth/preloading and whole-game limits are
+recorded in [current state](../../docs/state.toml).
 
 `cargo xtask mupen-source-check` verifies the complete active graph.
 `python3 native/mupen/check_boundary.py` compiles the actual selected header,

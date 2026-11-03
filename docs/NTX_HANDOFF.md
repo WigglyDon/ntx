@@ -92,7 +92,7 @@ and disclosed defects with acceptance issues open; do not automatically replay
 earned tests. Future preparation must bind the actual installed artifact and
 latest returned collection, never an earlier rollback baseline.
 
-Current installed source7bfad42/APK40e77e2c fixes deterministic N64 frame-clock
+Source7bfad42/APK40e77e2c fixes deterministic N64 frame-clock
 drift from repeated wake-up jitter.109 portable tests and host/ARM64 warnings-denied
 checks pass. The bounded Pixel4 title/intro diagnostic captured the first4096
 aggregate observations:24 core calls exceeded40ms (max241.845ms), while host
@@ -107,3 +107,25 @@ no NTX task, hold or recovery remains. See the
 Continue inside the pinned core-call path, preserving options/checkpoint bindings.
 Do not reopen closed GC timing/save/scene campaigns or repeat the same diagnostic
 without a narrower question and ready instrumentation.
+
+
+Sourcea9e465f/APKe98f7e4e/core43508a7b now verifies guarded per-profile shader
+cache creation/reuse on Pixel4. Rust validates bounded native key/binary envelopes
+before loading; malformed derivatives are retained intact. The small native patch
+uses the existing directory ABI. Core/options fingerprints change honestly; older
+scenes and compatible builds remain retained, with original games/progress intact.
+114 library tests, warnings-denied host/ARM64 checks, native boundary/four-patch
+reproduction,2275-source and signed corresponding-source checks pass.
+
+One same-installation cold/warm title pair generated725-byte keys and211493-byte
+binary data; both passed the warm guard and retained identical hashes after Stop.
+Each first4096 window includes startup: core calls above40ms fell24 to7, maximum
+238.431ms to130.280ms; shader-bearing frames fell19 to1. The warm pass still has
+seven residual stalls. Driver warmth/preloading also differs, so this does not
+isolate all cache effects or establish a whole-game hitch cure, display/audio
+rate or CPU cause. Both normal native joins, protected N64 ordinary/cards/untouched
+profile, exact original preferences, source installation/IDs and physicalOFF return
+passed; custodian completed/returned=true with no NTX hold or recovery. Keep the
+historical GL0502/Pixel/Fold incidents and acceptance issues open. Do not replay
+closed save/scene/timing campaigns from this result.
+[Verified cache outcome](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6614505085).
