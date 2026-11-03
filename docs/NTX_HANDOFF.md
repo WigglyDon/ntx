@@ -21,13 +21,20 @@ isolated N64 preview: stick+A, independent A release, then cancellation to neutr
 Temporary input resources, exact preferences, current ordinary data/cards and
 actual OFF return were verified; no NTX hold or recovery remained.
 
-Next: one still-unperformed NTX-5 step1 boundary. docs/ACCEPTANCE.md explicitly
-records canonical-package GameCube Home/reentry as untested. Qualify one short
-current-progress play/Home/return/Pause/Resume/joined-Stop route through normal
-custody. Preserve all earned N64/save/scene/layout/input evidence; no repeated
-campaign, quest, timing, new Save, package change or historical-freeze cure claim.
-After that report the finite outcomes and retained defects for review, keeping
-acceptance issues open. No Fold/concurrent-native/release claim.
+Canonical GC Home/reentry is now observed on the installed build: stock Home,
+native pause/durable checkpoint, normal HOT return with new frames, Pause/Resume
+and normal joined Stop, with current cards/prefs and actual OFF return verified.
+This was title/attract execution, not a new in-world/current-file load check or a
+historical-freeze cure. Brief USB read failure before reentry recovered under the
+same lease; no failed mutation was replayed.
+
+The requested playable N64 and bounded Pixel alpha evidence are ready for review.
+Keep issues open and all earned results/build limits. Next concrete defects remain
+unmeasured N64 intro hitches/backend GL origin and the retained historical Pixel/
+Fold reports. Do not start another device/quest/save/timing campaign merely from
+this handoff. No pending NTX phone task or return obligation remains; actual
+custodian status still governs all future admission. No Fold/concurrency/release
+qualification is implied.
 
 Read docs/state.toml for exact source/artifact and earned-result bounds. Installed
 android-device admission/return is authoritative; older returns establish no

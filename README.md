@@ -18,7 +18,8 @@ intro hitches and historical lifecycle incidents remain disclosed.
 The installed N64 Rust editor now passes drag/resize, Save/Cancel and fresh-process
 layout persistence, with the shared GameCube editor preserved. Actual-target
 stick/button input, independent release and cancellation also pass in the isolated
-preview. One canonical-package GameCube Home/reentry regression remains. See the
+preview. A bounded canonical-package GameCube title/attract Home/return and
+Pause/Resume/Stop route is also observed, with current cards unchanged. See the
 [migration boundary](docs/IDENTITY_MIGRATION.md), [acceptance](docs/ACCEPTANCE.md)
 and [N64 pin/audit](native/mupen/README.md).
 

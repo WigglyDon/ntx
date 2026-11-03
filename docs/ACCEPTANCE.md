@@ -17,7 +17,10 @@ and exact ordinary bytes, with unchanged legacy source and verified physical OFF
 return. Both original media grants and a short current-package GameCube boundary
 are verified: WW Start/Pause/Resume/normal Stop and TP native frame/Pause/normal
 Stop, with both ordinary cards unchanged and normal backend SRAM updates retained.
-GameCube Home/reentry was not exercised. The N64 PCM handoff repair now reaches
+A later source87f3641 check also observes canonical-package GameCube title/attract
+Home departure, durable checkpoint, normal HOT return, Pause/Resume, advancing
+frames and joined Stop. Current cards remain unchanged. This is not a new in-world
+or current-file load qualification and does not resolve the historical freeze. The N64 PCM handoff repair now reaches
 first-room analog movement and owner-confirmed clear sound. A new ordinary file
 survived normal Stop/full process exit/cold native reload. Home checkpoint/hot
 return, Pause/normal Stop and actual return also completed with the other profiles
@@ -35,8 +38,8 @@ with native joins, current saves and actual return verified. Installed source87f
 fresh-process native layout loading and shared GC editor open/Cancel. The actual
 isolated preview shows stick+A, independent A release with stick retained, and
 cancellation to neutral. Original preferences, current ordinary data/cards and
-actual OFF return are verified. The still-unperformed canonical GameCube
-Home/reentry route above remains a focused step1 check. Some intro hitches were owner-observed. See
+actual OFF return are verified. The bounded canonical GameCube Home/reentry route above is also recorded;
+acceptance remains open for review with those exact limits. Some intro hitches were owner-observed. See
 [the exact migration boundary](IDENTITY_MIGRATION.md).
 
 ## Earned GameCube baseline: preserve, do not replay
@@ -70,7 +73,8 @@ instances are not inferred from the earned bounded results.
 
 1. Full active identity/package/data rename plus verified protected migration of
    actual GameCube progress; representative affected controls/library/lifecycle
-   check, without repeating quest progression or earned save/timing campaigns.
+   check, without repeating quest progression or earned save/timing campaigns. The
+   canonical Home/reentry addition is bounded to title/attract execution.
 2. Real N64 cartridge in the same collection: controllable graphics/audio,
    system-correct input, ordinary save/reload and joined Stop. Earned for Ocarina
    on source1dc7db2/APK1cb108de, retaining prior clear-audio evidence at its bounds;
@@ -79,6 +83,8 @@ instances are not inferred from the earned bounded results.
    independent same-system and cross-system progress, stale/failed restore
    protection and comfortable picture/control/menu layout. Report unsupported
    capabilities honestly; process-pool implementation does not gate the first slice.
+   Supported scenes/switch, layout persistence, menu/picture and representative
+   actual-target stick/button release/cancel are observed at the recorded bounds.
 
 Host tests, native/package/signature/resource/license checks, visible gameplay,
 audible sound, ordinary saves, machine resume, residency and measured performance
