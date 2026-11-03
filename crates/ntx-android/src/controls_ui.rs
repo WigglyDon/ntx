@@ -11,6 +11,7 @@ struct Session {
     editor: Editing,
     menu: u64,
     activity: u64,
+    bitmap: Option<GlobalRef>,
 }
 pub(super) enum Editing {
     GameCube(Box<Editor>),
@@ -22,6 +23,51 @@ impl Editing {
             Self::GameCube(e) => (e.width, e.height),
             Self::Nintendo64(e) => (e.width, e.height),
         }
+    }
+    fn draft(&mut self) -> &mut ntx::layout_edit::Draft {
+        match self {
+            Self::GameCube(e) => &mut e.draft,
+            Self::Nintendo64(e) => &mut e.draft,
+        }
+    }
+    fn sync(&mut self) {
+        match self {
+            Self::GameCube(e) => e.sync(),
+            Self::Nintendo64(e) => e.sync(),
+        }
+    }
+    fn testing(&self) -> bool {
+        match self {
+            Self::GameCube(e) => e.testing,
+            Self::Nintendo64(e) => e.testing,
+        }
+    }
+    fn mirror(&mut self) {
+        use ntx::{Control as C, n64::Button as B, n64_touch::Target as N, touch::Target as G};
+        let partner = match self {
+            Self::GameCube(e) => {
+                let target = match e.selected {
+                    Some(G::Stick(C::StickX, _)) => Some(G::Stick(C::CX, C::CY)),
+                    Some(G::Stick(C::CX, _)) => Some(G::Stick(C::StickX, C::StickY)),
+                    Some(G::Travel(C::LTravel)) => Some(G::Travel(C::RTravel)),
+                    Some(G::Travel(C::RTravel)) => Some(G::Travel(C::LTravel)),
+                    Some(G::Button(C::LClick)) => Some(G::Button(C::RClick)),
+                    Some(G::Button(C::RClick)) => Some(G::Button(C::LClick)),
+                    _ => None,
+                };
+                target.and_then(|t| e.layout.zones.iter().position(|z| z.target == t))
+            }
+            Self::Nintendo64(e) => {
+                let target = match e.selected {
+                    Some(N::Button(B::L)) => Some(N::Button(B::R)),
+                    Some(N::Button(B::R)) => Some(N::Button(B::L)),
+                    _ => None,
+                };
+                target.and_then(|t| e.zones.iter().position(|z| z.target == t))
+            }
+        };
+        self.draft().mirror(partner);
+        self.sync();
     }
     fn settings(&mut self) -> &mut Settings {
         match self {
@@ -85,6 +131,7 @@ pub(super) fn bind(editor: Option<Editing>, menu: u64, activity: u64) {
             editor,
             menu,
             activity,
+            bitmap: None,
         });
     }
 }
@@ -172,19 +219,98 @@ fn tag(env: &mut JNIEnv<'_>, view: &JObject<'_>, text: &str) -> Result<()> {
     )?;
     Ok(())
 }
-pub(super) fn append(
+fn add(env: &mut JNIEnv<'_>, parent: &JObject<'_>, child: &JObject<'_>) -> Result<()> {
+    env.call_method(
+        parent,
+        "addView",
+        "(Landroid/view/View;)V",
+        &[JValue::Object(child)],
+    )?;
+    Ok(())
+}
+fn linear<'a>(env: &mut JNIEnv<'a>, activity: &JObject<'_>, vertical: bool) -> Result<JObject<'a>> {
+    let v = env.new_object(
+        "android/widget/LinearLayout",
+        "(Landroid/content/Context;)V",
+        &[JValue::Object(activity)],
+    )?;
+    env.call_method(
+        &v,
+        "setOrientation",
+        "(I)V",
+        &[JValue::Int(i32::from(vertical))],
+    )?;
+    Ok(v)
+}
+fn button(
     env: &mut JNIEnv<'_>,
     activity: &JObject<'_>,
     parent: &JObject<'_>,
-    density: f32,
     menu: u64,
+    runtime: u64,
+    action: (i32, &str),
+    density: f32,
 ) -> Result<()> {
-    let (width, height, settings, n64) = with_editing(menu, |e| {
-        let (w, h) = e.size();
-        let n64 = matches!(e, Editing::Nintendo64(_));
-        (w, h, e.settings().clone(), n64)
+    let (id, text) = action;
+    let b = env.new_object(
+        "android/widget/Button",
+        "(Landroid/content/Context;)V",
+        &[JValue::Object(activity)],
+    )?;
+    set_text(env, &b, text)?;
+    tag(env, &b, &format!("ntx-action-{id}"))?;
+    env.call_method(&b, "setAllCaps", "(Z)V", &[JValue::Bool(0)])?;
+    env.call_method(&b, "setTextSize", "(F)V", &[JValue::Float(13.)])?;
+    env.call_method(
+        &b,
+        "setMinimumHeight",
+        "(I)V",
+        &[JValue::Int((48. * density).round() as i32)],
+    )?;
+    let class = activity_class(env, activity, "com.machinerhythm.ntx.NtxActivity$Action")?;
+    let listener = env.new_object(
+        class,
+        "(Lcom/machinerhythm/ntx/NtxActivity;IJJ)V",
+        &[
+            JValue::Object(activity),
+            JValue::Int(id),
+            JValue::Long(menu as i64),
+            JValue::Long(runtime as i64),
+        ],
+    )?;
+    env.call_method(
+        &b,
+        "setOnClickListener",
+        "(Landroid/view/View$OnClickListener;)V",
+        &[JValue::Object(&listener)],
+    )?;
+    add(env, parent, &b)
+}
+pub(super) fn build_dialog(
+    env: &mut JNIEnv<'_>,
+    activity: &JObject<'_>,
+    menu: u64,
+    runtime: u64,
+) -> Result<GlobalRef> {
+    let geometry = measure(env, activity)?;
+    let safe = geometry.control_bounds().ok_or("No safe display")?;
+    let density = geometry.density;
+    with_editing(menu, |e| {
+        let d = e.draft();
+        d.frame = Area {
+            left: (geometry.surface.left - safe.left) / density,
+            top: (geometry.surface.top - safe.top) / density,
+            right: (geometry.surface.right - safe.left) / density,
+            bottom: (geometry.surface.bottom - safe.top) / density,
+        };
+        d.aspect = last_frame(runtime).map_or(4. / 3., |f| f.aspect);
     })
     .ok_or("Editor expired")?;
+    let content = env.new_object(
+        "android/widget/FrameLayout",
+        "(Landroid/content/Context;)V",
+        &[JValue::Object(activity)],
+    )?;
     let class = activity_class(
         env,
         activity,
@@ -196,42 +322,232 @@ pub(super) fn append(
         &[JValue::Object(activity), JValue::Long(menu as i64)],
     )?;
     tag(env, &preview, "ntx-controls-preview")?;
-    let description = env.new_string("Touch control layout preview")?;
+    let desc = env.new_string("Full size game field and controller layout editor")?;
     env.call_method(
         &preview,
         "setContentDescription",
         "(Ljava/lang/CharSequence;)V",
-        &[JValue::Object(&description)],
+        &[JValue::Object(&desc)],
     )?;
-    let preview_height = (640. * height / width).clamp(220., 480.);
     let params = env.new_object(
-        "android/widget/LinearLayout$LayoutParams",
+        "android/widget/FrameLayout$LayoutParams",
         "(II)V",
-        &[
-            JValue::Int(-1),
-            JValue::Int((preview_height * density).round() as i32),
-        ],
+        &[JValue::Int(-1), JValue::Int(-1)],
     )?;
     env.call_method(
-        parent,
+        &content,
         "addView",
         "(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V",
         &[JValue::Object(&preview), JValue::Object(&params)],
     )?;
+    let dock = linear(env, activity, true)?;
+    tag(env, &dock, "ntx-editor-dock")?;
+    env.call_method(
+        &dock,
+        "setBackgroundColor",
+        "(I)V",
+        &[JValue::Int(0xee14191cu32 as i32)],
+    )?;
     let hint = label(
         env,
         activity,
-        "Select a control in the preview",
+        "Game field and controls · select, move or resize",
         13.,
-        theme::MUTED,
+        theme::TEXT,
     )?;
     tag(env, &hint, "ntx-controls-hint")?;
-    env.call_method(
-        parent,
-        "addView",
-        "(Landroid/view/View;)V",
-        &[JValue::Object(&hint)],
+    add(env, &dock, &hint)?;
+    let scroll = env.new_object(
+        "android/widget/HorizontalScrollView",
+        "(Landroid/content/Context;)V",
+        &[JValue::Object(activity)],
     )?;
+    let row = linear(env, activity, false)?;
+    for (id, text) in [
+        (10, "Done"),
+        (11, "Cancel"),
+        (26, "Game field"),
+        (27, "Move"),
+        (28, "Resize"),
+        (29, "Undo"),
+        (30, "Grid"),
+        (31, "Group"),
+        (32, "Mirror"),
+        (33, "Reset selected"),
+        (36, "Dock bottom"),
+        (37, "Options"),
+    ] {
+        button(env, activity, &row, menu, runtime, (id, text), density)?;
+    }
+    add(env, &scroll, &row)?;
+    add(env, &dock, &scroll)?;
+    let options = linear(env, activity, true)?;
+    tag(env, &options, "ntx-editor-options")?;
+    let option_scroll = env.new_object(
+        "android/widget/HorizontalScrollView",
+        "(Landroid/content/Context;)V",
+        &[JValue::Object(activity)],
+    )?;
+    let option_row = linear(env, activity, false)?;
+    for (id, text) in [
+        (20, "Size −"),
+        (21, "Size +"),
+        (34, "Spacing −"),
+        (35, "Spacing +"),
+        (23, "Test inputs"),
+        (24, "Haptics"),
+        (22, "Reset screen"),
+    ] {
+        button(
+            env,
+            activity,
+            &option_row,
+            menu,
+            runtime,
+            (id, text),
+            density,
+        )?;
+    }
+    if with_editing(menu, |e| matches!(e, Editing::GameCube(_))).unwrap_or(false) {
+        button(
+            env,
+            activity,
+            &option_row,
+            menu,
+            runtime,
+            (25, "Following sticks"),
+            density,
+        )?;
+    }
+    add(env, &option_scroll, &option_row)?;
+    add(env, &options, &option_scroll)?;
+    let settings = with_editing(menu, |e| e.settings().clone()).ok_or("Editor expired")?;
+    append_sliders(env, activity, &options, density, menu, &settings)?;
+    env.call_method(&options, "setVisibility", "(I)V", &[JValue::Int(8)])?;
+    add(env, &dock, &options)?;
+    let params = env.new_object(
+        "android/widget/FrameLayout$LayoutParams",
+        "(III)V",
+        &[JValue::Int(-1), JValue::Int(-2), JValue::Int(48)],
+    )?;
+    let dp = |v: f32| (v * density).round() as i32;
+    env.call_method(
+        &params,
+        "setMargins",
+        "(IIII)V",
+        &[
+            JValue::Int(dp((-geometry.surface.left + safe.left) / density)),
+            JValue::Int(dp((-geometry.surface.top + safe.top) / density)),
+            JValue::Int(dp((geometry.surface.right - safe.right) / density)),
+            JValue::Int(dp((geometry.surface.bottom - safe.bottom) / density)),
+        ],
+    )?;
+    env.call_method(
+        &content,
+        "addView",
+        "(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V",
+        &[JValue::Object(&dock), JValue::Object(&params)],
+    )?;
+    let dialog = env.new_object(
+        "android/app/Dialog",
+        "(Landroid/content/Context;)V",
+        &[JValue::Object(activity)],
+    )?;
+    env.call_method(&dialog, "requestWindowFeature", "(I)Z", &[JValue::Int(1)])?;
+    env.call_method(&dialog, "setCancelable", "(Z)V", &[JValue::Bool(0)])?;
+    env.call_method(
+        &dialog,
+        "setContentView",
+        "(Landroid/view/View;)V",
+        &[JValue::Object(&content)],
+    )?;
+    let window = env
+        .call_method(&dialog, "getWindow", "()Landroid/view/Window;", &[])?
+        .l()?;
+    let bg = env.new_object(
+        "android/graphics/drawable/ColorDrawable",
+        "(I)V",
+        &[JValue::Int(theme::BACKGROUND as i32)],
+    )?;
+    env.call_method(
+        &window,
+        "setBackgroundDrawable",
+        "(Landroid/graphics/drawable/Drawable;)V",
+        &[JValue::Object(&bg)],
+    )?;
+    env.call_method(&window, "clearFlags", "(I)V", &[JValue::Int(2)])?;
+    env.call_method(&window, "addFlags", "(I)V", &[JValue::Int(0x80 | 0x400)])?;
+    let decor = env
+        .call_method(&window, "getDecorView", "()Landroid/view/View;", &[])?
+        .l()?;
+    env.call_method(
+        &decor,
+        "setSystemUiVisibility",
+        "(I)V",
+        &[JValue::Int(0x1706)],
+    )?;
+    if sdk(env)? >= 28 {
+        let parent = env
+            .call_method(activity, "getWindow", "()Landroid/view/Window;", &[])?
+            .l()?;
+        let source = env
+            .call_method(
+                parent,
+                "getAttributes",
+                "()Landroid/view/WindowManager$LayoutParams;",
+                &[],
+            )?
+            .l()?;
+        let cutout = env
+            .get_field(source, "layoutInDisplayCutoutMode", "I")?
+            .i()?;
+        let attrs = env
+            .call_method(
+                &window,
+                "getAttributes",
+                "()Landroid/view/WindowManager$LayoutParams;",
+                &[],
+            )?
+            .l()?;
+        env.set_field(
+            &attrs,
+            "layoutInDisplayCutoutMode",
+            "I",
+            JValue::Int(cutout),
+        )?;
+        env.call_method(
+            &window,
+            "setAttributes",
+            "(Landroid/view/WindowManager$LayoutParams;)V",
+            &[JValue::Object(&attrs)],
+        )?;
+    }
+    if sdk(env)? >= 30 {
+        env.call_method(
+            &window,
+            "setDecorFitsSystemWindows",
+            "(Z)V",
+            &[JValue::Bool(0)],
+        )?;
+    }
+    env.call_method(&dialog, "show", "()V", &[])?;
+    env.call_method(
+        &window,
+        "setLayout",
+        "(II)V",
+        &[JValue::Int(-1), JValue::Int(-1)],
+    )?;
+    request_frame(env, activity, menu, runtime, geometry)?;
+    Ok(env.new_global_ref(dialog)?)
+}
+fn append_sliders(
+    env: &mut JNIEnv<'_>,
+    activity: &JObject<'_>,
+    parent: &JObject<'_>,
+    density: f32,
+    menu: u64,
+    settings: &Settings,
+) -> Result<()> {
     for (setting, value, max) in [(0, settings.opacity - 30, 70), (1, settings.dead_zone, 25)] {
         let text = value_label(setting, i32::from(value));
         let heading = label(env, activity, &text, 15., theme::TEXT)?;
@@ -298,23 +614,6 @@ pub(super) fn append(
             &[JValue::Object(&slider)],
         )?;
     }
-    let help = label(
-        env,
-        activity,
-        if n64 {
-            "One analog stick, four C buttons, digital L/R and Z. Test inputs never reach your game."
-        } else {
-            "Slide L/R for analog travel. Their separate click buttons work independently. Test inputs never reach your game."
-        },
-        13.,
-        theme::MUTED,
-    )?;
-    env.call_method(
-        parent,
-        "addView",
-        "(Landroid/view/View;)V",
-        &[JValue::Object(&help)],
-    )?;
     Ok(())
 }
 fn value_label(setting: i32, value: i32) -> String {
@@ -325,6 +624,58 @@ fn value_label(setting: i32, value: i32) -> String {
     }
 }
 pub(super) fn action(env: &mut JNIEnv<'_>, action: i32, menu: u64) -> Result<()> {
+    if matches!(action, 36 | 37) {
+        let bound = MENU
+            .lock()
+            .map_err(|_| "Menu lock poisoned")?
+            .clone()
+            .ok_or("No editor")?;
+        let window = env
+            .call_method(bound.as_obj(), "getWindow", "()Landroid/view/Window;", &[])?
+            .l()?;
+        let root = env
+            .call_method(window, "getDecorView", "()Landroid/view/View;", &[])?
+            .l()?;
+        if action == 36 {
+            let dock = find(env, &root, "ntx-editor-dock")?;
+            let params = env
+                .call_method(
+                    &dock,
+                    "getLayoutParams",
+                    "()Landroid/view/ViewGroup$LayoutParams;",
+                    &[],
+                )?
+                .l()?;
+            let top = env.get_field(&params, "gravity", "I")?.i()? == 48;
+            env.set_field(
+                &params,
+                "gravity",
+                "I",
+                JValue::Int(if top { 80 } else { 48 }),
+            )?;
+            env.call_method(
+                &dock,
+                "setLayoutParams",
+                "(Landroid/view/ViewGroup$LayoutParams;)V",
+                &[JValue::Object(&params)],
+            )?;
+            let button = find(env, &root, "ntx-action-36")?;
+            set_text(env, &button, if top { "Dock top" } else { "Dock bottom" })?;
+        } else {
+            let panel = find(env, &root, "ntx-editor-options")?;
+            let visible = env.call_method(&panel, "getVisibility", "()I", &[])?.i()? == 0;
+            env.call_method(
+                &panel,
+                "setVisibility",
+                "(I)V",
+                &[JValue::Int(if visible { 8 } else { 0 })],
+            )?;
+        }
+        return Ok(());
+    }
+    if with_editing(menu, |e| e.testing()).unwrap_or(false) && !matches!(action, 23..=25) {
+        return Ok(());
+    }
     with_editing(menu, |e| match action {
         20 => e.resize(-8.),
         21 => e.resize(8.),
@@ -339,6 +690,42 @@ pub(super) fn action(env: &mut JNIEnv<'_>, action: i32, menu: u64) -> Result<()>
                 e.settings.floating_sticks = !e.settings.floating_sticks;
                 e.configure_test();
             }
+        }
+        26 => {
+            e.cancel();
+            e.draft().selected = Some(ntx::layout_edit::Selection::Picture);
+            e.sync();
+        }
+        27 | 28 => {
+            e.cancel();
+            e.draft().mode = if action == 27 {
+                ntx::layout_edit::Mode::Move
+            } else {
+                ntx::layout_edit::Mode::Resize
+            };
+        }
+        29 => {
+            e.draft().undo();
+            e.sync();
+        }
+        30 => {
+            e.cancel();
+            let d = e.draft();
+            d.grid = !d.grid;
+        }
+        31 => {
+            e.cancel();
+            let d = e.draft();
+            d.grouped = !d.grouped;
+        }
+        32 => e.mirror(),
+        33 => {
+            e.draft().reset_selected();
+            e.sync();
+        }
+        34 | 35 => {
+            e.draft().spacing(if action == 34 { -8. } else { 8. });
+            e.sync();
         }
         _ => {}
     })
@@ -366,7 +753,7 @@ pub(super) fn refresh(env: &mut JNIEnv<'_>, menu: u64) -> Result<()> {
             .map(|z| z.label.to_string_lossy().into_owned())
             .unwrap_or_else(|| "Select a control".into());
         let hint = if e.rejected {
-            "Keep controls apart and within the preview".into()
+            "Keep the game field and controls apart and within the screen".into()
         } else if e.testing {
             let p = e.pad();
             format!(
@@ -379,7 +766,7 @@ pub(super) fn refresh(env: &mut JNIEnv<'_>, menu: u64) -> Result<()> {
                 p.values()[17]
             )
         } else {
-            format!("{selected} · drag to move; size buttons below")
+            format!("{selected} · drag to move; Resize shows corner grips")
         };
         (
             hint,
@@ -397,7 +784,7 @@ pub(super) fn refresh(env: &mut JNIEnv<'_>, menu: u64) -> Result<()> {
                 .map(|z| n64_name(z.target, z.label))
                 .unwrap_or("Select a control");
             let hint = if e.rejected {
-                "Keep controls apart and within the preview".into()
+                "Keep the game field and controls apart and within the screen".into()
             } else if e.testing {
                 let p = e.pad();
                 let held = [
@@ -428,7 +815,7 @@ pub(super) fn refresh(env: &mut JNIEnv<'_>, menu: u64) -> Result<()> {
                     if held.is_empty() { "Released" } else { &held }
                 )
             } else {
-                format!("{selected} · drag to move; size buttons below")
+                format!("{selected} · drag to move; Resize shows corner grips")
             };
             (
                 hint,
@@ -438,6 +825,29 @@ pub(super) fn refresh(env: &mut JNIEnv<'_>, menu: u64) -> Result<()> {
                 e.selected.is_some(),
             )
         })
+    })
+    .ok_or("Editor expired")?;
+    let (hint, selected, dragging, mode, grid, grouped, undo) = with_editing(menu, |e| {
+        let testing = e.testing();
+        let d = e.draft();
+        let hint = if !testing && d.selected == Some(ntx::layout_edit::Selection::Picture) {
+            if d.rejected {
+                "Keep the game field clear of controls and inside the screen".into()
+            } else {
+                "Game field · move or resize; console aspect stays intact".into()
+            }
+        } else {
+            hint
+        };
+        (
+            hint,
+            selected || d.selected.is_some(),
+            d.dragging(),
+            d.mode,
+            d.grid,
+            d.grouped,
+            d.can_undo(),
+        )
     })
     .ok_or("Editor expired")?;
     let bound = MENU
@@ -451,6 +861,45 @@ pub(super) fn refresh(env: &mut JNIEnv<'_>, menu: u64) -> Result<()> {
     let root = env
         .call_method(window, "getDecorView", "()Landroid/view/View;", &[])?
         .l()?;
+    let dock = find(env, &root, "ntx-editor-dock")?;
+    env.call_method(
+        dock,
+        "setVisibility",
+        "(I)V",
+        &[JValue::Int(if dragging { 4 } else { 0 })],
+    )?;
+    for (id, title) in [
+        (
+            27,
+            if mode == ntx::layout_edit::Mode::Move {
+                "Move ✓"
+            } else {
+                "Move"
+            },
+        ),
+        (
+            28,
+            if mode == ntx::layout_edit::Mode::Resize {
+                "Resize ✓"
+            } else {
+                "Resize"
+            },
+        ),
+        (30, if grid { "Grid · On" } else { "Grid · Off" }),
+        (31, if grouped { "Group" } else { "Single" }),
+    ] {
+        let b = find(env, &root, &format!("ntx-action-{id}"))?;
+        if !b.is_null() {
+            set_text(env, &b, title)?;
+        }
+    }
+    let b = find(env, &root, "ntx-action-29")?;
+    env.call_method(
+        b,
+        "setEnabled",
+        "(Z)V",
+        &[JValue::Bool(u8::from(undo && !testing))],
+    )?;
     let preview = find(env, &root, "ntx-controls-preview")?;
     if !preview.is_null() {
         env.call_method(preview, "invalidate", "()V", &[])?;
@@ -509,15 +958,11 @@ pub(super) fn refresh(env: &mut JNIEnv<'_>, menu: u64) -> Result<()> {
     }
     Ok(())
 }
-fn mapping(width: i32, height: i32, w: f32, h: f32) -> (f32, f32, f32) {
-    let scale = ((width as f32 - 24.) / w)
-        .min((height as f32 - 24.) / h)
+fn mapping(width: i32, height: i32, frame: Area) -> (f32, f32, f32) {
+    let scale = (width as f32 / (frame.right - frame.left))
+        .min(height as f32 / (frame.bottom - frame.top))
         .max(0.001);
-    (
-        scale,
-        (width as f32 - w * scale) / 2.,
-        (height as f32 - h * scale) / 2.,
-    )
+    (scale, -frame.left * scale, -frame.top * scale)
 }
 #[unsafe(no_mangle)]
 extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_controlsValue(
@@ -566,12 +1011,11 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_controlsTouch(
         return 0;
     }
     let handled = with_editing(menu as u64, |e| {
-        let (ew, eh) = e.size();
-        let (scale, ox, oy) = mapping(width, height, ew, eh);
+        let (scale, ox, oy) = mapping(width, height, e.draft().frame);
         let (x, y) = ((x - ox) / scale, (y - oy) / scale);
         match action {
             0 | 5 => {
-                if x < 0. || y < 0. || x > ew || y > eh {
+                if !e.draft().frame.contains(x, y) {
                     return false;
                 }
                 if !e.down(pointer, x, y) {
@@ -607,24 +1051,22 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_controlsDraw(
         let pad = e.pad();
         N64Preview {
             zones: e.zones.clone(),
-            width: e.width,
-            height: e.height,
             selected: e.selected,
             pad,
             opacity: e.settings.opacity,
+            decor: Decor::new(&e.draft),
         }
     }) {
-        draw_n64(&mut env, &canvas, width, height, preview);
+        draw_n64(&mut env, &canvas, width, height, menu as u64, preview);
         return;
     }
-    let Some((layout, w, h, selected, pad, opacity)) = with_editor(menu as u64, |e| {
+    let Some((layout, selected, pad, opacity, decor)) = with_editor(menu as u64, |e| {
         (
             e.layout.clone(),
-            e.width,
-            e.height,
             e.selected,
             e.pad(),
             e.settings.opacity,
+            Decor::new(&e.draft),
         )
     }) else {
         return;
@@ -632,7 +1074,7 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_controlsDraw(
     let mut canvas_save = None;
     let result: Result<()> = (|| {
         let paint = env.new_object("android/graphics/Paint", "(I)V", &[JValue::Int(1)])?;
-        let (scale, ox, oy) = mapping(width, height, w, h);
+        let (scale, ox, oy) = mapping(width, height, decor.frame);
         let save = env.call_method(&canvas, "save", "()I", &[])?.i()?;
         canvas_save = Some(save);
         env.call_method(
@@ -647,29 +1089,7 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_controlsDraw(
             "(FF)V",
             &[JValue::Float(scale), JValue::Float(scale)],
         )?;
-        rectangle(
-            &mut env,
-            &canvas,
-            &paint,
-            Area {
-                left: 0.,
-                top: 0.,
-                right: w,
-                bottom: h,
-            },
-            0xff14191c,
-            12.,
-        )?;
-        rectangle(&mut env, &canvas, &paint, layout.game, 0xff1d252a, 8.)?;
-        text(
-            &mut env,
-            &canvas,
-            &paint,
-            "Game picture",
-            (w / 2. - 42., h * 0.3),
-            14.,
-            theme::MUTED,
-        )?;
+        draw_field(&mut env, &canvas, &paint, &decor, menu as u64)?;
         for zone in &layout.zones {
             let a = zone.area;
             let pressed = matches!(zone.target,Target::Button(c) if pad.values()[c as usize]>0.0);
@@ -822,6 +1242,7 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_controlsDraw(
                 },
             )?;
         }
+        draw_selection(&mut env, &canvas, &paint, &decor)?;
         env.call_method(&canvas, "restoreToCount", "(I)V", &[JValue::Int(save)])?;
         canvas_save = None;
         Ok(())
@@ -859,32 +1280,31 @@ fn n64_name(target: ntx::n64_touch::Target, _label: &str) -> &'static str {
 }
 struct N64Preview {
     zones: Vec<ntx::n64_touch::Zone>,
-    width: f32,
-    height: f32,
     selected: Option<ntx::n64_touch::Target>,
     pad: ntx::n64::Pad,
     opacity: u8,
+    decor: Decor,
 }
 fn draw_n64(
     env: &mut JNIEnv<'_>,
     canvas: &JObject<'_>,
     width: i32,
     height: i32,
+    menu: u64,
     preview: N64Preview,
 ) {
     let N64Preview {
         zones,
-        width: w,
-        height: h,
         selected,
         pad,
         opacity,
+        decor,
     } = preview;
     use ntx::{n64::Button as B, n64_touch::Target as T};
     let mut canvas_save = None;
     let result: Result<()> = (|| {
         let paint = env.new_object("android/graphics/Paint", "(I)V", &[JValue::Int(1)])?;
-        let (scale, ox, oy) = mapping(width, height, w, h);
+        let (scale, ox, oy) = mapping(width, height, decor.frame);
         let save = env.call_method(canvas, "save", "()I", &[])?.i()?;
         canvas_save = Some(save);
         env.call_method(
@@ -899,42 +1319,7 @@ fn draw_n64(
             "(FF)V",
             &[JValue::Float(scale), JValue::Float(scale)],
         )?;
-        rectangle(
-            env,
-            canvas,
-            &paint,
-            Area {
-                left: 0.,
-                top: 0.,
-                right: w,
-                bottom: h,
-            },
-            0xff14191c,
-            12.,
-        )?;
-        let size = (w / 4.).min(h / 3.);
-        rectangle(
-            env,
-            canvas,
-            &paint,
-            Area {
-                left: (w - 4. * size) / 2.,
-                top: (h - 3. * size) / 2.,
-                right: (w + 4. * size) / 2.,
-                bottom: (h + 3. * size) / 2.,
-            },
-            0xff1d252a,
-            8.,
-        )?;
-        text(
-            env,
-            canvas,
-            &paint,
-            "Game picture",
-            (w / 2. - 42., h * 0.3),
-            14.,
-            theme::MUTED,
-        )?;
+        draw_field(env, canvas, &paint, &decor, menu)?;
         for z in zones {
             let a = z.area;
             let pressed = matches!(z.target,T::Button(b) if pad.pressed(b));
@@ -1011,6 +1396,7 @@ fn draw_n64(
                 )?;
             }
         }
+        draw_selection(env, canvas, &paint, &decor)?;
         env.call_method(canvas, "restoreToCount", "(I)V", &[JValue::Int(save)])?;
         canvas_save = None;
         Ok(())
@@ -1071,5 +1457,332 @@ fn text(
             JValue::Object(paint),
         ],
     )?;
+    Ok(())
+}
+
+#[derive(Clone, Copy)]
+struct Frame {
+    runtime: u64,
+    activity: u64,
+    picture: Area,
+    width: f32,
+    height: f32,
+    aspect: f32,
+}
+static FRAME: Mutex<Option<Frame>> = Mutex::new(None);
+pub(super) fn record_frame(picture: Area, width: f32, height: f32, aspect: f32) {
+    if let Ok(mut frame) = FRAME.lock() {
+        *frame = Some(Frame {
+            runtime: TRACE_RUNTIME.load(Ordering::Relaxed),
+            activity: EPOCH.load(Ordering::Acquire),
+            picture,
+            width,
+            height,
+            aspect,
+        });
+    }
+}
+fn last_frame(runtime: u64) -> Option<Frame> {
+    FRAME.lock().ok()?.filter(|f| {
+        runtime != 0 && f.runtime == runtime && f.activity == EPOCH.load(Ordering::Acquire)
+    })
+}
+fn request_frame(
+    env: &mut JNIEnv<'_>,
+    activity: &JObject<'_>,
+    menu: u64,
+    runtime: u64,
+    g: ntx::viewport::WindowGeometry,
+) -> Result<()> {
+    let Some(f) = last_frame(runtime) else {
+        return Ok(());
+    };
+    if f.width < 2. || f.height < 2. {
+        return Ok(());
+    }
+    let sx = (g.surface.right - g.surface.left) / f.width;
+    let sy = (g.surface.bottom - g.surface.top) / f.height;
+    let p = f.picture;
+    let (l, t, r, b) = (
+        (g.surface.left - g.window.left + p.left * sx).round() as i32,
+        (g.surface.top - g.window.top + p.top * sy).round() as i32,
+        (g.surface.left - g.window.left + p.right * sx).round() as i32,
+        (g.surface.top - g.window.top + p.bottom * sy).round() as i32,
+    );
+    if r - l < 2 || b - t < 2 || r - l > 4096 || b - t > 4096 {
+        return Ok(());
+    }
+    let result: Result<()> = (|| {
+        let config = env
+            .get_static_field(
+                "android/graphics/Bitmap$Config",
+                "ARGB_8888",
+                "Landroid/graphics/Bitmap$Config;",
+            )?
+            .l()?;
+        let bitmap = env
+            .call_static_method(
+                "android/graphics/Bitmap",
+                "createBitmap",
+                "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;",
+                &[
+                    JValue::Int(r - l),
+                    JValue::Int(b - t),
+                    JValue::Object(&config),
+                ],
+            )?
+            .l()?;
+        let rect = env.new_object(
+            "android/graphics/Rect",
+            "(IIII)V",
+            &[
+                JValue::Int(l),
+                JValue::Int(t),
+                JValue::Int(r),
+                JValue::Int(b),
+            ],
+        )?;
+        let class = activity_class(env, activity, "com.machinerhythm.ntx.NtxActivity$FrameCopy")?;
+        let listener = env.new_object(
+            class,
+            "(Lcom/machinerhythm/ntx/NtxActivity;Landroid/graphics/Bitmap;J)V",
+            &[
+                JValue::Object(activity),
+                JValue::Object(&bitmap),
+                JValue::Long(menu as i64),
+            ],
+        )?;
+        let looper = env
+            .call_static_method(
+                "android/os/Looper",
+                "getMainLooper",
+                "()Landroid/os/Looper;",
+                &[],
+            )?
+            .l()?;
+        let handler = env.new_object(
+            "android/os/Handler",
+            "(Landroid/os/Looper;)V",
+            &[JValue::Object(&looper)],
+        )?;
+        let window = env
+            .call_method(activity, "getWindow", "()Landroid/view/Window;", &[])?
+            .l()?;
+        env.call_static_method("android/view/PixelCopy","request","(Landroid/view/Window;Landroid/graphics/Rect;Landroid/graphics/Bitmap;Landroid/view/PixelCopy$OnPixelCopyFinishedListener;Landroid/os/Handler;)V",
+            &[JValue::Object(&window),JValue::Object(&rect),JValue::Object(&bitmap),JValue::Object(&listener),JValue::Object(&handler)])?;
+        Ok(())
+    })();
+    if result.is_err() {
+        env.exception_clear()?;
+    }
+    Ok(()) // A missing paused frame does not prevent editing or alter the runtime.
+}
+#[unsafe(no_mangle)]
+extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_controlsFrame(
+    mut env: JNIEnv<'_>,
+    activity: JObject<'_>,
+    bitmap: JObject<'_>,
+    result: jint,
+    menu: jlong,
+) {
+    if result != 0 || !current_activity(&env, &activity) || !menu_current(menu as u64) {
+        return;
+    }
+    let Ok(bitmap) = env.new_global_ref(bitmap) else {
+        let _ = env.exception_clear();
+        return;
+    };
+    if let Ok(mut slot) = EDITOR.lock()
+        && let Some(s) = slot.as_mut()
+        && s.menu == menu as u64
+        && s.activity == EPOCH.load(Ordering::Acquire)
+    {
+        s.bitmap = Some(bitmap);
+    }
+    if refresh(&mut env, menu as u64).is_err() {
+        let _ = env.exception_clear();
+    }
+}
+struct Decor {
+    frame: Area,
+    picture: Area,
+    bounds: Option<Area>,
+    resize: bool,
+    grid: bool,
+    guides: (Option<f32>, Option<f32>),
+}
+impl Decor {
+    fn new(d: &ntx::layout_edit::Draft) -> Self {
+        Self {
+            frame: d.frame,
+            picture: d.picture(),
+            bounds: d.selection_bounds(),
+            resize: d.mode == ntx::layout_edit::Mode::Resize,
+            grid: d.grid,
+            guides: d.guides,
+        }
+    }
+}
+fn draw_field(
+    env: &mut JNIEnv<'_>,
+    canvas: &JObject<'_>,
+    paint: &JObject<'_>,
+    d: &Decor,
+    menu: u64,
+) -> Result<()> {
+    rectangle(env, canvas, paint, d.frame, theme::BACKGROUND, 0.)?;
+    let p = d.picture;
+    rectangle(env, canvas, paint, p, 0xff1d252a, 0.)?;
+    let bitmap = EDITOR.lock().ok().and_then(|s| {
+        s.as_ref()
+            .filter(|s| s.menu == menu)
+            .and_then(|s| s.bitmap.clone())
+    });
+    if let Some(bitmap) = bitmap {
+        let rect = env.new_object(
+            "android/graphics/RectF",
+            "(FFFF)V",
+            &[
+                JValue::Float(p.left),
+                JValue::Float(p.top),
+                JValue::Float(p.right),
+                JValue::Float(p.bottom),
+            ],
+        )?;
+        env.call_method(paint, "setAlpha", "(I)V", &[JValue::Int(255)])?;
+        env.call_method(paint, "setFilterBitmap", "(Z)V", &[JValue::Bool(1)])?;
+        env.call_method(canvas,"drawBitmap","(Landroid/graphics/Bitmap;Landroid/graphics/Rect;Landroid/graphics/RectF;Landroid/graphics/Paint;)V",&[JValue::Object(bitmap.as_obj()),JValue::Object(&JObject::null()),JValue::Object(&rect),JValue::Object(paint)])?;
+    } else {
+        text(
+            env,
+            canvas,
+            paint,
+            "Game field",
+            (p.center().0 - 34., p.center().1),
+            14.,
+            theme::MUTED,
+        )?;
+    }
+    if d.grid {
+        let mut x = d.frame.center().0;
+        while x > d.frame.left {
+            x -= 8.;
+        }
+        while x <= d.frame.right {
+            line(
+                env,
+                canvas,
+                paint,
+                (x, d.frame.top, x, d.frame.bottom),
+                0x183e9e79,
+                0.5,
+            )?;
+            x += 8.;
+        }
+        let mut y = (d.frame.top / 8.).ceil() * 8.;
+        while y <= d.frame.bottom {
+            line(
+                env,
+                canvas,
+                paint,
+                (d.frame.left, y, d.frame.right, y),
+                0x183e9e79,
+                0.5,
+            )?;
+            y += 8.;
+        }
+    }
+    Ok(())
+}
+fn line(
+    env: &mut JNIEnv<'_>,
+    canvas: &JObject<'_>,
+    paint: &JObject<'_>,
+    a: (f32, f32, f32, f32),
+    color: u32,
+    width: f32,
+) -> Result<()> {
+    env.call_method(paint, "setColor", "(I)V", &[JValue::Int(color as i32)])?;
+    env.call_method(paint, "setStrokeWidth", "(F)V", &[JValue::Float(width)])?;
+    env.call_method(
+        canvas,
+        "drawLine",
+        "(FFFFLandroid/graphics/Paint;)V",
+        &[
+            JValue::Float(a.0),
+            JValue::Float(a.1),
+            JValue::Float(a.2),
+            JValue::Float(a.3),
+            JValue::Object(paint),
+        ],
+    )?;
+    Ok(())
+}
+fn draw_selection(
+    env: &mut JNIEnv<'_>,
+    canvas: &JObject<'_>,
+    paint: &JObject<'_>,
+    d: &Decor,
+) -> Result<()> {
+    if let Some(a) = d.bounds {
+        for (x, y, r, b) in [
+            (a.left, a.top, a.right, a.top),
+            (a.right, a.top, a.right, a.bottom),
+            (a.right, a.bottom, a.left, a.bottom),
+            (a.left, a.bottom, a.left, a.top),
+        ] {
+            line(env, canvas, paint, (x, y, r, b), theme::ACCENT, 2.)?;
+        }
+        if d.resize {
+            for (x, y) in ntx::layout_edit::corners(a) {
+                rectangle(
+                    env,
+                    canvas,
+                    paint,
+                    Area {
+                        left: x - 8.,
+                        top: y - 8.,
+                        right: x + 8.,
+                        bottom: y + 8.,
+                    },
+                    theme::ACCENT,
+                    4.,
+                )?;
+                rectangle(
+                    env,
+                    canvas,
+                    paint,
+                    Area {
+                        left: x - 3.,
+                        top: y - 3.,
+                        right: x + 3.,
+                        bottom: y + 3.,
+                    },
+                    theme::BACKGROUND,
+                    1.,
+                )?;
+            }
+        }
+    }
+    if let Some(x) = d.guides.0 {
+        line(
+            env,
+            canvas,
+            paint,
+            (x, d.frame.top, x, d.frame.bottom),
+            theme::ACCENT,
+            1.,
+        )?;
+    }
+    if let Some(y) = d.guides.1 {
+        line(
+            env,
+            canvas,
+            paint,
+            (d.frame.left, y, d.frame.right, y),
+            theme::ACCENT,
+            1.,
+        )?;
+    }
     Ok(())
 }

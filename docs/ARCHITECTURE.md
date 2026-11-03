@@ -131,3 +131,20 @@ newer ordinary saves. Qualify supported residency separately from checkpoint
 fallback. Do not block the N64 vertical slice on a process pool, all-platform
 campaign or quest automation. The current owner assignment and handoff order
 identity/migration, first playable N64, then supported continuity/alpha comfort.
+
+### Layout editing and picture preferences
+
+`layout_edit::Draft` owns bounded undo and geometric gestures for either console.
+Console adapters retain their own targets and isolated test pads. A game-field
+selection has the same move/resize, collision, reset, undo and cancellation
+contracts as a control selection. Group transforms preserve relative placement;
+rejected edits never move other controls. Android owns Canvas/Bitmap/window
+resources; a paused frame is ephemeral, scoped to the current activity/menu/runtime
+and never enters game persistence. The tools dock overlays the play-size surface.
+
+Optional `picture` rectangles in each system's per-display controls profile are
+normalized against the full drawable, independently of control-safe margins.
+Both backend presentation paths fit their aspect inside that box. Automatic
+picture placement maximizes the clear area around real targets. Controls, ordinary
+saves and machine checkpoints remain separate. Version1 preferences without a
+picture member keep their existing behavior and are never rewritten at load.

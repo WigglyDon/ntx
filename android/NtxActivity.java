@@ -18,6 +18,17 @@ public final class NtxActivity extends android.app.NativeActivity {
     private native boolean controlsTouch(int action, int pointer, float x, float y, int width, int height, long menu);
     private native void controlsValue(android.widget.TextView label, int setting, int value, long menu);
 
+    private native void controlsFrame(android.graphics.Bitmap bitmap, int result, long menu);
+    public static final class FrameCopy implements android.view.PixelCopy.OnPixelCopyFinishedListener {
+        private final NtxActivity activity;
+        private final android.graphics.Bitmap bitmap;
+        private final long menu;
+        public FrameCopy(NtxActivity activity, android.graphics.Bitmap bitmap, long menu) {
+            this.activity=activity; this.bitmap=bitmap; this.menu=menu;
+        }
+        @Override public void onPixelCopyFinished(int result) { activity.controlsFrame(bitmap,result,menu); }
+    }
+
     // Mechanical View/SeekBar callbacks only. Rust owns editor state, drawing,
     // validation, settings, hit testing and all actions.
     public static final class ControlsView extends android.view.View {

@@ -348,6 +348,7 @@ fn playing_window(
     playing: bool,
     editing: bool,
 ) -> Result<()> {
+    let playing = playing || editing;
     let window = env
         .call_method(activity, "getWindow", "()Landroid/view/Window;", &[])?
         .l()?;
@@ -1198,6 +1199,13 @@ fn render_menu_with_games(
             if let Some(dialog) = old {
                 env.call_method(dialog.as_obj(), "dismiss", "()V", &[])?;
             }
+            if show && editing {
+                let dialog = controls_ui::build_dialog(env, activity, generation, runtime)?;
+                *MENU.lock().map_err(|_| "menu lock poisoned")? = Some(dialog);
+                controls_ui::refresh(env, generation)?;
+                update_window(env, activity);
+                return Ok(());
+            }
             if show {
                 trace(runtime, generation, "dialog.build", "");
                 let view = env.new_object(
@@ -1303,9 +1311,6 @@ fn render_menu_with_games(
                         14.0,
                         ntx::presentation::MUTED,
                     )?;
-                }
-                if editing {
-                    controls_ui::append(env, activity, &view, density, generation)?;
                 }
                 let stop_available = actions.iter().any(|(action, _)| *action == 4);
                 let fixed_footer = editing || stop_available;
@@ -1741,12 +1746,12 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_uiAction(
         }
         11 => push(Command::ControlsBack(menu as u64)),
         17 => push(Command::ConfirmLegacyMedia(menu as u64)),
-        20..=25 if controls_ui::action(&mut env, action, menu as u64).is_err() => {
+        20..=37 if controls_ui::action(&mut env, action, menu as u64).is_err() => {
             let _ = env.exception_clear();
         }
         _ => {}
     }
-    if matches!(action, 1..=17 | 20..=25) {
+    if matches!(action, 1..=17 | 20..=37) {
         feedback(&mut env, &activity);
     }
 }
@@ -2076,4 +2081,8 @@ pub extern "C" fn dispatch(
         }
     })();
     result.unwrap_or(-1)
+}
+
+pub fn record_editor_frame(picture: ntx::touch::Area, width: f32, height: f32, aspect: f32) {
+    controls_ui::record_frame(picture, width, height, aspect);
 }

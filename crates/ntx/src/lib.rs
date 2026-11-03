@@ -206,3 +206,5 @@ mod tests {
 pub mod library;
 
 pub mod storage;
+
+pub mod layout_edit;

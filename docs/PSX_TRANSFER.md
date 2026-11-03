@@ -175,3 +175,36 @@ capture and original input-following policy are retained. The actual shared
 Geometry example now includes a Fold-size synthetic picture fixture. Host checks
 are not a physical Fold layout, haptics or performance acceptance. Sibling work,
 files and device settings were untouched.
+
+## Full-size layout editing and game field, 2026-11-02
+
+Owner requested PSX controller editing/layout quality, with equal priority for
+its game field. Read the clean public MIT reference checkout at
+`ac74cc06602a3e5c00b14d77404a93c94cebb6bc`: `crates/player/src/input.rs`
+(blob `6a867ce3a1177d5d76a866626deabf61583cfc52`), `ui.rs`
+(`3571c9916439954cccdc2e3a25e410e160e91061`), `controller_profiles.rs`
+(`89cc72474835a19a3c5b4dc03f1769a7d4870a17`) and MIT LICENSE
+(`b7f230132ee7f02cf3a70d97da95362132e6a6fb`). No sibling files were changed.
+
+Selected concepts: a play-size editing surface, a movable tools dock, grouped
+face/C/directional buttons, opposite-corner resize, centered grid and alignment
+guides, explicit mirror, scoped reset, bounded draft undo and separate input test.
+The picture is a selectable move/resize target with the same collision priority
+and undo/cancel policy as controls. The clear-picture solver already adapted here
+is shared by both renderers; custom picture boxes fit the actual backend aspect.
+An optional normalized picture field extends each system's display preference;
+old version1 preferences remain readable. No saves, profile/game identities,
+snapshot formats, core input masks or PSX frontend were transferred.
+
+The implementation is original Rust in `layout_edit`, the existing console
+editors, Android Canvas/JNI UI and backend presentation adapters. A small Java
+listener only forwards PixelCopy completion; Rust requests a bounded in-memory
+copy of the current app's paused game rectangle, validates activity/menu/runtime
+ownership and draws it inside the edited game field. A missing copy leaves a
+neutral game field. Nothing is captured to storage by this player feature.
+Machine Rhythm MIT attribution remains in LICENSE and packaged notices.
+
+Focused portable fixtures check grouped movement/scaling, anchored corners,
+one undo per gesture, cancellation, collision priority, spacing/mirror, snapping
+escape and preference reload into both renderers across safe insets/density.
+These source checks alone do not qualify the physical editor or a Fold layout.

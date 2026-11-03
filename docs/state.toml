@@ -158,3 +158,12 @@ limits = "One title/attract route, not a new in-world or current-file load quali
 [acceptance_review]
 status = "Open; bounded Pixel outcomes reported, no issue closed or public binary released"
 final_outcome = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6594210587"
+
+[layout_editor_increment]
+request = "PSX controller editing/layout quality; game field has equal priority"
+status = "IMPLEMENTED_SOURCE_HOST_CHECKED_DEVICE_PENDING"
+reference = "PSX public MIT ac74cc06602a3e5c00b14d77404a93c94cebb6bc; docs/PSX_TRANSFER.md"
+features = "Full play-size canvas; top/bottom floating dock; game-field select/move/aspect-preserving corner resize; grouped controls; grid/alignment guides; explicit mirror; scoped reset; 32-entry gesture undo; isolated Test inputs; Done/Cancel"
+persistence = "Optional normalized full-drawable picture per system/display in version1 control preferences; backward compatible; both direct Dolphin and N64 host render actual picture preferences"
+validation = "98 portable library tests, existing decoder/integration/motion-probe and xtask suites; warnings-denied host all-targets and ARM64 Android checks; pinned Dolphin source check"
+limits = "New editor device verification pending. Earlier layout/play/save/scene/Home evidence remains bound to its prior source/APK. No sibling change, native core rebuild, new gameplay campaign or Fold operation"

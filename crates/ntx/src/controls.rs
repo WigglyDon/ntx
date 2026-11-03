@@ -34,6 +34,9 @@ impl Default for Settings {
 pub struct Profile {
     pub display: String,
     pub zones: Vec<Placement>,
+    /// Normalized game-field bounds within the complete drawable.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub picture: Option<Area>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(deny_unknown_fields)]
@@ -84,6 +87,9 @@ impl Settings {
                     .iter()
                     .any(|p| p.display == profile.display)
                 || profile.zones.len() > 20
+                || profile
+                    .picture
+                    .is_some_and(|a| !crate::layout_edit::valid_picture(a))
             {
                 return Err(invalid());
             }
@@ -199,170 +205,178 @@ pub struct Editor {
     pub selected: Option<Target>,
     pub testing: bool,
     pub rejected: bool,
-    drag: Option<(i32, f32, f32, Area)>,
+    pub draft: crate::layout_edit::Draft,
     test_pad: TouchPad,
 }
 impl Editor {
     pub fn new(width: f32, height: f32, settings: Settings) -> Self {
+        let layout = settings.layout(width, height);
+        let defaults = Layout::new(width, height);
+        let mut groups = vec![
+            layout
+                .zones
+                .iter()
+                .enumerate()
+                .filter(|(_, z)| {
+                    matches!(
+                        z.target,
+                        Target::Button(
+                            crate::Control::A
+                                | crate::Control::B
+                                | crate::Control::X
+                                | crate::Control::Y
+                        )
+                    )
+                })
+                .map(|(i, _)| i)
+                .collect(),
+        ];
+
+        groups.retain(|g: &Vec<usize>| g.len() > 1);
+        let picture = settings
+            .profiles
+            .iter()
+            .find(|p| p.display == display_key(width, height))
+            .and_then(|p| p.picture);
+        let draft = crate::layout_edit::Draft::new(
+            width,
+            height,
+            layout.zones.iter().map(|z| z.area).collect(),
+            defaults.zones.iter().map(|z| z.area).collect(),
+            groups,
+            picture,
+            48.,
+        );
         let mut test_pad = TouchPad::new();
         test_pad.configure(settings.dead_zone, settings.floating_sticks);
         Self {
-            layout: settings.layout(width, height),
+            layout,
+            test_pad,
             settings,
             width,
             height,
             selected: None,
             testing: false,
             rejected: false,
-            drag: None,
-            test_pad,
+            draft,
         }
+    }
+    pub fn sync(&mut self) {
+        for (zone, area) in self.layout.zones.iter_mut().zip(self.draft.areas()) {
+            zone.area = *area;
+        }
+        self.selected = match self.draft.selected {
+            Some(crate::layout_edit::Selection::Control(i)) => {
+                self.layout.zones.get(i).map(|z| z.target)
+            }
+            _ => None,
+        };
+        self.rejected = self.draft.rejected;
     }
     pub fn select(&mut self, target: Target) {
-        self.selected = Some(target);
-        self.drag = None;
-    }
-    pub fn down(&mut self, pointer: i32, x: f32, y: f32) -> bool {
-        if self.testing {
-            return matches!(
-                self.test_pad.down_report(pointer, x, y, &self.layout),
-                crate::touch::DownReport::Captured | crate::touch::DownReport::Pause
-            );
-        }
-        if self.drag.is_some() || !x.is_finite() || !y.is_finite() {
-            return false;
-        }
-        if let Some(zone) = self
+        self.draft.cancel();
+        self.draft.selected = self
             .layout
             .zones
             .iter()
-            .rev()
-            .find(|z| z.area.contains(x, y))
-        {
-            self.selected = Some(zone.target);
-            self.drag = Some((pointer, x, y, zone.area));
-            self.rejected = false;
-            return true;
-        }
-        false
+            .position(|z| z.target == target)
+            .map(crate::layout_edit::Selection::Control);
+        self.sync();
     }
-    pub fn moved(&mut self, pointer: i32, x: f32, y: f32) {
+    pub fn down(&mut self, id: i32, x: f32, y: f32) -> bool {
         if self.testing {
-            self.test_pad.moved(pointer, x, y);
-            return;
+            return matches!(
+                self.test_pad.down_report(id, x, y, &self.layout),
+                crate::touch::DownReport::Captured | crate::touch::DownReport::Pause
+            );
         }
-        if let Some((id, ox, oy, a)) = self.drag.filter(|(id, ..)| *id == pointer) {
-            let _ = id;
-            if !x.is_finite() || !y.is_finite() {
-                return;
-            }
-            let dx = (x - ox).clamp(-a.left, self.width - a.right);
-            let dy = (y - oy).clamp(-a.top, self.height - a.bottom);
-            self.place(Area {
-                left: a.left + dx,
-                top: a.top + dy,
-                right: a.right + dx,
-                bottom: a.bottom + dy,
-            });
+        let handled = self.draft.down(id, x, y);
+        self.sync();
+        handled
+    }
+    pub fn moved(&mut self, id: i32, x: f32, y: f32) {
+        if self.testing {
+            self.test_pad.moved(id, x, y);
+        } else {
+            self.draft.moved(id, x, y);
+            self.sync();
         }
     }
-    pub fn up(&mut self, pointer: i32) {
-        self.test_pad.up(pointer);
-        if self.drag.is_some_and(|(id, ..)| id == pointer) {
-            self.drag = None;
-        }
+    pub fn up(&mut self, id: i32) {
+        self.test_pad.up(id);
+        self.draft.up(id);
+        self.sync();
     }
     pub fn cancel(&mut self) {
-        self.drag = None;
+        self.draft.cancel();
         self.test_pad.cancel();
+        self.sync();
     }
     pub fn toggle_test(&mut self) {
         self.cancel();
         self.testing = !self.testing;
     }
-    pub fn pad(&self) -> crate::Pad {
-        self.test_pad.pad()
-    }
     pub fn configure_test(&mut self) {
         self.test_pad
             .configure(self.settings.dead_zone, self.settings.floating_sticks);
     }
-    pub fn resize(&mut self, delta: f32) {
-        let Some(zone) = self
-            .layout
-            .zones
-            .iter()
-            .find(|z| Some(z.target) == self.selected)
-        else {
-            return;
-        };
-        let a = zone.area;
-        let (cx, cy) = a.center();
-        let w = (a.right - a.left + delta).max(48.).min(self.width);
-        let h = (a.bottom - a.top + delta).max(48.).min(self.height);
-        self.place(Area {
-            left: cx - w / 2.,
-            top: cy - h / 2.,
-            right: cx + w / 2.,
-            bottom: cy + h / 2.,
-        });
+    pub fn pad(&self) -> crate::Pad {
+        self.test_pad.pad()
     }
+    pub fn resize(&mut self, delta: f32) {
+        if !self.testing && delta.is_finite() {
+            self.draft.resize(delta);
+            self.sync();
+        }
+    }
+    #[cfg(test)]
     fn place(&mut self, area: Area) {
-        let Some(target) = self.selected else {
-            return;
-        };
-        if !usable(area, self.width, self.height)
-            || self
+        if let Some(target) = self.selected {
+            let i = self
                 .layout
                 .zones
                 .iter()
-                .any(|z| z.target != target && overlaps(area, z.area))
-        {
-            self.rejected = true;
-            return;
-        }
-        if let Some(zone) = self.layout.zones.iter_mut().find(|z| z.target == target) {
-            zone.area = area;
-            self.rejected = false;
+                .position(|z| z.target == target)
+                .unwrap();
+            self.draft.selected = Some(crate::layout_edit::Selection::Control(i));
+            self.draft.set_selected_area(area);
+            self.sync();
         }
     }
     pub fn reset_display(&mut self) {
         self.cancel();
-        self.layout = Layout::new(self.width, self.height);
-        self.selected = None;
-        self.settings
-            .profiles
-            .retain(|p| p.display != display_key(self.width, self.height));
-        self.rejected = false;
+        self.draft.reset_display();
+        self.sync();
     }
     pub fn finish(&mut self) -> io::Result<Settings> {
         self.cancel();
-        let original = Layout::new(self.width, self.height);
         let zones = self
             .layout
             .zones
             .iter()
-            .zip(&original.zones)
-            .filter(|(a, b)| a.area != b.area)
-            .map(|(z, _)| {
-                let a = z.area;
-                Placement {
-                    target: z.target,
-                    bounds: Area {
-                        left: a.left / self.width,
-                        top: a.top / self.height,
-                        right: a.right / self.width,
-                        bottom: a.bottom / self.height,
+            .enumerate()
+            .filter(|(i, z)| z.area != self.draft.default_area(*i))
+            .map(|(_, z)| Placement {
+                target: z.target,
+                bounds: crate::layout_edit::normalized(
+                    z.area,
+                    Area {
+                        left: 0.,
+                        top: 0.,
+                        right: self.width,
+                        bottom: self.height,
                     },
-                }
+                ),
             })
             .collect::<Vec<_>>();
         let key = display_key(self.width, self.height);
         self.settings.profiles.retain(|p| p.display != key);
-        if !zones.is_empty() {
+        let picture = self.draft.picture_preference();
+        if !zones.is_empty() || picture.is_some() {
             self.settings.profiles.push(Profile {
                 display: key,
                 zones,
+                picture,
             });
         }
         self.settings.validate()?;
@@ -529,6 +543,7 @@ mod tests {
         assert!(s.validate().is_err());
         s.dead_zone = 12;
         s.profiles.push(Profile {
+            picture: None,
             display: display_key(840., 420.),
             zones: vec![Placement {
                 target: Target::Pause,
@@ -575,5 +590,104 @@ mod tests {
         );
         e.toggle_test();
         assert_eq!(e.pad().values(), &[0.; 18]);
+    }
+}
+
+#[cfg(test)]
+mod picture_tests {
+    use super::*;
+    use crate::{
+        layout_edit::{Selection, denormalized, fit},
+        viewport::{Geometry, Insets, WindowGeometry},
+    };
+    #[test]
+    fn game_field_round_trip_reaches_both_renderers_with_full_drawable_and_distinct_profiles() {
+        // Existing v1 settings have no picture member and continue to decode.
+        let old: Settings =
+            serde_json::from_str(r#"{"version":1,"profiles":[],"n64_profiles":[]}"#).unwrap();
+        let frame = Area {
+            left: -20.,
+            top: -12.,
+            right: 860.,
+            bottom: 432.,
+        };
+        let mut gc = Editor::new(840., 420., old);
+        gc.draft.frame = frame;
+        gc.draft.aspect = 1.25;
+        gc.draft.selected = Some(Selection::Picture);
+        gc.resize(-100.);
+        let gc_picture = gc.draft.picture();
+        let settings = gc.finish().unwrap();
+        assert_eq!(settings.profiles.len(), 1);
+        assert!(settings.profiles[0].zones.is_empty());
+        let mut n = crate::n64_controls::Editor::new(840., 420., settings);
+        n.draft.frame = frame;
+        n.draft.selected = Some(Selection::Picture);
+        n.resize(-80.);
+        let n_picture = n.draft.picture();
+        let settings = n.finish().unwrap();
+        let bytes = serde_json::to_vec(&settings).unwrap();
+        let settings: Settings = serde_json::from_slice(&bytes).unwrap();
+        settings.validate().unwrap();
+        assert_eq!(settings.profiles.len(), 1);
+        assert_eq!(settings.n64_profiles.len(), 1);
+        let bounds = Area {
+            left: 0.,
+            top: 0.,
+            right: 1760.,
+            bottom: 888.,
+        };
+        let w = WindowGeometry {
+            window: bounds,
+            surface: bounds,
+            content: bounds,
+            input_origin: (0., 0.),
+            density: 2.,
+            clearance: Insets {
+                left: 40.,
+                right: 40.,
+                top: 24.,
+                bottom: 24.,
+            },
+        };
+        let g = Geometry::with_controls(w, 880., 444., Some(&settings)).unwrap();
+        let p = g.picture(1.25);
+        assert_eq!(
+            p,
+            Area {
+                left: gc_picture.left + 20.,
+                top: gc_picture.top + 12.,
+                right: gc_picture.right + 20.,
+                bottom: gc_picture.bottom + 12.
+            }
+        );
+        let mut view = crate::n64_touch::View::default();
+        view.configure(&settings);
+        view.measure(Some(w));
+        let p = view.picture(880., 444., 4. / 3.).unwrap();
+        assert_eq!(
+            p,
+            Area {
+                left: n_picture.left + 20.,
+                top: n_picture.top + 12.,
+                right: n_picture.right + 20.,
+                bottom: n_picture.bottom + 12.
+            }
+        );
+        let reloaded = Editor::new(840., 420., settings.clone());
+        assert_eq!(
+            reloaded.draft.picture_preference(),
+            settings.profiles[0].picture
+        );
+        assert_eq!(
+            fit(
+                denormalized(settings.profiles[0].picture.unwrap(), frame),
+                1.25
+            ),
+            gc_picture
+        );
+        let mut invalid = settings;
+        invalid.n64_profiles[0].picture.as_mut().unwrap().right = f32::INFINITY;
+        assert!(invalid.validate().is_err());
     }
 }

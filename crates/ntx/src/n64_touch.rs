@@ -29,8 +29,35 @@ pub struct View {
     pub sampled: Pad,
     dead_zone: u8,
     profiles: Vec<crate::n64_controls::Profile>,
+    picture: Option<Area>,
 }
 impl View {
+    /// Picture and controls use the same measured window and buffer transform.
+    pub fn picture(&self, width: f32, height: f32, aspect: f32) -> Option<Area> {
+        let g = self.measured?;
+        g.control_bounds()?;
+        let frame = Area {
+            left: 0.,
+            top: 0.,
+            right: width,
+            bottom: height,
+        };
+        let sx = width / (g.surface.right - g.surface.left);
+        let sy = height / (g.surface.bottom - g.surface.top);
+        let zones = self.zones.iter().map(|z| Area {
+            left: (z.area.left - g.surface.left) * sx,
+            top: (z.area.top - g.surface.top) * sy,
+            right: (z.area.right - g.surface.left) * sx,
+            bottom: (z.area.bottom - g.surface.top) * sy,
+        });
+        if let Some(p) = self.picture {
+            let a = crate::layout_edit::fit(crate::layout_edit::denormalized(p, frame), aspect);
+            if !zones.clone().any(|b| crate::controls::overlaps(a, b)) {
+                return Some(a);
+            }
+        }
+        Some(crate::layout_edit::clear_picture(frame, zones, aspect))
+    }
     pub fn configure(&mut self, settings: &crate::controls::Settings) {
         self.configure_dead_zone(settings.dead_zone);
         if self.profiles != settings.n64_profiles {
@@ -54,12 +81,22 @@ impl View {
         self.cancel();
         self.measured = geometry;
         self.zones.clear();
+        self.picture = None;
         let Some(g) = geometry else {
             return;
         };
         let Some(a) = g.control_bounds() else {
             return;
         };
+        let key = crate::controls::display_key(
+            (a.right - a.left) / g.density,
+            (a.bottom - a.top) / g.density,
+        );
+        self.picture = self
+            .profiles
+            .iter()
+            .find(|p| p.display == key)
+            .and_then(|p| p.picture);
         let w = a.right - a.left;
         let h = a.bottom - a.top;
         let r = (22.0 * g.density).min(w / 22.0).min(h / 9.0);

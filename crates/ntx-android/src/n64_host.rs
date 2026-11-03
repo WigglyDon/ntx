@@ -348,19 +348,20 @@ impl Graphics {
             glColorMask(1, 1, 1, 1);
             glClearColor(0., 0., 0., 1.);
             glClear(0x4000);
-            let scale = (w as f32 / 4.).min(h as f32 / 3.);
-            let dw = (scale * 4.) as i32;
-            let dh = (scale * 3.) as i32;
+            let picture = view
+                .picture(w as f32, h as f32, 4. / 3.)
+                .ok_or("N64 picture geometry unavailable")?;
+            platform::record_editor_frame(picture, w as f32, h as f32, 4. / 3.);
             glBindFramebuffer(0x8ca8, self.fbo);
             glBlitFramebuffer(
                 0,
                 0,
                 width as i32,
                 height as i32,
-                (w - dw) / 2,
-                (h - dh) / 2,
-                (w + dw) / 2,
-                (h + dh) / 2,
+                picture.left.round() as i32,
+                h - picture.bottom.round() as i32,
+                picture.right.round() as i32,
+                h - picture.top.round() as i32,
                 0x4000,
                 0x2600,
             );

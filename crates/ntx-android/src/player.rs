@@ -589,6 +589,7 @@ extern "C" fn draw(phase: u32, width: f32, height: f32, aspect: f32) -> Rect {
     }
     if phase == 0 {
         let a = geometry.picture(aspect);
+        platform::record_editor_frame(a, width, height, aspect);
         return Rect {
             left: a.left as i32,
             top: a.top as i32,

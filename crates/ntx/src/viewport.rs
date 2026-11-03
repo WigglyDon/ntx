@@ -99,6 +99,7 @@ fn intersection(a: Area, b: Area) -> Area {
 pub struct Geometry {
     pub layout: Layout,
     pub density: f32,
+    picture: Option<Area>,
     window: WindowGeometry,
     buffer: (f32, f32),
 }
@@ -154,7 +155,19 @@ impl Geometry {
             right: (picture.right - window.surface.left) * sx,
             bottom: (picture.bottom - window.surface.top) * sy,
         };
+        let picture = settings
+            .and_then(|s| {
+                s.profiles.iter().find(|p| {
+                    p.display
+                        == crate::controls::display_key(
+                            (safe.right - safe.left) / window.density,
+                            (safe.bottom - safe.top) / window.density,
+                        )
+                })
+            })
+            .and_then(|p| p.picture);
         Some(Self {
+            picture,
             layout,
             density: window.density * sx.min(sy),
             window,
@@ -187,46 +200,25 @@ impl Geometry {
         })
     }
     pub fn picture(&self, aspect: f32) -> Area {
-        let a = self.layout.game;
-        let aspect = if aspect.is_finite() && aspect > 0.0 {
-            aspect
-        } else {
-            1.0
-        };
-        // Adapted from PSX's clear_picture: maximize the complete centered
-        // picture around real targets, rather than excluding entire side rails.
-        // Keep the engine's aspect instead of copying PSX's fixed 4:3 ratio.
-        let center = (a.left + a.right) * 0.5;
-        let mut best = Area {
-            left: center,
-            top: a.top,
-            right: center,
-            bottom: a.top,
-        };
-        for top in std::iter::once(a.top)
-            .chain(self.layout.zones.iter().map(|z| z.area.bottom))
-            .filter(|y| *y >= a.top && *y <= a.bottom)
-        {
-            let mut width = (a.right - a.left).min((a.bottom - top) * aspect).max(0.0);
-            for zone in &self.layout.zones {
-                let r = zone.area;
-                if r.bottom <= top + 0.01 {
-                    continue;
-                }
-                let beside = (center - r.right).max(r.left - center).max(0.0) * 2.0;
-                let above = (r.top - top).max(0.0) * aspect;
-                width = width.min(beside.max(above));
-            }
-            if width > best.right - best.left {
-                best = Area {
-                    left: center - width * 0.5,
-                    top,
-                    right: center + width * 0.5,
-                    bottom: top + width / aspect,
-                };
+        if let Some(p) = self.picture {
+            let a = crate::layout_edit::fit(
+                crate::layout_edit::denormalized(p, self.layout.game),
+                aspect,
+            );
+            if !self
+                .layout
+                .zones
+                .iter()
+                .any(|z| crate::controls::overlaps(a, z.area))
+            {
+                return a;
             }
         }
-        best
+        crate::layout_edit::clear_picture(
+            self.layout.game,
+            self.layout.zones.iter().map(|z| z.area),
+            aspect,
+        )
     }
 }
 

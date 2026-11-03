@@ -15,6 +15,9 @@ use std::io;
 pub struct Profile {
     pub display: String,
     pub zones: Vec<Placement>,
+    /// Normalized game-field bounds within the complete drawable.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub picture: Option<Area>,
 }
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -42,6 +45,8 @@ pub(crate) fn validate_profiles(profiles: &[Profile]) -> io::Result<()> {
             || !p.display.bytes().all(|c| c.is_ascii_digit() || c == b'x')
             || profiles[..i].iter().any(|other| other.display == p.display)
             || p.zones.len() > 16
+            || p.picture
+                .is_some_and(|a| !crate::layout_edit::valid_picture(a))
         {
             return Err(invalid());
         }
@@ -135,81 +140,138 @@ fn preview(width: f32, height: f32, settings: &Settings) -> View {
 }
 pub struct Editor {
     pub settings: Settings,
+    pub zones: Vec<Zone>,
     pub width: f32,
     pub height: f32,
-    pub zones: Vec<Zone>,
     pub selected: Option<Target>,
     pub testing: bool,
     pub rejected: bool,
-    drag: Option<(i32, f32, f32, Area)>,
+    pub draft: crate::layout_edit::Draft,
     test: View,
 }
 impl Editor {
     pub fn new(width: f32, height: f32, settings: Settings) -> Self {
         let test = preview(width, height, &settings);
-        Self {
-            zones: test.zones.clone(),
+        let mut default_settings = settings.clone();
+        default_settings.n64_profiles.clear();
+        let defaults = preview(width, height, &default_settings);
+        let layout = &test;
+        let mut groups = vec![
+            layout
+                .zones
+                .iter()
+                .enumerate()
+                .filter(|(_, z)| {
+                    matches!(
+                        z.target,
+                        Target::Button(crate::n64::Button::A | crate::n64::Button::B)
+                    )
+                })
+                .map(|(i, _)| i)
+                .collect(),
+        ];
+
+        for buttons in [
+            [
+                crate::n64::Button::CUp,
+                crate::n64::Button::CDown,
+                crate::n64::Button::CLeft,
+                crate::n64::Button::CRight,
+            ],
+            [
+                crate::n64::Button::Up,
+                crate::n64::Button::Down,
+                crate::n64::Button::Left,
+                crate::n64::Button::Right,
+            ],
+        ] {
+            groups.push(
+                layout
+                    .zones
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, z)| matches!(z.target,Target::Button(b) if buttons.contains(&b)))
+                    .map(|(i, _)| i)
+                    .collect(),
+            );
+        }
+
+        groups.retain(|g: &Vec<usize>| g.len() > 1);
+        let picture = settings
+            .n64_profiles
+            .iter()
+            .find(|p| p.display == display_key(width, height))
+            .and_then(|p| p.picture);
+        let draft = crate::layout_edit::Draft::new(
             width,
             height,
+            layout.zones.iter().map(|z| z.area).collect(),
+            defaults.zones.iter().map(|z| z.area).collect(),
+            groups,
+            picture,
+            16.,
+        );
+
+        Self {
+            zones: test.zones.clone(),
+            test,
             settings,
+            width,
+            height,
             selected: None,
             testing: false,
             rejected: false,
-            drag: None,
-            test,
+            draft,
         }
     }
-    pub fn down(&mut self, id: i32, x: f32, y: f32) -> bool {
-        if !x.is_finite() || !y.is_finite() {
-            return false;
+    pub fn sync(&mut self) {
+        for (zone, area) in self.zones.iter_mut().zip(self.draft.areas()) {
+            zone.area = *area;
         }
+        self.selected = match self.draft.selected {
+            Some(crate::layout_edit::Selection::Control(i)) => self.zones.get(i).map(|z| z.target),
+            _ => None,
+        };
+        self.rejected = self.draft.rejected;
+    }
+    pub fn select(&mut self, target: Target) {
+        self.draft.cancel();
+        self.draft.selected = self
+            .zones
+            .iter()
+            .position(|z| z.target == target)
+            .map(crate::layout_edit::Selection::Control);
+        self.sync();
+    }
+    pub fn down(&mut self, id: i32, x: f32, y: f32) -> bool {
         if self.testing {
             return self.test.down(id, x, y).is_some();
         }
-        if self.drag.is_some() {
-            return false;
-        }
-        let Some(z) = self.zones.iter().rev().find(|z| z.area.contains(x, y)) else {
-            return false;
-        };
-        self.selected = Some(z.target);
-        self.drag = Some((id, x, y, z.area));
-        self.rejected = false;
-        true
+        let handled = self.draft.down(id, x, y);
+        self.sync();
+        handled
     }
     pub fn moved(&mut self, id: i32, x: f32, y: f32) {
-        if !x.is_finite() || !y.is_finite() {
-            return;
-        }
         if self.testing {
             self.test.move_pointer(id, x, y);
-            return;
-        }
-        if let Some((_, ox, oy, a)) = self.drag.filter(|(p, ..)| *p == id) {
-            let dx = (x - ox).clamp(-a.left, self.width - a.right);
-            let dy = (y - oy).clamp(-a.top, self.height - a.bottom);
-            self.place(Area {
-                left: a.left + dx,
-                top: a.top + dy,
-                right: a.right + dx,
-                bottom: a.bottom + dy,
-            });
+        } else {
+            self.draft.moved(id, x, y);
+            self.sync();
         }
     }
     pub fn up(&mut self, id: i32) {
         self.test.up(id);
-        if self.drag.is_some_and(|(p, ..)| p == id) {
-            self.drag = None;
-        }
+        self.draft.up(id);
+        self.sync();
     }
     pub fn cancel(&mut self) {
-        self.drag = None;
+        self.draft.cancel();
         self.test.cancel();
+        self.sync();
     }
     pub fn toggle_test(&mut self) {
         self.cancel();
         self.testing = !self.testing;
-        self.rejected = false;
         self.test.zones = self.zones.clone();
     }
     pub fn configure_test(&mut self) {
@@ -220,79 +282,44 @@ impl Editor {
         self.test.sampled.clone()
     }
     pub fn resize(&mut self, delta: f32) {
-        if self.testing || !delta.is_finite() {
-            return;
-        }
-        let Some(z) = self.zones.iter().find(|z| Some(z.target) == self.selected) else {
-            return;
-        };
-        let a = z.area;
-        let (x, y) = a.center();
-        let w = (a.right - a.left + delta).max(16.).min(self.width);
-        let h = (a.bottom - a.top + delta).max(16.).min(self.height);
-        self.place(Area {
-            left: x - w / 2.,
-            top: y - h / 2.,
-            right: x + w / 2.,
-            bottom: y + h / 2.,
-        });
-    }
-    fn place(&mut self, a: Area) {
-        let Some(target) = self.selected else {
-            return;
-        };
-        if !usable(a, self.width, self.height)
-            || self
-                .zones
-                .iter()
-                .any(|z| z.target != target && overlaps(a, z.area))
-        {
-            self.rejected = true;
-            return;
-        }
-        if let Some(z) = self.zones.iter_mut().find(|z| z.target == target) {
-            z.area = a;
-            self.rejected = false;
+        if !self.testing && delta.is_finite() {
+            self.draft.resize(delta);
+            self.sync();
         }
     }
     pub fn reset_display(&mut self) {
         self.cancel();
-        let key = display_key(self.width, self.height);
-        self.settings.n64_profiles.retain(|p| p.display != key);
-        self.zones = preview(self.width, self.height, &self.settings).zones;
-        self.test.zones = self.zones.clone();
-        self.selected = None;
-        self.rejected = false;
+        self.draft.reset_display();
+        self.sync();
     }
     pub fn finish(&mut self) -> io::Result<Settings> {
         self.cancel();
-        let mut defaults = self.settings.clone();
-        defaults.n64_profiles.clear();
-        let original = preview(self.width, self.height, &defaults);
         let zones = self
             .zones
             .iter()
-            .zip(original.zones)
-            .filter(|(a, b)| a.area != b.area)
-            .map(|(z, _)| {
-                let a = z.area;
-                Placement {
-                    target: z.target,
-                    bounds: Area {
-                        left: a.left / self.width,
-                        top: a.top / self.height,
-                        right: a.right / self.width,
-                        bottom: a.bottom / self.height,
+            .enumerate()
+            .filter(|(i, z)| z.area != self.draft.default_area(*i))
+            .map(|(_, z)| Placement {
+                target: z.target,
+                bounds: crate::layout_edit::normalized(
+                    z.area,
+                    Area {
+                        left: 0.,
+                        top: 0.,
+                        right: self.width,
+                        bottom: self.height,
                     },
-                }
+                ),
             })
             .collect::<Vec<_>>();
         let key = display_key(self.width, self.height);
         self.settings.n64_profiles.retain(|p| p.display != key);
-        if !zones.is_empty() {
+        let picture = self.draft.picture_preference();
+        if !zones.is_empty() || picture.is_some() {
             self.settings.n64_profiles.push(Profile {
                 display: key,
                 zones,
+                picture,
             });
         }
         self.settings.validate()?;
@@ -381,6 +408,7 @@ mod tests {
     fn saved_n64_draft_is_independent_of_gc_and_test_input_never_leaks_after_cancel() {
         let mut settings = Settings::default();
         settings.profiles.push(GcProfile {
+            picture: None,
             display: display_key(840., 420.),
             zones: vec![GcPlacement {
                 target: GcTarget::Pause,
