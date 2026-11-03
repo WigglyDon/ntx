@@ -42,10 +42,12 @@ The owner's next requested increment is PSX-quality controller editing with equa
 priority for the game field. The source adds a full-size editor, grouped controls,
 corner resize, grid/alignment guides, mirror, undo, scoped reset and editable
 aspect-correct game-field preferences in both renderers. Its paused-frame preview
-is app-local and ephemeral. Host checks are recorded in state; the installed
-source87f/APK97930 remains the earlier qualified baseline until a new protected
-update and bounded editor verification are recorded. No earlier device result
-qualifies this new UI.
+is app-local and ephemeral. Source6e80b99/APKf809ee02 was installed through a
+protected update: GC field corner/move/undo/Save, N64 paused image/field resize/Save
+and native picture mapping passed. Original preferences/current ordinary progress
+and actual physical return were verified. Short-screen GC group validation and
+N64 landscape auxiliary-control picture crowding were found and repaired in
+source with focused fixtures; the repair's new target check is pending.
 
 Read docs/state.toml for exact source/artifact and earned-result bounds. Installed
 android-device admission/return is authoritative; older returns establish no

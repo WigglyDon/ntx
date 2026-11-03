@@ -167,6 +167,10 @@ impl Draft {
             drag: None,
         }
     }
+    fn minimum_for(&self, index: usize) -> f32 {
+        let a = self.defaults[index];
+        self.minimum.min(a.right - a.left).min(a.bottom - a.top)
+    }
     pub fn areas(&self) -> &[Area] {
         &self.state.areas
     }
@@ -387,7 +391,7 @@ impl Draft {
             };
             let invalid = ids.iter().any(|i| {
                 let a = candidate.areas[*i];
-                !inside(a, bounds, self.minimum)
+                !inside(a, bounds, self.minimum_for(*i))
                     || candidate
                         .areas
                         .iter()
@@ -548,7 +552,7 @@ impl Draft {
                     right: self.width,
                     bottom: self.height,
                 },
-                self.minimum,
+                self.minimum_for(*i),
             ) && self
                 .state
                 .areas

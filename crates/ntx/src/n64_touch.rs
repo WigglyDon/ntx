@@ -171,10 +171,18 @@ impl View {
             Target::Button(Button::R),
             "R",
         );
-        add(x + w * 0.5, a.top + 1.2 * r, 0.8 * r, Target::Pause, "II");
+        // Keep auxiliary controls out of the landscape game field. A centered
+        // Pause/Start pair needlessly reduced the clear 4:3 picture's height.
+        let landscape = w > h * 1.25;
+        let aux = if landscape { x + 6.8 * r } else { x + w * 0.5 };
+        add(aux, a.top + 1.2 * r, 0.8 * r, Target::Pause, "II");
         add(
-            x + w * 0.5,
-            y - r,
+            aux,
+            if landscape {
+                (y - 7. * r).max(a.top + 3. * r)
+            } else {
+                y - r
+            },
             0.7 * r,
             Target::Button(Button::Start),
             "S",
@@ -353,5 +361,43 @@ mod tests {
         view.cancel();
         view.poll();
         assert_eq!(view.sampled.input_state(0, 5, 0, 0), 0);
+    }
+}
+
+#[cfg(test)]
+mod picture_space_tests {
+    use super::*;
+    #[test]
+    fn landscape_auxiliary_controls_leave_a_large_clear_aspect_correct_game_field() {
+        let a = Area {
+            left: 0.,
+            top: 0.,
+            right: 2280.,
+            bottom: 1080.,
+        };
+        let mut view = View::default();
+        view.measure(Some(WindowGeometry {
+            window: a,
+            surface: a,
+            content: a,
+            input_origin: (0., 0.),
+            density: 2.75,
+            clearance: crate::viewport::Insets {
+                top: 66.,
+                bottom: 66.,
+                ..Default::default()
+            },
+        }));
+        let p = view.picture(2280., 1080., 4. / 3.).unwrap();
+        assert!(p.bottom - p.top >= 900., "game field lost priority: {p:?}");
+        assert!(((p.right - p.left) / (p.bottom - p.top) - 4. / 3.).abs() < 0.0001);
+        for (i, z) in view.zones.iter().enumerate() {
+            assert!(!crate::controls::overlaps(p, z.area));
+            assert!(
+                view.zones[..i]
+                    .iter()
+                    .all(|other| !crate::controls::overlaps(z.area, other.area))
+            );
+        }
     }
 }

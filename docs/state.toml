@@ -161,9 +161,16 @@ final_outcome = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-65942105
 
 [layout_editor_increment]
 request = "PSX controller editing/layout quality; game field has equal priority"
-status = "IMPLEMENTED_SOURCE_HOST_CHECKED_DEVICE_PENDING"
+status = "PIXEL_V21_GAME_FIELD_OBSERVED_SHORT_SCREEN_FIX_PENDING"
 reference = "PSX public MIT ac74cc06602a3e5c00b14d77404a93c94cebb6bc; docs/PSX_TRANSFER.md"
 features = "Full play-size canvas; top/bottom floating dock; game-field select/move/aspect-preserving corner resize; grouped controls; grid/alignment guides; explicit mirror; scoped reset; 32-entry gesture undo; isolated Test inputs; Done/Cancel"
 persistence = "Optional normalized full-drawable picture per system/display in version1 control preferences; backward compatible; both direct Dolphin and N64 host render actual picture preferences"
-validation = "98 portable library tests, existing decoder/integration/motion-probe and xtask suites; warnings-denied host all-targets and ARM64 Android checks; pinned Dolphin source check"
+validation = "100 portable library tests including actual short-screen832x328 grouped move/reload and landscape N64 clear-picture size/disjointness; existing decoder/integration/motion-probe and xtask suites; warnings-denied host all-targets and ARM64 Android checks; pinned Dolphin source check"
 limits = "New editor device verification pending. Earlier layout/play/save/scene/Home evidence remains bound to its prior source/APK. No sibling change, native core rebuild, new gameplay campaign or Fold operation"
+
+[layout_editor_increment.pixel_v21]
+source = "6e80b9994a9fce16f356e5dbf6b7194eead711cb"
+apk_sha256 = "f809ee0251329d50988c54f4232dc751902bddb003f2d3434b38867d0b199986"
+observed = "Full-size GC/N64 editor; GC game-field anchored corner resize, move, undo and Save; N64 actual paused game image, anchored corner resize, Save and live native-renderer picture change"
+retained = "Protected same-signer update, exact original preferences restored, all three identities, original installation, GC cards/N64 ordinary/untouched TP and physical OFF actual return verified; no outstanding NTX custody"
+found = "GC grouped move rejected default scaled caps below48DP on actual832x328 display. N64 centered Pause/Start reduced clear picture unnecessarily. Both source repairs have affected-boundary tests; new target check pending"

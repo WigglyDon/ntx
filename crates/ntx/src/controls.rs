@@ -155,6 +155,9 @@ impl Settings {
                     valid = false;
                     break;
                 };
+                let minimum = 48_f32
+                    .min(zone.area.right - zone.area.left)
+                    .min(zone.area.bottom - zone.area.top);
                 let a = placement.bounds;
                 zone.area = Area {
                     left: a.left * width,
@@ -162,7 +165,7 @@ impl Settings {
                     right: a.right * width,
                     bottom: a.bottom * height,
                 };
-                if !usable(zone.area, width, height) {
+                if !usable(zone.area, width, height, minimum) {
                     valid = false;
                     break;
                 }
@@ -187,14 +190,14 @@ impl Settings {
         layout
     }
 }
-fn usable(a: Area, w: f32, h: f32) -> bool {
+fn usable(a: Area, w: f32, h: f32, minimum: f32) -> bool {
     finite(a)
         && a.left >= 0.
         && a.top >= 0.
         && a.right <= w
         && a.bottom <= h
-        && a.right - a.left + 0.01 >= 48_f32.min(w)
-        && a.bottom - a.top + 0.01 >= 48_f32.min(h)
+        && a.right - a.left + 0.01 >= minimum.min(w)
+        && a.bottom - a.top + 0.01 >= minimum.min(h)
 }
 /// The editor cannot emit game input. Its test pad is independent of LiveRuntime.
 pub struct Editor {
@@ -689,5 +692,48 @@ mod picture_tests {
         let mut invalid = settings;
         invalid.n64_profiles[0].picture.as_mut().unwrap().right = f32::INFINITY;
         assert!(invalid.validate().is_err());
+    }
+}
+
+#[cfg(test)]
+mod short_editor_tests {
+    use super::*;
+    #[test]
+    fn pixel_short_screen_group_move_round_trips_scaled_default_caps() {
+        let mut e = Editor::new(832., 328., Settings::default());
+        e.draft.grid = false;
+        let original = e.layout.clone();
+        let a = original
+            .zones
+            .iter()
+            .find(|z| z.target == Target::Button(crate::Control::A))
+            .unwrap()
+            .area;
+        let (x, y) = a.center();
+        e.down(1, x, y);
+        e.moved(1, x, y + 12.);
+        e.up(1);
+        assert!(!e.rejected, "default scaled caps must remain movable");
+        let faces = |t| {
+            matches!(
+                t,
+                Target::Button(
+                    crate::Control::A | crate::Control::B | crate::Control::X | crate::Control::Y
+                )
+            )
+        };
+        for (old, new) in original.zones.iter().zip(&e.layout.zones) {
+            assert!(
+                (new.area.top - old.area.top - if faces(old.target) { 12. } else { 0. }).abs()
+                    < 0.001
+            );
+        }
+        let expected = e.layout.clone();
+        let saved = e.finish().unwrap();
+        let loaded = saved.layout(832., 328.);
+        for (a, b) in loaded.zones.iter().zip(expected.zones) {
+            assert!((a.area.top - b.area.top).abs() < 0.001);
+        }
+        assert_eq!(saved.profiles[0].zones.len(), 4);
     }
 }

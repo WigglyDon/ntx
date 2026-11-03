@@ -267,6 +267,48 @@ fn button(
         "(I)V",
         &[JValue::Int((48. * density).round() as i32)],
     )?;
+    let primary = id == 10;
+    menu_background(
+        env,
+        &b,
+        if primary {
+            theme::ACCENT
+        } else {
+            theme::SURFACE
+        },
+        density,
+    )?;
+    env.call_method(
+        &b,
+        "setTextColor",
+        "(I)V",
+        &[JValue::Int(
+            if primary { theme::INK } else { theme::TEXT } as i32
+        )],
+    )?;
+    let params = env.new_object(
+        "android/widget/LinearLayout$LayoutParams",
+        "(II)V",
+        &[JValue::Int(-2), JValue::Int(-2)],
+    )?;
+    let gap = (3. * density).round() as i32;
+    env.call_method(
+        &params,
+        "setMargins",
+        "(IIII)V",
+        &[
+            JValue::Int(gap),
+            JValue::Int(gap),
+            JValue::Int(gap),
+            JValue::Int(gap),
+        ],
+    )?;
+    env.call_method(
+        &b,
+        "setLayoutParams",
+        "(Landroid/view/ViewGroup$LayoutParams;)V",
+        &[JValue::Object(&params)],
+    )?;
     let class = activity_class(env, activity, "com.machinerhythm.ntx.NtxActivity$Action")?;
     let listener = env.new_object(
         class,
