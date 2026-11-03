@@ -172,3 +172,15 @@ Owner explicitly says do not stop. Continue directly into a targeted compiler
 repair, using the source-checked pass/cache observer before changing cache
 maintenance or algorithms.119 tests and host/ARM64 lints pass. Do not end merely
 at a diagnostic milestone, repeat closed campaigns or create another worker.
+
+
+Native review found a real ARM64 dirty-page batch bug: a run reaching bit31
+could be cleared without cache maintenance. Patch7 flushes every completed run
+and uses unsigned masks. The actual batcher fails before and passes after under
+normal/UBSan trap fixtures, covering two groups and full/trailing/disjoint masks.
+119 library tests and host/ARM64 warnings-denied checks pass; seven patches
+reproduce active source. Core70ec78b9 changes one native object plus link; the
+primitive's instructions, A53 workaround and barriers are unchanged. A bounded
+completion counter can show target exercise. Installed/returned evidence is still
+v32 above until a new admitted signed candidate is observed; no performance or
+historical-incident cure is claimed. Continue through target results and repair.

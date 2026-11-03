@@ -85,6 +85,16 @@ The [Arm cache-maintenance explanation](https://developer.arm.com/community/arm-
 is reviewed context; the selected maintenance instructions, barriers and A53
 workaround remain unchanged pending actual subphase evidence.
 
+The cache-batch repair completes a trailing dirty-page run even when it reaches
+bit31 of its128KiB bookkeeping group. Previously that run could be marked clean
+without calling the existing maintenance primitive. Unsigned bitmap shifts also
+avoid the sign-bit undefined behavior. `check_cache_batch.py` compiles the actual
+batcher and checks all64 single-bit positions across two groups, complete tails,
+disjoint masks and empty masks before flags clear, in normal and UBSan trap mode.
+The primitive's instructions/barriers/A53 workaround are retained. A bounded
+completion counter can establish whether the repaired path executes on target;
+no speed benefit or historical-incident cure is presumed from the fixture.
+
 ## Actual backend boundaries
 
 | Boundary | Implemented ownership and limit |

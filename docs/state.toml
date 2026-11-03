@@ -27,7 +27,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Repair measured compiler latency: compiler subtraction leaves only one of eight slow calls over40ms, the shader-heavy startup. Compiler-pass/cache observation is source-checked; use its actual result before changing maintenance or compiler algorithms. User explicitly says do not stop. No pending phone return; normal admission/capacity still required"
+next_step = "Verify the ARM64 dirty-page cache-batch correctness repair and bounded compiler subphases on target, then use measured hot passes to repair remaining compilation hitches. User explicitly says do not stop; normal admission/capacity still required"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 hitches: prior same-installation cache pair24 to7 slow calls. New package trace has8 slow CPU-heavy calls, shader-bearing startup946.435ms/residual132.936ms. Exact routine unqualified", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Single pre-Pause gray field in latest bounded title check: duration/cause unknown; normal Pause and Stop followed", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -311,3 +311,9 @@ report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6616663647"
 implementation = "Bounded Rust aggregates for ten actual compiler passes and nested cache maintenance. Cache overlaps link/expiration; never sum nested stages. Raw IDC/DIC metadata is observational, not an optimization decision"
 validation = "119 library tests; phase routing/nested cache/feature intersection-union/bounds fixture; host all-targets/ARM64 warnings-denied checks. Six-patch reproduction and original-body comparison after removing declared notification statements pass. Exactly one native compilation unit plus link"
 limits = "No cache operation/barrier, A53 workaround, compiler algorithm or new frame-yield point changed. Per-pass target result and repair remain pending"
+
+[n64_cache_batch_repair]
+implementation = "Flush every dirty-page run before clearing its mask, including runs ending at bit31; use unsigned shifts. Existing cache primitive, A53 workaround and barriers retained. Bounded successful-tail counter accompanies compiler-pass observation"
+core_sha256 = "70ec78b934e0b9298ab87cb3bc5b66900ac6a76e2caeeab6e714699f2a94a7fc"
+validation = "Actual native batcher fixture fails before and passes after; all64 single bits across two groups, full/trailing/disjoint/empty masks, normal and UBSan trap mode.119 library tests, host all-targets/ARM64 warnings-denied lints, seven-patch/source/ABI checks pass. One native compilation unit plus link"
+limits = "Target exercise and performance impact pending. No hitch, gray-frame or historical lifecycle cure is claimed; old cores/scenes/artifacts retained with honest fingerprints"

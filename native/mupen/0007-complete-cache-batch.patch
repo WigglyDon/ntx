@@ -1,0 +1,49 @@
+NTX native correctness repair: complete every dirty-page cache batch, including bit31 tails.
+Upstream15bada85906593376e8fd697f1b0b3af3a20f512; original licenses retained.
+
+--- a/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
++++ b/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
+@@ -24,9 +24,11 @@
+ extern void retro_ntx_compile_event(unsigned event);
+ #define NTX_PHASE_EVENT(phase, entering) retro_ntx_compile_event(16u + 2u * (phase) + (entering))
+ #define NTX_CACHE_BEGIN(ctr) retro_ntx_compile_event(37u | ((((ctr) >> 28) & 3u) << 8))
++#define NTX_CACHE_TAIL() retro_ntx_compile_event(40u)
+ #else
+ #define NTX_PHASE_EVENT(phase, entering) ((void)0)
+ #define NTX_CACHE_BEGIN(ctr) ((void)0)
++#define NTX_CACHE_TAIL() ((void)0)
+ #endif
+ 
+ #include <stdio.h>
+--- a/mupen64plus-core/src/device/r4300/new_dynarec/arm64/assem_arm64.c
++++ b/mupen64plus-core/src/device/r4300/new_dynarec/arm64/assem_arm64.c
+@@ -1,3 +1,4 @@
++/* Modified by ntx 2026-11-03: flush trailing dirty-page runs before clearing their masks; unsigned bitmap shifts. */
+ /* Modified by ntx 2026-11-03: cache-maintenance observation only; operations/barriers unchanged. */
+ /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  *   Mupen64plus - assem_arm64.c                                           *
+@@ -4598,19 +4599,21 @@
+       uintptr_t start,end;
+       for(j=0;j<32;j++)
+       {
+-        if(bitmap&(1<<j)) {
++        if(bitmap&(1u<<j)) {
+           start=(intptr_t)base_addr_rx+i*131072+j*4096;
+           end=start+4095;
+           j++;
+           while(j<32) {
+-            if(bitmap&(1<<j)) {
++            if(bitmap&(1u<<j)) {
+               end+=4096;
+               j++;
+             }else{
+-              cache_flush((char *)start,(char *)end);
+               break;
+             }
+           }
++          // A run can reach bit31 without taking the gap branch above.
++          cache_flush((char *)start,(char *)end);
++          if (j == 32) NTX_CACHE_TAIL();
+         }
+       }
+       needs_clear_cache[i]=0;

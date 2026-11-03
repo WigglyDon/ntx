@@ -228,6 +228,7 @@ pub fn prepare(root: &Path, source: &Path) -> Result<()> {
         "0004-profile-shader-cache.patch",
         "0005-compile-observer.patch",
         "0006-compiler-phase-observer.patch",
+        "0007-complete-cache-batch.patch",
     ] {
         copy(
             &root.join("native/mupen").join(name),

@@ -27,6 +27,7 @@ pub struct CompilerPhases {
     phases: [CompileProbe; 11],
     unknown_events: u32,
     cache_features: Option<(u32, u32)>,
+    cache_tail_flushes: u32,
 }
 impl CompilerPhases {
     pub fn collecting(&self) -> bool {
@@ -43,6 +44,12 @@ impl CompilerPhases {
         }
     }
     pub fn event(&mut self, tag: u32) {
+        if tag == 40 {
+            if self.phases[10].active {
+                self.cache_tail_flushes = self.cache_tail_flushes.saturating_add(1);
+            }
+            return;
+        }
         let event = tag & 255;
         if !(16..38).contains(&event) || (event != 37 && tag >> 8 != 0) || tag >> 10 != 0 {
             self.unknown_events = self.unknown_events.saturating_add(1);
@@ -67,8 +74,8 @@ impl CompilerPhases {
     }
     pub fn coverage(&self) -> String {
         format!(
-            "unknown_events={} cache_ctr_features={:?} (intersection,union of IDC/DIC; no policy inferred)",
-            self.unknown_events, self.cache_features
+            "unknown_events={} cache_tail_flushes={} cache_ctr_features={:?} (intersection,union of IDC/DIC; no policy inferred)",
+            self.unknown_events, self.cache_tail_flushes, self.cache_features
         )
     }
 }
@@ -203,10 +210,12 @@ mod tests {
         p.event(37 | (1 << 8));
         p.event(36);
         p.event(32); // Link ends.
+        p.event(40); // Successful tail-batch flush, inside the same core call.
         p.end_frame(Duration::MAX);
         assert_eq!(p.phases[8].scopes, 1);
         assert_eq!(p.phases[10].scopes, 2);
         assert_eq!(p.cache_features, Some((1, 3)));
+        assert_eq!(p.cache_tail_flushes, 1);
         assert!(p.phases.iter().all(|phase| phase.invalid_frames == 0));
         assert_eq!(p.summaries().len(), 11);
         p.event(17 | (1 << 8)); // Flags belong only to cache begin.
@@ -219,8 +228,10 @@ mod tests {
         assert!(!p.collecting());
         p.event(37 | (2 << 8));
         p.event(36);
+        p.event(40);
         assert_eq!(p.cache_features, Some((1, 3)));
         assert_eq!(p.phases[10].scopes, 2);
+        assert_eq!(p.cache_tail_flushes, 1);
     }
     #[test]
     fn exact_scopes_are_correlated_only_with_their_own_core_call() {
