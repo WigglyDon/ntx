@@ -32,7 +32,7 @@ same lease; no failed mutation was replayed.
 The [final NTX-5 handback](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6594210587)
 records the playable N64 and bounded Pixel alpha evidence for review.
 Keep issues open and all earned results/build limits. Next concrete defects remain
-unmeasured N64 intro hitches/backend GL origin and the retained historical Pixel/
+N64 core-call outliers/backend GL origin and the retained historical Pixel/
 Fold reports. Do not start another device/quest/save/timing campaign merely from
 this handoff. No pending NTX phone task or return obligation remains; actual
 custodian status still governs all future admission. No Fold/concurrency/release
@@ -75,7 +75,7 @@ Source63e5e11/APK6854b394 earned the bounded Pixel4 N64 game-first check:
 full-height 4:3 picture, clear side-bar controls, Pause/paused-image editor,
 grouped C-button move/Save, native resumed mapping, reopen and exact-byte Cancel.
 
-Current installed source9c9608c/APK551b14a3 adds a focused GameCube fix: saved-field
+Source9c9608c/APK551b14a3 added a focused GameCube fix: saved-field
 admission now uses the same buffer-adjusted aspect as presentation. The valid
 rounded-buffer fixture fails before and passes after; all105 portable tests and
 warnings-denied host/ARM64 checks pass. Signed corresponding source is retained.
@@ -92,10 +92,18 @@ and disclosed defects with acceptance issues open; do not automatically replay
 earned tests. Future preparation must bind the actual installed artifact and
 latest returned collection, never an earlier rollback baseline.
 
-Active unfinished work: N64 hitch diagnosis. Source7bfad42 fixes deterministic
-frame-clock drift from repeated wake-up jitter and adds bounded elapsed-host
-phase aggregates;109 portable tests and host/ARM64 warnings-denied checks pass.
-Signed/private source-bound APK40e77e2c is ready for a short queued title/intro
-diagnostic, with no gameplay inputs or game Save. Do not infer a hitch cure or
-reopen closed GC timing/save/scene campaigns. Current admission/return and exact
-private preparation govern continuation; waiting is not custody.
+Current installed source7bfad42/APK40e77e2c fixes deterministic N64 frame-clock
+drift from repeated wake-up jitter.109 portable tests and host/ARM64 warnings-denied
+checks pass. The bounded Pixel4 title/intro diagnostic captured the first4096
+aggregate observations:24 core calls exceeded40ms (max241.845ms), while host
+presentation maxed at11.116ms and audio at36.796ms. The window exceeded the rough
+30-45s plan, about76s of accepted callbacks; the fixed collection bound held.
+Long outliers fall in core-call elapsed time beyond the measured host stages;
+exact shader/dynarec/GPU/OS cause remains unqualified. Nested maxima do not identify
+the same frame. No hitch cure, before/after speed gain or new audible/display proof
+is claimed. Pause/join/protected data/preferences/physical OFF return passed;
+no NTX task, hold or recovery remains. See the
+[measurement report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6611607755).
+Continue inside the pinned core-call path, preserving options/checkpoint bindings.
+Do not reopen closed GC timing/save/scene campaigns or repeat the same diagnostic
+without a narrower question and ready instrumentation.

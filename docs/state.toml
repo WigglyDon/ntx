@@ -1,6 +1,6 @@
 schema_version = 1
 product = "ntx"
-classification = "NTX5_GAME_FIRST_BOTH_RENDERERS_PIXEL_OBSERVED_REVIEW_OPEN"
+classification = "NTX5_N64_PACING_REPAIRED_CORE_CALL_OUTLIERS_OPEN"
 repository = "WigglyDon/ntx"
 repository_id = 1429193278
 branch = "main"
@@ -9,10 +9,10 @@ active_issue = "https://github.com/WigglyDon/ntx/issues/5"
 architecture_amendment = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6505289270"
 handoff = "docs/NTX_HANDOFF.md"
 source_status = "Canonical identity/migration verified. Baseline1cb/source1dc earned N64 play/Save/cold reload, native-unloaded scene return, fresh-process GC and N64 scenes and GC/N64/GC switching; independent saves retained. Earlier source87f3641/APK97930ed passes N64 drag/resize Save, Cancel, fresh-process runtime layout and shared GameCube editor boundaries; protected update and exact preference undo verified. Actual-target simultaneous stick/A, independent release and cancellation pass. Canonical GC title/attract Home/HOT return/Pause/Resume/joined Stop is now observed with current cards unchanged; review and disclosed limits remain open"
-current_editor_source = "9c9608c3a4ba72e6da2a85812203b104c370f09b"
-installed_editor_source = "9c9608c3a4ba72e6da2a85812203b104c370f09b"
-installed_editor_apk_sha256 = "551b14a364328dc9bdc42aff89fbaa98e97a5bfcc8a9d9c01a724a73a293b4dc"
-ready_editor_apk_sha256 = "551b14a364328dc9bdc42aff89fbaa98e97a5bfcc8a9d9c01a724a73a293b4dc"
+current_editor_source = "7bfad42b4d64b3fd81b795682a00a186ba0e4581"
+installed_editor_source = "7bfad42b4d64b3fd81b795682a00a186ba0e4581"
+installed_editor_apk_sha256 = "40e77e2ca180d000f6c2986e006f84e7a81fb2e7a6475a2400d3e4bcd6ce2b65"
+ready_editor_apk_sha256 = "40e77e2ca180d000f6c2986e006f84e7a81fb2e7a6475a2400d3e4bcd6ce2b65"
 active_systems = ["GameCube: retained direct Dolphin and canonical package", "Nintendo64: pinned Mupen Rust host; one-cartridge play/Save/cold reload verified on Pixel4"]
 axes = "Host platform/device, emulated system and execution backend are independent"
 session_model = "Many independent open/resumable games; one foreground runtime initially is scheduling policy, not permanent architecture"
@@ -27,10 +27,10 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Complete the prepared bounded N64 title/intro pacing diagnostic through normal admission; source phase drift is repaired, while the actual hitch cause remains unqualified. Both active renderers have physical game-first observations and GC saved-field rounding has a failing-before/passing-after fixture. Prior playable/save/scene/input/Home evidence retains its build bounds; no closed campaign repeat, Fold port, concurrent native instances or public binary release"
+next_step = "Investigate the pinned N64 core-call outliers, now localized by bounded phase diagnostics; exact shader/dynarec/GPU/OS cause remains unqualified. Preserve current options/checkpoint bindings and earned migration/play/save/scene/layout evidence. No NTX device task or recovery remains. No closed campaign repeat, Fold window/port, concurrent native instances or public binary release"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
-open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 intro hitches: owner observed, unmeasured", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
+open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 intro hitches: first4096 core calls include24 over40ms/max241.845ms; measured presentation/audio stages do not account for the long outliers; exact cause unqualified", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
 resources = "No outstanding gcx return obligation at succession reconciliation; no phone test or new reservation authorized by relocation; normal installed policy remains authoritative"
 legacy_detail = "docs/history/gcx-state.toml and docs/history/GCX_ACCEPTANCE.md are historical evidence, never active priorities or proof retired inputs exist"
 
@@ -54,14 +54,14 @@ resume_limit = "Checked native restore results and state-job yields implemented;
 device_actions = "Installed87f3641/APK97930ed protected update retains original signer, all three identities and every prior file. N64 layout Save/Cancel/cold native loading, actual isolated two-pointer release/cancel and shared GC editor verified. Canonical GC title/attract Home return/Pause/Resume/Stop observed; exact preferences/current cards/N64 ordinary/untouched profile and actual OFF return verified. No Fold operation or outstanding NTX custody"
 
 [validation]
-host = "105 portable library tests passed, including N64 layout/persistence/independent-input fixtures and GLES3 callback ABI, deferred copied PCM ordering/bounds/silence/failure handling, foreground game identity and frame deadlines; retained 15 decoder and 3 integration checks; host all-targets and ARM64 Android lints deny warnings"
+host = "109 portable library tests passed, including N64 layout/persistence/independent-input fixtures and GLES3 callback ABI, deferred copied PCM ordering/bounds/silence/failure handling, foreground game identity and frame deadlines; retained 15 decoder and 3 integration checks; host all-targets and ARM64 Android lints deny warnings"
 helpers = "99 offline packet fixtures passed, including bounded prepared inspection, expiry/focus rejection, single-use contacts and empty viewport-read retries"
 n64_inspector = "Protected-copy-only native-free inspector source63a7479 validates the actual N64 container against an independent binding and current ordinary generation/image. Focused integration fixture preserves valid-copy bytes and rejects wrong-core and changed-ordinary inputs; warnings-denied bin/test Clippy passed. No native restore or device result follows"
 lints = "Warnings-denied host all-targets including native declarations and ARM64 Android Clippy passed; no mock native library or fingerprints"
 android_shell = "Java compiler module, DEX namespace and compiled resources/manifest checked; canonical package/activity/label confirmed"
 native = "Full renamed Dolphin build completed; pinned Mupen core compiled with declared patches; actual header/entrypoint/result/yield/shutdown fixtures and exact patch reproduction passed"
 retained = "8 critical inputs retain exact recorded SHA256/inode/size; baseline patch SHA256 retained; same signer independently verified"
-limits = "Current-package migration/short GameCube boundary and N64 first-room control/clear audio/ordinary-file cold reload verified. N64 game-pause/Save after play, ordinary cold reload, fresh-process scenes and sequential cross-system return are verified. New alpha layout persistence is verified; actual-target simultaneous-input preview is now verified; canonical bounded GC Home/reentry is verified below. Intro hitches are unmeasured; no Fold migration or public binary release"
+limits = "Current-package migration/short GameCube boundary and N64 first-room control/clear audio/ordinary-file cold reload verified. N64 game-pause/Save after play, ordinary cold reload, fresh-process scenes and sequential cross-system return are verified. New alpha layout persistence is verified; actual-target simultaneous-input preview is now verified; canonical bounded GC Home/reentry is verified below. N64 phase measurements are recorded below; no Fold migration or public binary release"
 
 [linked_candidate]
 source = "22f0f147426d23d6d619c375b1ab8ceb5d75e650"
@@ -217,11 +217,29 @@ limits = "GameCube presentation/editor only; no save/scene/timing campaign. Roun
 report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6610661291"
 
 [n64_pacing]
-status = "SOURCE_PHASE_DRIFT_REPAIRED_BOUNDED_DIAGNOSTIC_PENDING"
+status = "PIXEL_DIAGNOSTIC_COMPLETE_CORE_CALL_OUTLIERS_OPEN"
 source = "7bfad42b4d64b3fd81b795682a00a186ba0e4581"
 ready_apk_sha256 = "40e77e2ca180d000f6c2986e006f84e7a81fb2e7a6475a2400d3e4bcd6ce2b65"
 problem = "Scheduling each deadline from the actual wake-up accumulates ordinary wake-up jitter; deterministic repeated0.5ms-delay regression fails before the fix"
 implementation = "Retain cadence phase for ordinary jitter; rebase after a missed whole period without catch-up bursts; resume resets phase. Fixed-memory first4096 aggregate phase timings, no per-frame log or game data"
-validation = "109 library tests; phase-drift and stall/resume fixtures; bounded timing aggregates/strict thresholds and pause-gap exclusion; warnings-denied host/ARM64 and signed package/source checks pass. Short title/intro diagnostic queued through normal custody; no target timing result yet"
+validation = "109 library tests; phase-drift and stall/resume fixtures; bounded timing aggregates/strict thresholds and pause-gap exclusion; warnings-denied host/ARM64 and signed package/source checks pass. Actual title/intro diagnostic, Pause/join/protected data/preferences/OFF return passed; first4096 measurements recorded below"
 limits = "No observed hitch cure or performance improvement inferred from the scheduling fixture. Core timing includes presentation callbacks; host durations are not actual display/audio proof. No closed GC timing/save/scene campaign reopened"
-report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6611044288"
+report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6611607755"
+
+[n64_pacing.pixel_v26]
+core_advertised_fps = 60.0
+observed = "Existing Ocarina title/intro without gameplay inputs/game Save; actual full-height picture and Pause; normal native join. Window exceeded rough30-45s plan, about76s of accepted callbacks; fixed first4096 aggregate bound honored, covering roughly70s of active dispatch intervals including startup"
+return = "Custodian completed/returnedtrue; protected ordinary/cards/untouched TP, exact preferences, IDs/source installation and physical OFF verified. No NTX task/hold/recovery remains"
+inference = "Long outliers fall in core-call elapsed window beyond measured host presentation/audio stages. Exact shader/dynarec/GPU/OS cause unqualified. No hitch cure, before/after gain, display-frame rate or audible-output proof inferred; nested stage maxima are not subtractable per-frame timings"
+backend_gl_flags = 0
+limits = "Title route only; earlier in-game GL0502 and historical lifecycle reports remain open. Prior earned campaigns not repeated"
+
+[n64_pacing.pixel_v26.stages]
+# Microseconds of elapsed host time, not CPU utilization. Core includes present;
+# present includes swap. First4096 observations; pause gaps excluded from intervals.
+interval = { samples = 4095, mean_us = 17090, max_us = 241961, over_40ms = 25 }
+lateness = { samples = 4096, mean_us = 454, max_us = 225294, over_40ms = 18 }
+core = { samples = 4096, mean_us = 7452, max_us = 241845, over_40ms = 24 }
+present = { samples = 4096, mean_us = 1432, max_us = 11116, over_40ms = 0 }
+swap = { samples = 4096, mean_us = 892, max_us = 10895, over_40ms = 0 }
+audio = { samples = 4096, mean_us = 260, max_us = 36796, over_20ms = 2, over_40ms = 0 }

@@ -124,3 +124,15 @@ The phone observed2280x1080; rounded buffers and portrait have model coverage.
 Android remains landscape-only. No new gameplay/save/scene/timing campaign or
 sibling/Fold/concurrent-native qualification follows. Acceptance issues stay open.
 [Latest outcome](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6610661291).
+
+## N64 pacing observation
+
+Installed source7bfad42/APK40e77e2c fixes deterministic wake-up-jitter clock drift;
+109 portable tests and relevant warnings-denied checks pass. Pixel4's bounded
+title/intro observation retained the full-height picture and normal Pause/join/
+protected-data/preferences/OFF return. First4096 samples include24 core calls
+over40ms, with host presentation below12ms and audio below40ms. These nested
+elapsed timings include startup; they establish neither a hitch cure nor a
+before/after improvement, CPU cause, actual display cadence or fresh human audio
+proof. Continue with a narrower core-call investigation, preserving prior test
+bounds and open incidents. [Report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6611607755).

@@ -36,6 +36,11 @@ editing, GameCube field resize, saved native placement and Cancel. See
 [current state](docs/state.toml) for exact build and verification bounds. Android
 currently requests landscape; portrait geometry has portable model coverage.
 
+N64 deadlines now retain cadence through wake-up jitter. A bounded Pixel4
+diagnostic locates remaining long stalls in the core-call elapsed window;
+their exact cause and an intro-hitch cure remain open. See the
+[measurement report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6611607755).
+
 Read [AGENTS.md](AGENTS.md), [successor handoff](docs/NTX_HANDOFF.md),
 [NTX-5](https://github.com/WigglyDon/ntx/issues/5) and its
 [architecture amendment](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6505289270).
