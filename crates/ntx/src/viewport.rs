@@ -224,7 +224,12 @@ impl Geometry {
         }
         let active_picture = picture.map_or_else(
             || crate::layout_edit::edge_picture(layout.game, buffer_aspect),
-            |p| crate::layout_edit::fit(crate::layout_edit::denormalized(p, layout.game), aspect),
+            |p| {
+                crate::layout_edit::fit(
+                    crate::layout_edit::denormalized(p, layout.game),
+                    buffer_aspect,
+                )
+            },
         );
         let controls_fit = (!picture_policy.is_game_first()
             || layout
@@ -1032,6 +1037,58 @@ mod game_first_tests {
 #[cfg(test)]
 mod buffer_scale_tests {
     use super::*;
+    #[test]
+    fn saved_picture_admission_uses_the_same_scaled_geometry_as_presentation() {
+        let a = Area {
+            left: 0.,
+            top: 0.,
+            right: 2280.,
+            bottom: 1080.,
+        };
+        let w = WindowGeometry {
+            window: a,
+            surface: a,
+            content: a,
+            input_origin: (0., 0.),
+            density: 2.75,
+            clearance: Insets {
+                top: 84.,
+                bottom: 84.,
+                ..Default::default()
+            },
+        };
+        let (cw, ch) = w.control_size().unwrap();
+        let settings = crate::controls::Settings {
+            profiles: vec![crate::controls::Profile {
+                display: crate::controls::display_key(cw, ch),
+                zones: Vec::new(),
+                picture: Some(Area {
+                    left: 0.,
+                    top: 0.,
+                    right: 1.,
+                    bottom: 1.,
+                }),
+                picture_policy: crate::layout_edit::PicturePolicy::GameFirst,
+            }],
+            ..Default::default()
+        };
+        settings.validate().unwrap();
+        for (width, height) in [(1140., 540.), (1125., 540.), (1155., 540.)] {
+            let g =
+                Geometry::with_controls_aspect(w, width, height, Some(&settings), 4. / 3.).unwrap();
+            let p = g.picture(4. / 3.);
+            assert!(
+                g.layout
+                    .zones
+                    .iter()
+                    .all(|z| !crate::controls::overlaps(z.area, p))
+            );
+            assert!(
+                g.controls_fit,
+                "valid saved picture rejected at {width}x{height}"
+            );
+        }
+    }
     #[test]
     fn physical_picture_aspect_survives_independent_native_buffer_axis_scaling() {
         let a = Area {
