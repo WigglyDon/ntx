@@ -46,8 +46,9 @@ The cache-directory bridge uses the existing host save-directory callback for
 derived renderer caches. Rust supplies each profile's `N64/backend` directory;
 system inputs and ordinary committed images remain separate. The host requests
 shader storage explicitly for this selected GLES3 pin and checks its bounded
-v5 key/v0x3B binary envelopes before native use. Malformed derivatives are retained
-in a fresh recovery directory. GPU/option checks and binary loading remain native;
+v5 key/v0x3B binary envelopes before native use, in both `backend/shaders`
+and the native loader’s fallback directly in `backend`. Each location has its own
+fresh recovery directory for malformed derivatives, preserving duplicate names. GPU/option checks and binary loading remain native;
 options and core fingerprints change honestly, without reidentifying games or
 forcing older machine scenes to load. One Pixel4 same-build title pair verifies cache creation/warm admission and
 reduces slow core calls above40ms from24 to7 in the first4096 window. Seven

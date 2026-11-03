@@ -153,19 +153,26 @@ fn recovery(root: &Path) -> io::Result<PathBuf> {
 /// derivatives are atomically moved intact into a new, non-overwriting recovery
 /// directory; saves, checkpoints, other files and unknown cache formats stay put.
 pub fn prepare(backend: &Path) -> io::Result<Report> {
-    let root = backend.join("shaders");
-    for dir in [backend, &root] {
-        match dir.symlink_metadata() {
-            Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(Report::default()),
-            Ok(m) if m.is_dir() && !m.file_type().is_symlink() => {}
-            Err(e) => return Err(e),
-            _ => return Err(invalid()),
-        }
+    // getStorageFileName falls back to backend itself if native mkdir fails.
+    // Check both possible loader locations, even when shaders does not exist.
+    let fallback = prepare_directory(backend)?;
+    let nested = prepare_directory(&backend.join("shaders"))?;
+    Ok(Report {
+        accepted: fallback.accepted + nested.accepted,
+        retained_invalid: fallback.retained_invalid + nested.retained_invalid,
+    })
+}
+fn prepare_directory(root: &Path) -> io::Result<Report> {
+    match root.symlink_metadata() {
+        Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(Report::default()),
+        Ok(m) if m.is_dir() && !m.file_type().is_symlink() => {}
+        Err(e) => return Err(e),
+        _ => return Err(invalid()),
     }
     let mut report = Report::default();
     let mut retained = None;
     let mut entries = Vec::new();
-    for (index, entry) in fs::read_dir(&root)?.enumerate() {
+    for (index, entry) in fs::read_dir(root)?.enumerate() {
         if index == MAX_PROGRAMS {
             return Err(invalid());
         }
@@ -201,7 +208,7 @@ pub fn prepare(backend: &Path) -> io::Result<Report> {
             continue;
         }
         if retained.is_none() {
-            retained = Some(recovery(&root)?);
+            retained = Some(recovery(root)?);
         }
         // This new directory belongs exclusively to this preparation; rename
         // preserves the original inode/bytes and cannot replace an older cache.
@@ -209,7 +216,7 @@ pub fn prepare(backend: &Path) -> io::Result<Report> {
         fs::rename(&path, &destination)?;
         fs::File::open(&destination)?.sync_all()?;
         fs::File::open(retained.as_ref().unwrap())?.sync_all()?;
-        fs::File::open(&root)?.sync_all()?;
+        fs::File::open(root)?.sync_all()?;
         report.retained_invalid += 1;
     }
     Ok(report)
@@ -300,6 +307,61 @@ mod tests {
         );
         let retry = prepare(&tmp).unwrap();
         assert_eq!((retry.accepted, retry.retained_invalid), (1, 0));
+        fs::remove_dir_all(tmp).unwrap();
+    }
+    #[test]
+    fn native_fallback_and_nested_caches_are_both_checked_without_recovery_collisions() {
+        let tmp = std::env::temp_dir().join(format!(
+            "ntx-cache-fallback-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::create_dir(&tmp).unwrap();
+        // Native falls back here if creation of its shaders directory fails.
+        let name = "GLideN64.123.GLES.keys";
+        fs::write(tmp.join(name), b"truncated fallback").unwrap();
+        let report = prepare(&tmp).unwrap();
+        assert_eq!((report.accepted, report.retained_invalid), (0, 1));
+        assert!(!tmp.join(name).exists());
+        let nested = tmp.join("shaders");
+        fs::create_dir(&nested).unwrap();
+        fs::write(tmp.join(name), b"second fallback").unwrap();
+        fs::write(nested.join(name), b"nested bad data").unwrap();
+        fs::write(tmp.join("ordinary-progress"), b"untouched").unwrap();
+        let report = prepare(&tmp).unwrap();
+        assert_eq!((report.accepted, report.retained_invalid), (0, 2));
+        let mut retained = BTreeSet::new();
+        for root in [&tmp, &nested] {
+            for e in fs::read_dir(root).unwrap() {
+                let p = e.unwrap().path();
+                if p.file_name()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .starts_with("ntx-recovery-")
+                {
+                    retained.insert(fs::read(p.join(name)).unwrap());
+                }
+            }
+        }
+        assert_eq!(
+            retained,
+            [
+                b"truncated fallback".to_vec(),
+                b"second fallback".to_vec(),
+                b"nested bad data".to_vec()
+            ]
+            .into()
+        );
+        assert_eq!(
+            fs::read(tmp.join("ordinary-progress")).unwrap(),
+            b"untouched"
+        );
+        let retry = prepare(&tmp).unwrap();
+        assert_eq!((retry.accepted, retry.retained_invalid), (0, 0));
         fs::remove_dir_all(tmp).unwrap();
     }
     #[cfg(unix)]
