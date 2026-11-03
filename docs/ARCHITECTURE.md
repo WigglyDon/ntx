@@ -54,6 +54,14 @@ from its bound GameId, selected session, resume/recovery state and reported host
 availability. Android supplies foreground/window/player visibility and applies
 the decision to either backend. A different selected game cannot execute the old
 runtime. Portable frame deadlines own N64 pacing; Android supplies event waits.
+Deadlines retain phase through ordinary wake-up jitter and rebase after a whole
+period is missed, without a catch-up burst. Resume resets phase. Bounded runtime
+diagnostics retain only aggregates for the first4096 elapsed host observations:
+active dispatch intervals/lateness, core calls, presentation/swap and outer-stack
+audio delivery. Core duration includes its presentation callbacks; callback and
+dispatch counts need not match. Pause gaps are excluded from active intervals.
+These observations include startup and are not display-frame, audible-output or
+measured speed claims. No per-frame logs or game data are collected by them.
 Neither decision embeds Android handles or changes durable identities.
 
 ## Ordinary progress and machine state

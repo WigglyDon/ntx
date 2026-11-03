@@ -53,10 +53,19 @@ impl FramePacer {
         if period.is_zero() {
             return Err("Frame scheduling period is below clock precision");
         }
-        self.next = now
+        let next = self
+            .next
             .checked_add(period)
+            .filter(|next| *next > now)
+            .or_else(|| now.checked_add(period))
             .ok_or("Frame deadline exceeds host clock range")?;
+        // Preserve phase through ordinary wake-up jitter. Once an entire
+        // deadline was missed, rebase instead of running a catch-up burst.
+        self.next = next;
         Ok(())
+    }
+    pub fn lateness(&self, now: Instant) -> Duration {
+        now.saturating_duration_since(self.next)
     }
     pub fn wait(&self, now: Instant, maximum_idle: Duration) -> Duration {
         self.next.saturating_duration_since(now).min(maximum_idle)
@@ -152,5 +161,42 @@ mod tests {
         assert!(!pacer.ready(now + Duration::from_millis(16)));
         pacer.reset(now);
         assert!(pacer.ready(now));
+    }
+
+    #[test]
+    fn repeated_small_wakeup_delays_do_not_accumulate_into_frame_clock_drift() {
+        let epoch = Instant::now();
+        let period = Duration::from_secs_f64(1. / 60.);
+        let jitter = Duration::from_micros(500);
+        let mut pacer = FramePacer::new(epoch);
+        pacer.schedule(epoch, 60.).unwrap();
+        let mut now = epoch;
+        for _ in 0..120 {
+            now += pacer.wait(now, Duration::MAX) + jitter;
+            assert!(pacer.ready(now));
+            pacer.schedule(now, 60.).unwrap();
+            assert!(!pacer.ready(now));
+        }
+        assert_eq!(pacer.wait(epoch + period * 121, period), Duration::ZERO);
+    }
+
+    #[test]
+    fn missed_periods_rebase_without_a_catchup_burst_and_resume_resets_phase() {
+        let epoch = Instant::now();
+        let period = Duration::from_secs_f64(1. / 60.);
+        let mut pacer = FramePacer::new(epoch);
+        pacer.schedule(epoch, 60.).unwrap();
+        let stalled = epoch + Duration::from_secs(2);
+        pacer.schedule(stalled, 60.).unwrap();
+        assert_eq!(pacer.wait(stalled, Duration::MAX), period);
+        assert!(!pacer.ready(stalled));
+        let resumed = stalled + Duration::from_secs(2);
+        pacer.reset(resumed);
+        assert!(pacer.ready(resumed));
+        pacer.schedule(resumed, 50.).unwrap();
+        assert_eq!(
+            pacer.wait(resumed, Duration::MAX),
+            Duration::from_millis(20)
+        );
     }
 }

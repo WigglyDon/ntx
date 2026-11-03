@@ -215,3 +215,10 @@ observed = "Wind Waker title/attract full-height field at Dolphin-reported1.2534
 return = "Normal joined Stop, exact original preferences restored to absence, protected cards/N64 ordinary/untouched TP, IDs/source installation and actual OFF return verified. Custodian completed/returnedtrue; no NTX hold/request/recovery"
 limits = "GameCube presentation/editor only; no save/scene/timing campaign. Rounded-buffer repair has host regression coverage; physical buffer was2280x1080. Android remains landscape-only; portable portrait fixtures do not qualify a portrait player. Prior N64 observations remain bound to63e5e11"
 report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6610661291"
+
+[n64_pacing]
+status = "SOURCE_PHASE_DRIFT_REPAIRED_BOUNDED_DIAGNOSTIC_PENDING"
+problem = "Scheduling each deadline from the actual wake-up accumulates ordinary wake-up jitter; deterministic repeated0.5ms-delay regression fails before the fix"
+implementation = "Retain cadence phase for ordinary jitter; rebase after a missed whole period without catch-up bursts; resume resets phase. Fixed-memory first4096 aggregate phase timings, no per-frame log or game data"
+validation = "109 library tests; phase-drift and stall/resume fixtures; bounded timing aggregates/strict thresholds and pause-gap exclusion; relevant warnings-denied host/ARM64 checks and signed package checks required before target admission"
+limits = "No observed hitch cure or performance improvement inferred from the scheduling fixture. Core timing includes presentation callbacks; host durations are not actual display/audio proof. No closed GC timing/save/scene campaign reopened"

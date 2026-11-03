@@ -8,6 +8,7 @@ use std::path::Path;
 pub mod backend;
 pub mod checkpoint;
 pub mod controls;
+pub mod frame_timing;
 mod legacy;
 pub mod lifecycle;
 pub mod migration;

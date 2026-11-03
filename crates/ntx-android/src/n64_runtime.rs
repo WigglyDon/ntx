@@ -4,6 +4,7 @@ use crate::n64_host::{Adapter, Resources};
 use ndk::native_window::NativeWindow;
 use ntx::{
     backend::mupen::Core,
+    frame_timing::FrameTimings,
     library::SavedSession,
     n64::Cartridge,
     n64_checkpoint::{self, Binding, Checkpoint},
@@ -32,6 +33,7 @@ pub(super) struct Runtime {
     binding: Binding,
     paused: bool,
     pacer: FramePacer,
+    timings: FrameTimings,
     accepted: Option<ntx::n64_save::Generation>,
 }
 impl Runtime {
@@ -100,6 +102,7 @@ impl Runtime {
             binding,
             paused: true,
             pacer: FramePacer::new(Instant::now()),
+            timings: FrameTimings::default(),
             accepted: None,
         })
     }
@@ -112,6 +115,7 @@ impl Runtime {
         self.paused = paused;
         self.resources.borrow_mut().muted = paused;
         if paused {
+            self.timings.suspend();
             if let Some(core) = self.core.as_mut() {
                 core.silence();
             }
@@ -142,15 +146,22 @@ impl Runtime {
             return;
         }
         let fps = self.core.as_ref().map_or(60., |c| c.av_info().timing.fps);
-        if let Err(error) = self.pacer.schedule(Instant::now(), fps) {
+        let start = Instant::now();
+        self.timings.start(start, self.pacer.lateness(start));
+        if let Err(error) = self.pacer.schedule(start, fps) {
             self.report(error.into());
             return;
         }
-        if let Err(e) = self.core().and_then(Core::run_frame) {
+        let core_start = Instant::now();
+        let run = self.core().and_then(Core::run_frame);
+        self.timings.core.record(core_start.elapsed());
+        if let Err(e) = run {
             self.report(e);
             return;
         }
+        let audio_start = Instant::now();
         let delivered = self.resources.borrow_mut().deliver_audio();
+        self.timings.audio.record(audio_start.elapsed());
         if let Err(error) = delivered {
             self.report(error);
         }
@@ -251,6 +262,18 @@ impl Runtime {
             let resources = self.resources.borrow();
             let audio_written = resources.written_audio_frames;
             let backend_gl_errors = resources.graphics.backend_gl_errors;
+            if self.timings.core.samples() != 0 {
+                platform::diagnostic(&format!(
+                    "N64 timing fps={} (first4096; includes startup; intervals exclude pauses; core includes present; elapsed host durations, not display/audio proof): interval[{}] late[{}] core[{}] present[{}] swap[{}] audio[{}]",
+                    core.av_info().timing.fps,
+                    self.timings.intervals,
+                    self.timings.lateness,
+                    self.timings.core,
+                    resources.graphics.present_timing,
+                    resources.graphics.swap_timing,
+                    self.timings.audio,
+                ));
+            }
             platform::diagnostic(&format!(
                 "N64 joined: {video_callbacks} accepted video callbacks, {audio_acknowledged} acknowledged stereo frames (including muted/background), {audio_written} stereo frames written to AudioTrack on host stack, {backend_gl_errors} GL flags observed before host presentation; not audible proof; profile writer retained"
             ));

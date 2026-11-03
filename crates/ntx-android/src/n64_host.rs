@@ -9,6 +9,7 @@ use jni::{
 use ndk::native_window::NativeWindow;
 use ntx::{
     backend::mupen::{AudioQueue, Host},
+    frame_timing::DurationStats,
     n64_touch::{Target, View},
 };
 use std::{
@@ -16,6 +17,7 @@ use std::{
     ffi::{CStr, c_char, c_void},
     ptr,
     rc::Rc,
+    time::Instant,
 };
 type Result<T> = std::result::Result<T, String>;
 type Handle = *mut c_void;
@@ -131,6 +133,8 @@ pub struct Graphics {
     round: i32,
     opacity: f32,
     pub backend_gl_errors: u64,
+    pub present_timing: DurationStats,
+    pub swap_timing: DurationStats,
 }
 impl Graphics {
     pub fn new(window: &NativeWindow) -> Result<Self> {
@@ -151,6 +155,8 @@ impl Graphics {
             round: 0,
             opacity: 0.85,
             backend_gl_errors: 0,
+            present_timing: DurationStats::default(),
+            swap_timing: DurationStats::default(),
         };
         // SAFETY: EGL outputs point to initialized owned fields, all calls on owner thread.
         unsafe {
@@ -461,7 +467,10 @@ impl Graphics {
             if error != 0 {
                 return Err(format!("N64 host controls-drawing GL error {error:x}"));
             }
-            if eglSwapBuffers(self.display, self.surface) == 0 {
+            let swap_start = Instant::now();
+            let swapped = eglSwapBuffers(self.display, self.surface);
+            self.swap_timing.record(swap_start.elapsed());
+            if swapped == 0 {
                 return Err("N64 surface presentation failed".into());
             }
         }
@@ -656,9 +665,12 @@ impl Host for Adapter {
         unsafe { eglGetProcAddress(name.as_ptr()) }
     }
     fn present(&mut self, w: u32, h: u32) -> Result<()> {
+        let start = Instant::now();
         let mut r = self.0.borrow_mut();
         let view = view().lock().map_err(|_| "N64 input lock poisoned")?;
-        r.graphics.present(w, h, &view)
+        let result = r.graphics.present(w, h, &view);
+        r.graphics.present_timing.record(start.elapsed());
+        result
     }
     fn audio(&mut self, bytes: &[i16]) -> Result<usize> {
         let mut r = self.0.borrow_mut();
