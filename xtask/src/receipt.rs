@@ -123,7 +123,7 @@ pub fn write(root: &Path, source: &Path) -> Result<()> {
         "mupen_selected_sources_sha256":digest(&root.join("native/mupen/selected-sources.txt"))?,
         "mupen_core_sha256":digest(&root.join("build/ntx-mupen/lib/arm64-v8a/libntx_mupen64plus_next.so"))?,
         "mupen_original_archive_sha256":digest(&root.join(".local/source-archives/mupen64plus-next-15bada85.tar.gz"))?,
-        "mupen_patches":[digest(&root.join("native/mupen/0001-checked-state-result.patch"))?,digest(&root.join("native/mupen/0002-coherent-state-boundary.patch"))?,digest(&root.join("native/mupen/0003-host-shader-dispatch.patch"))?,digest(&root.join("native/mupen/0004-profile-shader-cache.patch"))?,digest(&root.join("native/mupen/0005-compile-observer.patch"))?],
+        "mupen_patches":[digest(&root.join("native/mupen/0001-checked-state-result.patch"))?,digest(&root.join("native/mupen/0002-coherent-state-boundary.patch"))?,digest(&root.join("native/mupen/0003-host-shader-dispatch.patch"))?,digest(&root.join("native/mupen/0004-profile-shader-cache.patch"))?,digest(&root.join("native/mupen/0005-compile-observer.patch"))?,digest(&root.join("native/mupen/0006-compiler-phase-observer.patch"))?],
         "mupen_makefile_sha256":digest(&mupen.join("libretro/jni/Android.mk"))?,
         "mupen_build":"NDK30/API28/arm64-v8a/GLES3/HLE/GLideN64; LLE=0 HAVE_PARALLEL_RSP=0 HAVE_PARALLEL_RDP=0 HAVE_THR_AL=0; -j1; 16KiB ELF",
         "cargo_lock_sha256":digest(&root.join("Cargo.lock"))?,"tools":tools

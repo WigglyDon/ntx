@@ -304,6 +304,9 @@ impl Runtime {
                     "N64 compilation timing (first4096 core calls; matched elapsed, not CPU/GPU attribution; scope stats first4096 scopes): {}",
                     core.compilation_summary()
                 ));
+                for (phase, summary) in core.compiler_phase_summaries() {
+                    platform::diagnostic(&format!("N64 compiler phase {phase}: {summary}"));
+                }
             }
             platform::diagnostic(&format!(
                 "N64 joined: {video_callbacks} accepted video callbacks, {audio_acknowledged} acknowledged stereo frames (including muted/background), {audio_written} stereo frames written to AudioTrack on host stack, {backend_gl_errors} GL flags observed before host presentation; not audible proof; profile writer retained"

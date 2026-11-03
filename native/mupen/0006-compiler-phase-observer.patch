@@ -1,0 +1,135 @@
+NTX mechanical compiler-phase/cache-observation events; cache operations and algorithms unchanged.
+Upstream15bada85906593376e8fd697f1b0b3af3a20f512; original licenses retained.
+
+--- a/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
++++ b/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
+@@ -18,6 +18,16 @@
+  *   Free Software Foundation, Inc.,                                       *
+  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
++
++/* Modified by ntx 2026-11-03: phase notifications only; compiler/cache algorithms retained. */
++#ifdef __LIBRETRO__
++extern void retro_ntx_compile_event(unsigned event);
++#define NTX_PHASE_EVENT(phase, entering) retro_ntx_compile_event(16u + 2u * (phase) + (entering))
++#define NTX_CACHE_BEGIN(ctr) retro_ntx_compile_event(37u | ((((ctr) >> 28) & 3u) << 8))
++#else
++#define NTX_PHASE_EVENT(phase, entering) ((void)0)
++#define NTX_CACHE_BEGIN(ctr) ((void)0)
++#endif
+ 
+ #include <stdio.h>
+ #include <stdint.h>
+@@ -8925,6 +8935,7 @@
+ 
+   //DebugMessage(M64MSG_VERBOSE, "addr = %x source = %x %x", addr,source,source[0]);
+ 
++  NTX_PHASE_EVENT(0, 1);
+   /* Pass 1 disassembly */
+ 
+   for(i=0;!done;i++) {
+@@ -9464,10 +9475,14 @@
+   }
+   assert(slen>0);
+ 
++  NTX_PHASE_EVENT(0, 0);
++  NTX_PHASE_EVENT(1, 1);
+   /* Pass 2 - Register dependencies and branch targets */
+ 
+   unneeded_registers(0,slen-1,0);
+ 
++  NTX_PHASE_EVENT(1, 0);
++  NTX_PHASE_EVENT(2, 1);
+   /* Pass 3 - Register allocation */
+ 
+   struct regstat current; // Current register allocations/status
+@@ -10456,6 +10471,8 @@
+     if(current.regmap[HOST_BTREG]==BTREG) current.regmap[HOST_BTREG]=-1;
+   }
+ 
++  NTX_PHASE_EVENT(2, 0);
++  NTX_PHASE_EVENT(3, 1);
+   /* Pass 4 - Cull unused host registers */
+ 
+   uint64_t nr=0LL;
+@@ -10730,6 +10747,8 @@
+     }
+   }
+ 
++  NTX_PHASE_EVENT(3, 0);
++  NTX_PHASE_EVENT(4, 1);
+   /* Pass 5 - Pre-allocate registers */
+ 
+   // If a register is allocated during a loop, try to allocate it for the
+@@ -11454,9 +11473,13 @@
+     }
+   }
+ 
++  NTX_PHASE_EVENT(4, 0);
++  NTX_PHASE_EVENT(5, 1);
+   /* Pass 6 - Optimize clean/dirty state */
+   clean_registers(0,slen-1,1);
+ 
++  NTX_PHASE_EVENT(5, 0);
++  NTX_PHASE_EVENT(6, 1);
+   /* Pass 7 - Identify 32-bit registers */
+ 
+   provisional_r32();
+@@ -11577,6 +11600,8 @@
+     bt[slen-1]=1; // Mark as a branch target so instruction can restart after exception
+   }
+ 
++  NTX_PHASE_EVENT(6, 0);
++  NTX_PHASE_EVENT(7, 1);
+   /* Pass 8 - Assembly */
+   linkcount=0;stubcount=0;
+   ds=0;is_delayslot=0;
+@@ -11800,6 +11825,8 @@
+     }
+   }
+ 
++  NTX_PHASE_EVENT(7, 0);
++  NTX_PHASE_EVENT(8, 1);
+   /* Pass 9 - Linker */
+   for(i=0;i<linkcount;i++)
+   {
+@@ -11933,6 +11960,8 @@
+     }
+   }
+ 
++  NTX_PHASE_EVENT(8, 0);
++  NTX_PHASE_EVENT(9, 1);
+   /* Pass 10 - Free memory by expiring oldest blocks */
+ 
+   int end=((((intptr_t)out-(intptr_t)base_addr)>>(TARGET_SIZE_2-16))+16384)&65535;
+@@ -11984,6 +12013,7 @@
+     }
+     expirep=(expirep+1)&65535;
+   }
++  NTX_PHASE_EVENT(9, 0);
+   return 0;
+ }
+ 
+--- a/mupen64plus-core/src/device/r4300/new_dynarec/arm64/assem_arm64.c
++++ b/mupen64plus-core/src/device/r4300/new_dynarec/arm64/assem_arm64.c
+@@ -1,3 +1,4 @@
++/* Modified by ntx 2026-11-03: cache-maintenance observation only; operations/barriers unchanged. */
+ /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  *   Mupen64plus - assem_arm64.c                                           *
+  *   Copyright (C) 2009-2018 Gillou68310                                   *
+@@ -272,6 +273,7 @@
+     size_t isize, dsize;
+ 
+     __asm__ volatile("mrs %0, ctr_el0" : "=r"(ctr_el0));
++    NTX_CACHE_BEGIN(ctr_el0);
+     isize = 4 << ((ctr_el0 >> 0) & 0xf);
+     dsize = 4 << ((ctr_el0 >> 16) & 0xf);
+ 
+@@ -292,6 +294,7 @@
+ 
+     __asm__ volatile("dsb ish" : : : "memory");
+     __asm__ volatile("isb" : : : "memory");
++    NTX_PHASE_EVENT(10, 0);
+ #endif
+ }
+ 

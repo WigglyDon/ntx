@@ -3,7 +3,7 @@
 //! presentation/audio resources; this adapter owns console calls and quiescence.
 //! Native globals permit one instance per process until isolation is qualified.
 use crate::{
-    backend::jit_probe::CompileProbe,
+    backend::jit_probe::{CompileProbe, CompilerPhases},
     n64::{Cartridge, SaveImage},
 };
 use std::{
@@ -174,6 +174,7 @@ struct Context {
     frames: u64,
     audio_frames: u64,
     compilation: CompileProbe,
+    compiler_phases: CompilerPhases,
 }
 impl Context {
     fn fail(&mut self, error: String) {
@@ -195,7 +196,13 @@ fn with_context<T>(default: T, f: impl FnOnce(&mut Context) -> T) -> T {
     })
 }
 unsafe extern "C" fn compilation_event(entering: u32) {
-    with_context((), |c| c.compilation.event(entering));
+    with_context((), |c| {
+        if entering <= 1 {
+            c.compilation.event(entering);
+        } else {
+            c.compiler_phases.event(entering);
+        }
+    });
 }
 unsafe extern "C" fn framebuffer() -> usize {
     with_context(0, |c| c.host.framebuffer())
@@ -557,6 +564,7 @@ impl Core {
             frames: 0,
             audio_frames: 0,
             compilation: CompileProbe::default(),
+            compiler_phases: CompilerPhases::default(),
         });
         CONTEXT.with(|p| p.set(&mut *context));
         let mut core = Self {
@@ -644,6 +652,11 @@ impl Core {
     pub fn compilation_summary(&self) -> String {
         self.context.compilation.to_string()
     }
+    pub fn compiler_phase_summaries(&self) -> Vec<(&'static str, String)> {
+        let mut summaries = self.context.compiler_phases.summaries();
+        summaries.push(("coverage", self.context.compiler_phases.coverage()));
+        summaries
+    }
     pub fn options_sha256(&self) -> String {
         let mut bytes = Vec::new();
         for (k, v) in &self.context.options {
@@ -658,7 +671,8 @@ impl Core {
         if !self.loaded || self.quarantined {
             return Err("N64 runtime is stopped or requires recovery".into());
         }
-        let observing = self.context.compilation.collecting();
+        let observing =
+            self.context.compilation.collecting() || self.context.compiler_phases.collecting();
         if self.compile_observer_active && !observing {
             // The qualified owner thread is quiescent between retro_run calls.
             unsafe { (self.api.set_compile_observer)(None) };
@@ -666,11 +680,14 @@ impl Core {
         }
         if observing {
             self.context.compilation.begin_frame();
+            self.context.compiler_phases.begin_frame();
         }
         let start = observing.then(Instant::now);
         unsafe { (self.api.run)() };
         if let Some(start) = start {
-            self.context.compilation.end_frame(start.elapsed());
+            let elapsed = start.elapsed();
+            self.context.compilation.end_frame(elapsed);
+            self.context.compiler_phases.end_frame(elapsed);
         }
         self.check()
     }
@@ -887,6 +904,7 @@ mod tests {
             frames: 0,
             audio_frames: 0,
             compilation: CompileProbe::default(),
+            compiler_phases: CompilerPhases::default(),
         });
         CONTEXT.with(|slot| {
             assert!(slot.get().is_null());

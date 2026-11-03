@@ -185,3 +185,19 @@ completed/returned=true; no NTX task/hold/recovery remains. Preserve prior earne
 campaign/build bounds and open incidents; do not repeat closed campaigns from this
 report. The earlier unacquired trace request was cancelled with no acquisition.
 [Latest guarded-cache/CPU outcome](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6615662768).
+
+
+Compiler observation sourcef1bb8dd/APK8df1ea05/core1be08c41 now identifies
+compilation as a major contributor:4096 calls,5577 completed scopes, zero invalid
+frames; compiler time in one frame reached126.757ms. Subtracting each slow call's
+own compiler time leaves only one of8 residuals above40ms, the shader-heavy
+startup. Scope statistics cap separately at4096 scopes; do not extrapolate their
+maximum to all5577. Actual return/protected ordinary/prefs/IDs/source/OFF passed.
+Both late pictures show rendered title at different positions; no persistent gray
+field was reproduced. The prior isolated gray frame and historical incidents stay
+open. [Result](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6616663647).
+
+Owner explicitly says do not stop. Continue directly into a targeted compiler
+repair, using the source-checked pass/cache observer before changing cache
+maintenance or algorithms.119 tests and host/ARM64 lints pass. Do not end merely
+at a diagnostic milestone, repeat closed campaigns or create another worker.

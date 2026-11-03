@@ -72,13 +72,18 @@ first-party/Dolphin/dependency bundles, Rust vendor inputs and exact tool/build
 bindings. The unsigned source-rebuild route needs no private signer.
 
 The optional compiler-observer bridge wraps the existing `new_recompile_block`
-entry without changing its retained implementation, arguments or results. A
+entry while retaining its algorithm, arguments and results. A
 nullable callback reports only begin/end; it exports no guest addresses or bytes.
 Rust owns first4096-call correlation and a131072-event cap, rejects incomplete or
 nested scopes, and unregisters between native calls after its bound. Timing is
 elapsed host time, not proof of CPU/GPU attribution or a compiler remedy. The
-actual wrapper/registrar fixture checks both returned results and callback
-retirement; reproduction checks the original compiler body byte for byte.
+actual wrapper/registrar fixture checks returned results and callback retirement.
+Pass/cache notifications are separately declared; removing only those statements
+reproduces the original compiler and cache bodies byte for byte. Cache time can
+overlap link/expiration and must not be summed with enclosing pass time.
+The [Arm cache-maintenance explanation](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/caches-self-modifying-code-implementing-clear-cache)
+is reviewed context; the selected maintenance instructions, barriers and A53
+workaround remain unchanged pending actual subphase evidence.
 
 ## Actual backend boundaries
 

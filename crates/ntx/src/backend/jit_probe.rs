@@ -6,6 +6,73 @@ use std::{
     time::{Duration, Instant},
 };
 
+pub const PHASES: [&str; 11] = [
+    "decode",
+    "dependencies",
+    "allocation",
+    "branch",
+    "preallocation",
+    "dirty",
+    "width",
+    "assembly",
+    "link",
+    "expiration",
+    "cache",
+];
+/// Actual duplication of the same bounded scope policy across the selected
+/// compiler's ten passes and nested instruction-cache maintenance. Cache time
+/// overlaps link/expiration; never sum it with its enclosing pass.
+#[derive(Default)]
+pub struct CompilerPhases {
+    phases: [CompileProbe; 11],
+    unknown_events: u32,
+    cache_features: Option<(u32, u32)>,
+}
+impl CompilerPhases {
+    pub fn collecting(&self) -> bool {
+        self.phases.iter().any(CompileProbe::collecting)
+    }
+    pub fn begin_frame(&mut self) {
+        for phase in &mut self.phases {
+            phase.begin_frame();
+        }
+    }
+    pub fn end_frame(&mut self, elapsed: Duration) {
+        for phase in &mut self.phases {
+            phase.end_frame(elapsed);
+        }
+    }
+    pub fn event(&mut self, tag: u32) {
+        let event = tag & 255;
+        if !(16..38).contains(&event) || (event != 37 && tag >> 8 != 0) || tag >> 10 != 0 {
+            self.unknown_events = self.unknown_events.saturating_add(1);
+            return;
+        }
+        let index = ((event - 16) / 2) as usize;
+        if event == 37 && self.phases[index].active {
+            let flags = (tag >> 8) & 3;
+            self.cache_features = Some(
+                self.cache_features
+                    .map_or((flags, flags), |(all, any)| (all & flags, any | flags)),
+            );
+        }
+        self.phases[index].event(event & 1);
+    }
+    pub fn summaries(&self) -> Vec<(&'static str, String)> {
+        PHASES
+            .iter()
+            .copied()
+            .zip(self.phases.iter().map(ToString::to_string))
+            .collect()
+    }
+    pub fn coverage(&self) -> String {
+        format!(
+            "unknown_events={} cache_ctr_features={:?} (intersection,union of IDC/DIC; no policy inferred)",
+            self.unknown_events, self.cache_features
+        )
+    }
+}
+
 #[derive(Default)]
 pub struct CompileProbe {
     frames: u32,
@@ -126,6 +193,35 @@ impl fmt::Display for CompileProbe {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn compiler_phases_route_nested_cache_separately_and_bound_feature_metadata() {
+        let mut p = CompilerPhases::default();
+        p.begin_frame();
+        p.event(33); // Link begins.
+        p.event(37 | (3 << 8));
+        p.event(36); // Cache ends, link remains active.
+        p.event(37 | (1 << 8));
+        p.event(36);
+        p.event(32); // Link ends.
+        p.end_frame(Duration::MAX);
+        assert_eq!(p.phases[8].scopes, 1);
+        assert_eq!(p.phases[10].scopes, 2);
+        assert_eq!(p.cache_features, Some((1, 3)));
+        assert!(p.phases.iter().all(|phase| phase.invalid_frames == 0));
+        assert_eq!(p.summaries().len(), 11);
+        p.event(17 | (1 << 8)); // Flags belong only to cache begin.
+        p.event(255);
+        assert_eq!(p.unknown_events, 2);
+        for _ in 1..DurationStats::LIMIT {
+            p.begin_frame();
+            p.end_frame(Duration::ZERO);
+        }
+        assert!(!p.collecting());
+        p.event(37 | (2 << 8));
+        p.event(36);
+        assert_eq!(p.cache_features, Some((1, 3)));
+        assert_eq!(p.phases[10].scopes, 2);
+    }
     #[test]
     fn exact_scopes_are_correlated_only_with_their_own_core_call() {
         let now = Instant::now();
