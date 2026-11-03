@@ -189,6 +189,13 @@ owner_feedback = "Field still not edge-to-edge. Default must maximize complete n
 
 [game_first_default]
 status = "SOURCE_HOST_MODELS_CHECKED_BUILD_TARGET_PENDING"
-validation = "103 library tests: full-height picture, non-overlapping typed controls, exact runtime/editor density/origin mapping, portrait fixtures, legacy policy compatibility, explicit no-space alternatives, aspect-change cancellation, prior storage/input/scene fixtures"
+validation = "104 library tests: full-height picture, non-overlapping typed controls, exact runtime/editor density/origin mapping, portrait fixtures, legacy policy compatibility, explicit no-space alternatives, aspect-change cancellation, prior storage/input/scene fixtures"
 policy = "GameFirst default; full drawable, preserved aspect and complete picture; touch controls occupy actual free space. Compact layout preserves semantic groups. Keep-clear and overlap are explicit alternatives"
 coordination = "Clarification delivered to existing sibling owners at the owner's explicit request; receipt is private. Their implementation/runtime uptake is not inferred"
+
+
+[game_first_default.buffer_mapping]
+status = "SOURCE_CHECKED_TARGET_PENDING"
+contract = "Fit aspect in physical screen coordinates before mapping each axis to a native buffer. Scaled or inherited buffers must not distort the physical game picture"
+validation = "104 portable tests, including 2280x1080 screen with1140x507/1140x540 buffers and a coherent rounded GC buffer"
+retired_candidate = "Source3f2303c/APK97cbeadd installed through protected update, then task retired at safe boundary before game execution. Normal original-preference/protected-data/physicalOFF return verified; no native picture result claimed"

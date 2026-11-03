@@ -53,7 +53,7 @@ Owner's latest steering supersedes the earlier clear-picture default: maximize
 uncropped native-aspect game real estate first (height in landscape, width in
 portrait), then fit controls in unused space without overlap. This is a default
 for every game, not an opt-in. Existing PSX/PCX/XBX/FN64/Pokémon owners were informed;
-only NTX is implemented here. The new game-first source has103 portable fixtures;
+only NTX is implemented here. The new game-first source has104 portable fixtures;
 its signed build and bounded Pixel4 verification are the next unfinished work.
 Installed75e73ae/APKaa2f2933 already passed GC grouped move/Save/reopen/Cancel/cold
 process, real GC paused image and movable dock; larger-but-not-edge N64 field and
@@ -71,3 +71,12 @@ continuation notes are .local/ntx-mupen-build/CURRENT.private.json; they are der
 notes, not another custody ledger. Keep all private device/media/signing material
 out of Git. [Historical handoff](history/NTX_HANDOFF_BASELINE_20261102.md) retains
 baseline and intermediate evidence, never current work priority.
+
+
+The next candidate also fits the game in screen space before independent native
+buffer scaling, preventing pixel-aspect distortion without changing core options.
+Source3f2303c/APK97cbeadd was protected-installed by the first queued check, which
+was retired at an acquired safe boundary before gameplay so the buffer correction
+could be packaged. Its actual return passed; no native picture qualification is
+claimed. The current installed artifact is97cbeadd; next preparation must use it
+as the compatible-update/rollback baseline and the latest returned collection.

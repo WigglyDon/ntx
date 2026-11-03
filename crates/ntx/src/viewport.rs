@@ -184,11 +184,12 @@ impl Geometry {
             right: (safe.right - window.surface.left) * sx,
             bottom: (safe.bottom - window.surface.top) * sy,
         };
+        let buffer_aspect = aspect * sx / sy;
         let controls_fit = !picture_policy.is_game_first()
             || crate::layout_edit::place_free(
                 &mut areas,
                 safe_buffer,
-                crate::layout_edit::edge_picture(layout.game, aspect),
+                crate::layout_edit::edge_picture(layout.game, buffer_aspect),
                 16. * window.density * sx.min(sy),
                 &crate::controls::groups(&layout.zones),
             );
@@ -204,11 +205,11 @@ impl Geometry {
                 window.density * sx.min(sy),
             );
             let p = picture.map_or_else(
-                || crate::layout_edit::edge_picture(layout.game, aspect),
+                || crate::layout_edit::edge_picture(layout.game, buffer_aspect),
                 |p| {
                     crate::layout_edit::fit(
                         crate::layout_edit::denormalized(p, layout.game),
-                        aspect,
+                        buffer_aspect,
                     )
                 },
             );
@@ -222,7 +223,7 @@ impl Geometry {
             }
         }
         let active_picture = picture.map_or_else(
-            || crate::layout_edit::edge_picture(layout.game, aspect),
+            || crate::layout_edit::edge_picture(layout.game, buffer_aspect),
             |p| crate::layout_edit::fit(crate::layout_edit::denormalized(p, layout.game), aspect),
         );
         let controls_fit = (!picture_policy.is_game_first()
@@ -267,6 +268,9 @@ impl Geometry {
         })
     }
     pub fn picture(&self, aspect: f32) -> Area {
+        let aspect = aspect
+            * (self.buffer.0 / (self.window.surface.right - self.window.surface.left))
+            / (self.buffer.1 / (self.window.surface.bottom - self.window.surface.top));
         if let Some(p) = self.picture {
             let a = crate::layout_edit::fit(
                 crate::layout_edit::denormalized(p, self.layout.game),
@@ -1021,6 +1025,50 @@ mod game_first_tests {
                 .zones
                 .iter()
                 .all(|z| !crate::controls::overlaps(z.area, next.picture(16. / 9.)))
+        );
+    }
+}
+
+#[cfg(test)]
+mod buffer_scale_tests {
+    use super::*;
+    #[test]
+    fn physical_picture_aspect_survives_independent_native_buffer_axis_scaling() {
+        let a = Area {
+            left: 0.,
+            top: 0.,
+            right: 2280.,
+            bottom: 1080.,
+        };
+        let w = WindowGeometry {
+            window: a,
+            surface: a,
+            content: a,
+            input_origin: (0., 0.),
+            density: 2.75,
+            clearance: Insets {
+                top: 84.,
+                bottom: 84.,
+                ..Default::default()
+            },
+        };
+        let mut view = crate::n64_touch::View::default();
+        view.measure(Some(w));
+        for (width, height) in [(2280., 1080.), (1140., 507.), (1140., 540.)] {
+            let p = view.picture(width, height, 4. / 3.).unwrap();
+            assert_eq!((p.top, p.bottom), (0., height));
+            let physical_width = (p.right - p.left) * 2280. / width;
+            let physical_height = (p.bottom - p.top) * 1080. / height;
+            assert!((physical_width / physical_height - 4. / 3.).abs() < 0.0001);
+            assert!((physical_width - 1440.).abs() < 0.001);
+        }
+        // Small rounding differences in a coherent GC drawable are compensated too.
+        let g = Geometry::with_controls_aspect(w, 1125., 540., None, 1.25).unwrap();
+        let p = g.picture(1.25);
+        assert!(
+            (((p.right - p.left) * 2280. / 1125.) / ((p.bottom - p.top) * 1080. / 540.) - 1.25)
+                .abs()
+                < 0.0001
         );
     }
 }

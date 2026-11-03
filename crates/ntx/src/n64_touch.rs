@@ -39,34 +39,38 @@ impl View {
         let g = self.measured?;
         g.control_bounds()?;
         let frame = Area {
-            left: 0.,
-            top: 0.,
-            right: width,
-            bottom: height,
+            left: g.surface.left.max(g.window.left),
+            top: g.surface.top.max(g.window.top),
+            right: g.surface.right.min(g.window.right),
+            bottom: g.surface.bottom.min(g.window.bottom),
         };
-        let sx = width / (g.surface.right - g.surface.left);
-        let sy = height / (g.surface.bottom - g.surface.top);
-        let zones = self.zones.iter().map(|z| Area {
-            left: (z.area.left - g.surface.left) * sx,
-            top: (z.area.top - g.surface.top) * sy,
-            right: (z.area.right - g.surface.left) * sx,
-            bottom: (z.area.bottom - g.surface.top) * sy,
-        });
-        if let Some(p) = self.picture {
-            let a = crate::layout_edit::fit(crate::layout_edit::denormalized(p, frame), aspect);
-            if self.picture_policy.is_overlay()
-                || !zones.clone().any(|b| crate::controls::overlaps(a, b))
-            {
-                return Some(a);
-            }
-        }
-        Some(
-            if self.picture_policy != crate::layout_edit::PicturePolicy::KeepClear {
-                crate::layout_edit::edge_picture(frame, aspect)
-            } else {
-                crate::layout_edit::clear_picture(frame, zones, aspect)
-            },
-        )
+        // The native buffer may scale each axis differently. Fit the picture in
+        // physical screen coordinates first, exactly like the touch targets.
+        let custom = self
+            .picture
+            .map(|p| crate::layout_edit::fit(crate::layout_edit::denormalized(p, frame), aspect));
+        let picture = if let Some(p) = custom.filter(|p| {
+            self.picture_policy.is_overlay()
+                || !self
+                    .zones
+                    .iter()
+                    .any(|z| crate::controls::overlaps(z.area, *p))
+        }) {
+            p
+        } else if self.picture_policy == crate::layout_edit::PicturePolicy::KeepClear {
+            crate::layout_edit::clear_picture(frame, self.zones.iter().map(|z| z.area), aspect)
+        } else {
+            crate::layout_edit::edge_picture(frame, aspect)
+        };
+        let (left, top) = self.screen_to_buffer(picture.left, picture.top, width, height)?;
+        let (right, bottom) =
+            self.screen_to_buffer(picture.right, picture.bottom, width, height)?;
+        Some(Area {
+            left,
+            top,
+            right,
+            bottom,
+        })
     }
     pub fn configure(&mut self, settings: &crate::controls::Settings) {
         self.configure_dead_zone(settings.dead_zone);
