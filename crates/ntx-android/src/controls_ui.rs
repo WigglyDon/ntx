@@ -8,12 +8,78 @@ use ntx::{
 };
 
 struct Session {
-    editor: Editor,
+    editor: Editing,
     menu: u64,
     activity: u64,
 }
+pub(super) enum Editing {
+    GameCube(Box<Editor>),
+    Nintendo64(Box<ntx::n64_controls::Editor>),
+}
+impl Editing {
+    fn size(&self) -> (f32, f32) {
+        match self {
+            Self::GameCube(e) => (e.width, e.height),
+            Self::Nintendo64(e) => (e.width, e.height),
+        }
+    }
+    fn settings(&mut self) -> &mut Settings {
+        match self {
+            Self::GameCube(e) => &mut e.settings,
+            Self::Nintendo64(e) => &mut e.settings,
+        }
+    }
+    fn configure_test(&mut self) {
+        match self {
+            Self::GameCube(e) => e.configure_test(),
+            Self::Nintendo64(e) => e.configure_test(),
+        }
+    }
+    fn resize(&mut self, v: f32) {
+        match self {
+            Self::GameCube(e) => e.resize(v),
+            Self::Nintendo64(e) => e.resize(v),
+        }
+    }
+    fn reset_display(&mut self) {
+        match self {
+            Self::GameCube(e) => e.reset_display(),
+            Self::Nintendo64(e) => e.reset_display(),
+        }
+    }
+    fn toggle_test(&mut self) {
+        match self {
+            Self::GameCube(e) => e.toggle_test(),
+            Self::Nintendo64(e) => e.toggle_test(),
+        }
+    }
+    fn down(&mut self, p: i32, x: f32, y: f32) -> bool {
+        match self {
+            Self::GameCube(e) => e.down(p, x, y),
+            Self::Nintendo64(e) => e.down(p, x, y),
+        }
+    }
+    fn moved(&mut self, p: i32, x: f32, y: f32) {
+        match self {
+            Self::GameCube(e) => e.moved(p, x, y),
+            Self::Nintendo64(e) => e.moved(p, x, y),
+        }
+    }
+    fn up(&mut self, p: i32) {
+        match self {
+            Self::GameCube(e) => e.up(p),
+            Self::Nintendo64(e) => e.up(p),
+        }
+    }
+    fn cancel(&mut self) {
+        match self {
+            Self::GameCube(e) => e.cancel(),
+            Self::Nintendo64(e) => e.cancel(),
+        }
+    }
+}
 static EDITOR: Mutex<Option<Session>> = Mutex::new(None);
-pub(super) fn bind(editor: Option<Editor>, menu: u64, activity: u64) {
+pub(super) fn bind(editor: Option<Editing>, menu: u64, activity: u64) {
     if let Ok(mut slot) = EDITOR.lock() {
         *slot = editor.map(|editor| Session {
             editor,
@@ -22,7 +88,7 @@ pub(super) fn bind(editor: Option<Editor>, menu: u64, activity: u64) {
         });
     }
 }
-fn with_editor<T>(menu: u64, f: impl FnOnce(&mut Editor) -> T) -> Option<T> {
+fn with_editing<T>(menu: u64, f: impl FnOnce(&mut Editing) -> T) -> Option<T> {
     if !menu_current(menu) {
         return None;
     }
@@ -31,15 +97,43 @@ fn with_editor<T>(menu: u64, f: impl FnOnce(&mut Editor) -> T) -> Option<T> {
     (session.menu == menu && session.activity == EPOCH.load(Ordering::Acquire))
         .then(|| f(&mut session.editor))
 }
+pub(super) fn active() -> bool {
+    with_editing(MENU_GENERATION.load(Ordering::Acquire), |_| ()).is_some()
+}
+fn with_editor<T>(menu: u64, f: impl FnOnce(&mut Editor) -> T) -> Option<T> {
+    with_editing(menu, |e| match e {
+        Editing::GameCube(e) => Some(f(e)),
+        _ => None,
+    })
+    .flatten()
+}
+fn with_n64_editor<T>(menu: u64, f: impl FnOnce(&mut ntx::n64_controls::Editor) -> T) -> Option<T> {
+    with_editing(menu, |e| match e {
+        Editing::Nintendo64(e) => Some(f(e)),
+        _ => None,
+    })
+    .flatten()
+}
 pub(super) fn applied(menu: u64) -> Option<Settings> {
-    with_editor(menu, |e| e.finish().ok()).flatten()
+    with_editing(menu, |e| match e {
+        Editing::GameCube(e) => e.finish().ok(),
+        Editing::Nintendo64(e) => e.finish().ok(),
+    })
+    .flatten()
 }
 pub(super) fn display(menu: u64) -> Option<String> {
-    with_editor(menu, |e| ntx::controls::display_key(e.width, e.height))
+    with_editing(menu, |e| {
+        let (w, h) = e.size();
+        ntx::controls::display_key(w, h)
+    })
 }
 pub(super) fn show(app: &AndroidApp, runtime: u64, editor: Editor) {
     render_menu_with_games(app,true,"Touch controls\nDrag a control to move it. Select it, then change its size. Layouts are remembered separately for each screen.".into(),
-        vec![(20,"Smaller selected control".into()),(21,"Larger selected control".into()),(23,"Test inputs".into()),(24,"Haptics".into()),(25,"Following sticks".into()),(22,"Reset this screen’s layout".into()),(10,"Save controls".into()),(11,"Cancel".into())],runtime,Vec::new(),Some(editor));
+        vec![(20,"Smaller selected control".into()),(21,"Larger selected control".into()),(23,"Test inputs".into()),(24,"Haptics".into()),(25,"Following sticks".into()),(22,"Reset this screen’s layout".into()),(10,"Save controls".into()),(11,"Cancel".into())],runtime,Vec::new(),Some(Editing::GameCube(Box::new(editor))));
+}
+pub(super) fn show_n64(app: &AndroidApp, runtime: u64, editor: ntx::n64_controls::Editor) {
+    render_menu_with_games(app,true,"N64 touch controls\nDrag a control to move it. Select it, then change its size. N64 layouts are remembered separately for each screen.".into(),
+        vec![(20,"Smaller selected control".into()),(21,"Larger selected control".into()),(23,"Test inputs".into()),(24,"Haptics".into()),(22,"Reset this screen’s layout".into()),(10,"Save controls".into()),(11,"Cancel".into())],runtime,Vec::new(),Some(Editing::Nintendo64(Box::new(editor))));
 }
 fn label<'a>(
     env: &mut JNIEnv<'a>,
@@ -85,8 +179,12 @@ pub(super) fn append(
     density: f32,
     menu: u64,
 ) -> Result<()> {
-    let (width, height, settings) =
-        with_editor(menu, |e| (e.width, e.height, e.settings.clone())).ok_or("Editor expired")?;
+    let (width, height, settings, n64) = with_editing(menu, |e| {
+        let (w, h) = e.size();
+        let n64 = matches!(e, Editing::Nintendo64(_));
+        (w, h, e.settings().clone(), n64)
+    })
+    .ok_or("Editor expired")?;
     let class = activity_class(
         env,
         activity,
@@ -203,7 +301,11 @@ pub(super) fn append(
     let help = label(
         env,
         activity,
-        "Slide L/R for analog travel. Their separate click buttons work independently. Test inputs never reach your game.",
+        if n64 {
+            "One analog stick, four C buttons, digital L/R and Z. Test inputs never reach your game."
+        } else {
+            "Slide L/R for analog travel. Their separate click buttons work independently. Test inputs never reach your game."
+        },
         13.,
         theme::MUTED,
     )?;
@@ -223,15 +325,20 @@ fn value_label(setting: i32, value: i32) -> String {
     }
 }
 pub(super) fn action(env: &mut JNIEnv<'_>, action: i32, menu: u64) -> Result<()> {
-    with_editor(menu, |e| match action {
+    with_editing(menu, |e| match action {
         20 => e.resize(-8.),
         21 => e.resize(8.),
         22 => e.reset_display(),
         23 => e.toggle_test(),
-        24 => e.settings.haptics = !e.settings.haptics,
+        24 => {
+            let settings = e.settings();
+            settings.haptics = !settings.haptics;
+        }
         25 => {
-            e.settings.floating_sticks = !e.settings.floating_sticks;
-            e.configure_test();
+            if let Editing::GameCube(e) = e {
+                e.settings.floating_sticks = !e.settings.floating_sticks;
+                e.configure_test();
+            }
         }
         _ => {}
     })
@@ -281,6 +388,56 @@ pub(super) fn refresh(env: &mut JNIEnv<'_>, menu: u64) -> Result<()> {
             e.settings.floating_sticks,
             e.selected.is_some(),
         )
+    })
+    .or_else(|| {
+        with_n64_editor(menu, |e| {
+            let selected = e
+                .selected
+                .and_then(|target| e.zones.iter().find(|z| z.target == target))
+                .map(|z| n64_name(z.target, z.label))
+                .unwrap_or("Select a control");
+            let hint = if e.rejected {
+                "Keep controls apart and within the preview".into()
+            } else if e.testing {
+                let p = e.pad();
+                let held = [
+                    ntx::n64::Button::A,
+                    ntx::n64::Button::B,
+                    ntx::n64::Button::Start,
+                    ntx::n64::Button::Z,
+                    ntx::n64::Button::L,
+                    ntx::n64::Button::R,
+                    ntx::n64::Button::Up,
+                    ntx::n64::Button::Down,
+                    ntx::n64::Button::Left,
+                    ntx::n64::Button::Right,
+                    ntx::n64::Button::CUp,
+                    ntx::n64::Button::CDown,
+                    ntx::n64::Button::CLeft,
+                    ntx::n64::Button::CRight,
+                ]
+                .into_iter()
+                .filter(|b| p.pressed(*b))
+                .map(|b| n64_name(ntx::n64_touch::Target::Button(b), ""))
+                .collect::<Vec<_>>()
+                .join(" + ");
+                format!(
+                    "Test only · Stick {:.2}, {:.2} · {}",
+                    p.input_state(0, 5, 0, 0) as f32 / 32767.,
+                    -(p.input_state(0, 5, 0, 1) as f32) / 32767.,
+                    if held.is_empty() { "Released" } else { &held }
+                )
+            } else {
+                format!("{selected} · drag to move; size buttons below")
+            };
+            (
+                hint,
+                e.testing,
+                e.settings.haptics,
+                false,
+                e.selected.is_some(),
+            )
+        })
     })
     .ok_or("Editor expired")?;
     let bound = MENU
@@ -374,10 +531,10 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_controlsValue(
     if !current_activity(&env, &activity) {
         return;
     }
-    if with_editor(menu as u64, |e| match setting {
-        0 => e.settings.opacity = (value.clamp(0, 70) + 30) as u8,
+    if with_editing(menu as u64, |e| match setting {
+        0 => e.settings().opacity = (value.clamp(0, 70) + 30) as u8,
         1 => {
-            e.settings.dead_zone = value.clamp(0, 25) as u8;
+            e.settings().dead_zone = value.clamp(0, 25) as u8;
             e.configure_test();
         }
         _ => {}
@@ -408,12 +565,13 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_controlsTouch(
     if !current_activity(&env, &activity) {
         return 0;
     }
-    let handled = with_editor(menu as u64, |e| {
-        let (scale, ox, oy) = mapping(width, height, e.width, e.height);
+    let handled = with_editing(menu as u64, |e| {
+        let (ew, eh) = e.size();
+        let (scale, ox, oy) = mapping(width, height, ew, eh);
         let (x, y) = ((x - ox) / scale, (y - oy) / scale);
         match action {
             0 | 5 => {
-                if x < 0. || y < 0. || x > e.width || y > e.height {
+                if x < 0. || y < 0. || x > ew || y > eh {
                     return false;
                 }
                 if !e.down(pointer, x, y) {
@@ -443,6 +601,20 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_controlsDraw(
     menu: jlong,
 ) {
     if !current_activity(&env, &activity) {
+        return;
+    }
+    if let Some(preview) = with_n64_editor(menu as u64, |e| {
+        let pad = e.pad();
+        N64Preview {
+            zones: e.zones.clone(),
+            width: e.width,
+            height: e.height,
+            selected: e.selected,
+            pad,
+            opacity: e.settings.opacity,
+        }
+    }) {
+        draw_n64(&mut env, &canvas, width, height, preview);
         return;
     }
     let Some((layout, w, h, selected, pad, opacity)) = with_editor(menu as u64, |e| {
@@ -659,6 +831,195 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_controlsDraw(
     }
     if let Some(save) = canvas_save {
         let _ = env.call_method(&canvas, "restoreToCount", "(I)V", &[JValue::Int(save)]);
+        let _ = env.exception_clear();
+    }
+}
+fn n64_name(target: ntx::n64_touch::Target, _label: &str) -> &'static str {
+    use ntx::{n64::Button as B, n64_touch::Target as T};
+    match target {
+        T::Stick => "Analog stick",
+        T::Pause => "Pause",
+        T::Button(b) => match b {
+            B::A => "A",
+            B::B => "B",
+            B::Start => "Start",
+            B::Z => "Z",
+            B::L => "L",
+            B::R => "R",
+            B::Up => "D-pad ↑",
+            B::Down => "D-pad ↓",
+            B::Left => "D-pad ←",
+            B::Right => "D-pad →",
+            B::CUp => "C ↑",
+            B::CDown => "C ↓",
+            B::CLeft => "C ←",
+            B::CRight => "C →",
+        },
+    }
+}
+struct N64Preview {
+    zones: Vec<ntx::n64_touch::Zone>,
+    width: f32,
+    height: f32,
+    selected: Option<ntx::n64_touch::Target>,
+    pad: ntx::n64::Pad,
+    opacity: u8,
+}
+fn draw_n64(
+    env: &mut JNIEnv<'_>,
+    canvas: &JObject<'_>,
+    width: i32,
+    height: i32,
+    preview: N64Preview,
+) {
+    let N64Preview {
+        zones,
+        width: w,
+        height: h,
+        selected,
+        pad,
+        opacity,
+    } = preview;
+    use ntx::{n64::Button as B, n64_touch::Target as T};
+    let mut canvas_save = None;
+    let result: Result<()> = (|| {
+        let paint = env.new_object("android/graphics/Paint", "(I)V", &[JValue::Int(1)])?;
+        let (scale, ox, oy) = mapping(width, height, w, h);
+        let save = env.call_method(canvas, "save", "()I", &[])?.i()?;
+        canvas_save = Some(save);
+        env.call_method(
+            canvas,
+            "translate",
+            "(FF)V",
+            &[JValue::Float(ox), JValue::Float(oy)],
+        )?;
+        env.call_method(
+            canvas,
+            "scale",
+            "(FF)V",
+            &[JValue::Float(scale), JValue::Float(scale)],
+        )?;
+        rectangle(
+            env,
+            canvas,
+            &paint,
+            Area {
+                left: 0.,
+                top: 0.,
+                right: w,
+                bottom: h,
+            },
+            0xff14191c,
+            12.,
+        )?;
+        let size = (w / 4.).min(h / 3.);
+        rectangle(
+            env,
+            canvas,
+            &paint,
+            Area {
+                left: (w - 4. * size) / 2.,
+                top: (h - 3. * size) / 2.,
+                right: (w + 4. * size) / 2.,
+                bottom: (h + 3. * size) / 2.,
+            },
+            0xff1d252a,
+            8.,
+        )?;
+        text(
+            env,
+            canvas,
+            &paint,
+            "Game picture",
+            (w / 2. - 42., h * 0.3),
+            14.,
+            theme::MUTED,
+        )?;
+        for z in zones {
+            let a = z.area;
+            let pressed = matches!(z.target,T::Button(b) if pad.pressed(b));
+            if Some(z.target) == selected || pressed {
+                rectangle(
+                    env,
+                    canvas,
+                    &paint,
+                    Area {
+                        left: a.left - 3.,
+                        top: a.top - 3.,
+                        right: a.right + 3.,
+                        bottom: a.bottom + 3.,
+                    },
+                    if pressed { theme::TEXT } else { theme::ACCENT },
+                    14.,
+                )?;
+            }
+            let color = match z.target {
+                T::Button(B::A) => 0xff3984e8,
+                T::Button(B::B) => 0xff27ad66,
+                T::Button(B::CUp | B::CDown | B::CLeft | B::CRight) => 0xffe6c44c,
+                T::Pause => 0xff303b40,
+                _ => 0xffaaa6a2,
+            };
+            let radius = (a.right - a.left).min(a.bottom - a.top) / 2.;
+            rectangle(
+                env,
+                canvas,
+                &paint,
+                a,
+                ntx::presentation::opacity(color, opacity),
+                radius,
+            )?;
+            let (x, y) = a.center();
+            if z.target == T::Stick {
+                let k = radius * 0.36;
+                let x = x + pad.input_state(0, 5, 0, 0) as f32 / 32767. * radius * 0.64;
+                let y = y + pad.input_state(0, 5, 0, 1) as f32 / 32767. * radius * 0.64;
+                rectangle(
+                    env,
+                    canvas,
+                    &paint,
+                    Area {
+                        left: x - k,
+                        top: y - k,
+                        right: x + k,
+                        bottom: y + k,
+                    },
+                    0xffcbc9be,
+                    k,
+                )?;
+            } else {
+                let label = match z.target {
+                    T::Button(B::Up | B::Down | B::Left | B::Right) => z.label,
+                    _ => n64_name(z.target, z.label),
+                };
+                let font = if label.chars().count() > 4 { 9. } else { 12. };
+                text(
+                    env,
+                    canvas,
+                    &paint,
+                    label,
+                    (
+                        x - label.chars().count() as f32 * font * 0.25,
+                        y + font * 0.35,
+                    ),
+                    font,
+                    if z.target == T::Pause {
+                        theme::TEXT
+                    } else {
+                        0xff13231d
+                    },
+                )?;
+            }
+        }
+        env.call_method(canvas, "restoreToCount", "(I)V", &[JValue::Int(save)])?;
+        canvas_save = None;
+        Ok(())
+    })();
+    if result.is_err() {
+        let _ = env.exception_clear();
+    }
+    if let Some(save) = canvas_save {
+        let _ = env.call_method(canvas, "restoreToCount", "(I)V", &[JValue::Int(save)]);
         let _ = env.exception_clear();
     }
 }

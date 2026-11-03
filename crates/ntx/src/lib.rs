@@ -13,6 +13,7 @@ pub mod lifecycle;
 pub mod migration;
 pub mod n64;
 pub mod n64_checkpoint;
+pub mod n64_controls;
 pub mod n64_save;
 pub mod n64_touch;
 pub mod presentation;

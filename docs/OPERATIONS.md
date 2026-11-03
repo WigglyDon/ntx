@@ -67,6 +67,24 @@ recipes are dormant evidence, not runnable commands or renewed authority.
 Detailed [prior helper gates](history/GCX_OPERATIONS.md) remain safety evidence;
 current installed procedure and actual admission govern device operations.
 
+N64 now has its own Rust drag/resize draft and isolated input preview in the same
+editor views. Its normalized per-screen placements are stored in `n64_profiles`
+inside `controls.json`, separately from GameCube placements and all game data.
+Save validates and atomically publishes preferences; Cancel discards the draft.
+Changed layouts neutralize held input before the runtime map is replaced. The
+foreground layout editor requests the same app-window screen-on flag as play;
+ordinary menus clear it. This changes no device timeout, permission or service.
+
+`ntx-motion-probe` is an optional bounded test transport for the installed scrcpy
+5.0 control service, following its pinned upstream touch-message format. It
+requires an inherited device-lease FD and an existing owned loopback forward;
+it grants no admission or device identity. The prepared task must verify current
+own focus/geometry and inspected preview targets, observe both contacts and
+independent release/cancel, then retire its control process, forward and staging
+file under the same lease. Sent bytes are not proof of observed input. Its
+loopback-only socket regression needs a host that permits a temporary localhost
+listener; no phone is involved in that test. No scrcpy service is bundled in ntx.
+
 Keep signer/password, private device identifiers, games/firmware, saves,
 checkpoints, raw logs/captures and private resource bindings out of public Git.
 Publish sanitized outcomes and source/build identities. Report remaining product

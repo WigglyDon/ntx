@@ -1036,7 +1036,7 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
     match ntx::controls::Settings::load(&root) {
         Ok(settings) => {
             if let Ok(mut view) = crate::n64_host::view().lock() {
-                view.configure_dead_zone(settings.dead_zone);
+                view.configure(&settings);
             }
             if let Ok(mut ui) = UI.lock() {
                 ui.configure_controls(settings);
@@ -1044,7 +1044,7 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
         }
         Err(_) => {
             if let Ok(mut view) = crate::n64_host::view().lock() {
-                view.configure_dead_zone(ntx::controls::Settings::default().dead_zone);
+                view.configure(&ntx::controls::Settings::default());
             }
             if let Ok(mut ui) = UI.lock() {
                 ui.configure_controls(ntx::controls::Settings::default());
@@ -1580,7 +1580,9 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
                         platform::n64_controls_menu(
                             app,
                             runtime.as_ref().map_or(0, |r| r.events.epoch),
-                            &settings,
+                            width,
+                            height,
+                            settings,
                         );
                         continue;
                     }
@@ -1598,7 +1600,7 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
                     }
                     if settings.save(&root).is_ok() {
                         if let Ok(mut view) = crate::n64_host::view().lock() {
-                            view.configure_dead_zone(settings.dead_zone);
+                            view.configure(&settings);
                         }
                         if let Ok(mut ui) = UI.lock() {
                             ui.configure_controls(settings);
@@ -1612,44 +1614,6 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
                     if platform::menu_current(menu) {
                         platform::push(Command::Library);
                     }
-                }
-                Command::N64Comfort(menu, action) => {
-                    if !platform::menu_current(menu)
-                        || !selected.is_some_and(|i| {
-                            collection.entries[i].system == ntx::backend::System::Nintendo64
-                        })
-                    {
-                        continue;
-                    }
-                    let mut settings = UI.lock().map_err(|_| "controls lock poisoned")?.controls();
-                    match action {
-                        13 => settings.opacity = settings.opacity.saturating_sub(10).max(30),
-                        14 => settings.opacity = (settings.opacity + 10).min(100),
-                        15 => settings.haptics = !settings.haptics,
-                        16 => {
-                            settings.dead_zone = match settings.dead_zone {
-                                0..=4 => 12,
-                                5..=15 => 20,
-                                _ => 0,
-                            }
-                        }
-                        _ => continue,
-                    }
-                    if let Err(e) = settings.save(&root) {
-                        platform::notice(app, format!("Could not preserve controls: {e}"));
-                        continue;
-                    }
-                    if let Ok(mut view) = crate::n64_host::view().lock() {
-                        view.configure_dead_zone(settings.dead_zone);
-                    }
-                    if let Ok(mut ui) = UI.lock() {
-                        ui.configure_controls(settings.clone());
-                    }
-                    platform::n64_controls_menu(
-                        app,
-                        runtime.as_ref().map_or(0, |r| r.events.epoch),
-                        &settings,
-                    );
                 }
                 Command::About(menu) => {
                     if platform::menu_current(menu) {

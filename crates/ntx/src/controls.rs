@@ -13,6 +13,8 @@ pub struct Settings {
     pub haptics: bool,
     pub floating_sticks: bool,
     pub profiles: Vec<Profile>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub n64_profiles: Vec<crate::n64_controls::Profile>,
 }
 impl Default for Settings {
     fn default() -> Self {
@@ -23,6 +25,7 @@ impl Default for Settings {
             haptics: true,
             floating_sticks: true,
             profiles: Vec::new(),
+            n64_profiles: Vec::new(),
         }
     }
 }
@@ -43,12 +46,12 @@ pub fn display_key(width: f32, height: f32) -> String {
     let points = |n: f32| ((n.clamp(1., 8192.) / 8.).round() * 8.) as u32;
     format!("{}x{}", points(width), points(height))
 }
-fn finite(a: Area) -> bool {
+pub(crate) fn finite(a: Area) -> bool {
     [a.left, a.top, a.right, a.bottom]
         .iter()
         .all(|v| v.is_finite())
 }
-fn overlaps(a: Area, b: Area) -> bool {
+pub(crate) fn overlaps(a: Area, b: Area) -> bool {
     a.left < b.right - 0.25
         && a.right > b.left + 0.25
         && a.top < b.bottom - 0.25
@@ -56,6 +59,7 @@ fn overlaps(a: Area, b: Area) -> bool {
 }
 impl Settings {
     pub fn validate(&self) -> io::Result<()> {
+        crate::n64_controls::validate_profiles(&self.n64_profiles)?;
         let invalid = || {
             io::Error::new(
                 io::ErrorKind::InvalidData,
@@ -120,7 +124,13 @@ impl Settings {
     }
     pub fn save(&self, root: &Path) -> io::Result<()> {
         self.validate()?;
-        crate::storage::atomic_replace(&root.join("controls.json"), &serde_json::to_vec(self)?)
+        let bytes = serde_json::to_vec(self)?;
+        if bytes.len() > 65536 {
+            return Err(io::Error::other(
+                "Controls settings exceed size limit; original retained",
+            ));
+        }
+        crate::storage::atomic_replace(&root.join("controls.json"), &bytes)
     }
     pub fn layout(&self, width: f32, height: f32) -> Layout {
         let mut layout = Layout::new(width, height);

@@ -1,6 +1,6 @@
 schema_version = 1
 product = "ntx"
-classification = "NTX5_N64_PLAYABLE_SAVE_COLD_RELOAD_CONTINUITY_PENDING"
+classification = "NTX5_N64_PLAYABLE_FRESH_SCENES_CROSS_SYSTEM_ALPHA_CONTROLS_PENDING"
 repository = "WigglyDon/ntx"
 repository_id = 1429193278
 branch = "main"
@@ -8,7 +8,7 @@ pre_succession_head = "b3a02e570e9f63e94d897c688a2f5f850b054ae6"
 active_issue = "https://github.com/WigglyDon/ntx/issues/5"
 architecture_amendment = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6505289270"
 handoff = "docs/NTX_HANDOFF.md"
-source_status = "Full active identity/migration and canonical GameCube boundary verified. Installed source1dc7db2/APK1cb108de now passes N64 in-game pause/Save, ordinary-save cold reload, analog movement and normal joined Stop. Supported machine/cross-system continuity remains unfinished"
+source_status = "Canonical identity/migration verified. Installed1cb/source1dc passes N64 play/Save/cold reload, native-unloaded scene return, fresh-process GC and N64 scenes and GC/N64/GC switching; independent saves retained. N64 drag/resize layout and actual-target multi-input/layout-persistence qualification remain alpha gaps"
 active_systems = ["GameCube: retained direct Dolphin and canonical package", "Nintendo64: pinned Mupen Rust host; one-cartridge play/Save/cold reload verified on Pixel4"]
 axes = "Host platform/device, emulated system and execution backend are independent"
 session_model = "Many independent open/resumable games; one foreground runtime initially is scheduling policy, not permanent architecture"
@@ -23,7 +23,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Supported per-game checkpoint return and cross-system switching, preserving current ordinary saves. Reuse earned N64 play/audio/Save/cold reload and earlier GameCube campaigns. Actual custody and prepared task inputs remain private; Fold needs its fresh personal window"
+next_step = "Complete N64 layout editing with independent system-correct targets using existing Rust editor facilities, then focused actual-target simultaneous-input and layout-persistence checks. Reuse all earned play/save/scene/switch evidence. No repeated campaigns; actual capacity/custody required"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 intro hitches: owner observed, unmeasured", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -122,3 +122,9 @@ source = "1dc7db2fe32578e5d50c06cec64fa7624f9ac48c"
 observed = "N64 unsaved room position captured, native Mupen joined/unloaded, direct Dolphin WW frame observed, WW captured/joined, new Mupen runtime restored the unsaved N64 position/camera. Separate game/profile/checkpoint references retained; current N64 ordinary generation2/image unchanged on restore"
 return = "Final normal N64 Stop, client retirement and actual OFF return completed. Both independent GC cards and every untouched TP profile file unchanged; expected WW backend SRAM/cache/new scenes retained"
 limits = "One application process with sequential native runtimes; no simultaneous instances or fresh-process machine-restore result. Next prepared slice covers fresh-process scenes and GC/N64/GC return; ordinary cold reload is already earned"
+
+[pixel_full_scene_20261102]
+source = "1dc7db2fe32578e5d50c06cec64fa7624f9ac48c"
+observed = "Fresh-process WW native scene restore acknowledged; GC/N64/GC scene return passed. N64 unsaved right-side room position checkpointed and unloaded through normal native join. GC stopped normally; old process absence verified, new cold process restored that N64 position/camera from its retained checkpoint with ordinary generation2 unchanged"
+return = "USB ADB disappeared before final Stop. Subsequent cleanup-only normal Stop, own-client retirement and actual OFF return passed; original GCcards, current N64 ordinary data and untouched TP profile byte-identical. Original failure retained and recovery linked; no shared-server/bus reset"
+controls = "N64-specific controls/menu and picture inspected; no setting changes. Drag/resize layout editing and actual-target input-combination/layout-persistence qualification remain unfinished"

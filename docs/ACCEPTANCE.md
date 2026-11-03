@@ -30,7 +30,9 @@ presentation; no renderer/performance fix is claimed. A subsequent N64 → direc
 room position/camera after actual capture/join/unload, with independent references
 and current ordinary generation unchanged on return. Normal Stop/actual return,
 unchanged GC cards and untouched TP profile passed. This used one app process;
-fresh-process machine scenes and representative GC/N64/GC return remain pending. Some intro hitches were owner-observed. See
+later fresh-process GameCube and N64 scene restores and GC/N64/GC also passed,
+with native joins, current saves and actual return verified. N64 drag/resize
+layout and actual-target simultaneous-input/layout-persistence checks remain due. Some intro hitches were owner-observed. See
 [the exact migration boundary](IDENTITY_MIGRATION.md).
 
 ## Earned GameCube baseline: preserve, do not replay

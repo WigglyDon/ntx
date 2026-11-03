@@ -193,7 +193,6 @@ pub enum Command {
     Library,
     Controls(u64, f32, f32),
     ApplyControls(u64, ntx::controls::Settings),
-    N64Comfort(u64, i32),
     ControlsBack(u64),
     About(u64),
     Game(String),
@@ -343,7 +342,12 @@ fn sdk(env: &mut JNIEnv<'_>) -> Result<i32> {
 }
 /// App-window policy only. No gesture exclusion, global settings or navigation
 /// mode changes. Stable inset clearance remains even during transient reveals.
-fn playing_window(env: &mut JNIEnv<'_>, activity: &JObject<'_>, playing: bool) -> Result<()> {
+fn playing_window(
+    env: &mut JNIEnv<'_>,
+    activity: &JObject<'_>,
+    playing: bool,
+    editing: bool,
+) -> Result<()> {
     let window = env
         .call_method(activity, "getWindow", "()Landroid/view/Window;", &[])?
         .l()?;
@@ -352,7 +356,11 @@ fn playing_window(env: &mut JNIEnv<'_>, activity: &JObject<'_>, playing: bool) -
     // showing the paused/library menu restores the normal display timeout.
     env.call_method(
         &window,
-        if playing { "addFlags" } else { "clearFlags" },
+        if playing || editing {
+            "addFlags"
+        } else {
+            "clearFlags"
+        },
         "(I)V",
         &[JValue::Int(0x80)], // FLAG_KEEP_SCREEN_ON; no wake-lock permission.
     )?;
@@ -643,7 +651,14 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_windowFocus(
     }
     trace_current("focus", if focused != 0 { "gained" } else { "lost" });
     if focused != 0 {
-        if playing_window(&mut env, &activity, PLAYING.load(Ordering::Acquire)).is_err() {
+        if playing_window(
+            &mut env,
+            &activity,
+            PLAYING.load(Ordering::Acquire),
+            controls_ui::active(),
+        )
+        .is_err()
+        {
             diagnostic("Could not apply app-local system-bar mode");
             let _ = env.exception_clear();
         }
@@ -765,7 +780,7 @@ pub fn picker(app: &AndroidApp, initial_uri: Option<&str>) {
         }
         let result = with_env(|env, activity| {
             PLAYING.store(false, Ordering::Release);
-            playing_window(env, activity, false)?;
+            playing_window(env, activity, false, false)?;
             let action = env.new_string("android.intent.action.OPEN_DOCUMENT")?;
             let intent = env.new_object(
                 "android/content/Intent",
@@ -1126,29 +1141,17 @@ pub fn controls_menu(
 pub fn about_menu(app: &AndroidApp) {
     render_menu(app,true,"ntx\nAlpha 1 · GameCube + N64\n\nYour games. Open, play, leave, return.\nMade by Machine Rhythm.\n\nBuilt with Dolphin and Mupen64Plus-Next. Original ntx work is MIT. The combined package follows applicable GPLv3 and component terms; no warranty.\nSource and notices: github.com/WigglyDon/ntx".into(),vec![(6,"Back to your games".into())],0);
 }
-pub fn n64_controls_menu(app: &AndroidApp, runtime: u64, settings: &ntx::controls::Settings) {
-    render_menu(
+pub fn n64_controls_menu(
+    app: &AndroidApp,
+    runtime: u64,
+    width: f32,
+    height: f32,
+    settings: ntx::controls::Settings,
+) {
+    controls_ui::show_n64(
         app,
-        true,
-        format!(
-            "N64 touch controls\n\nOne analog stick, four C buttons, digital L/R and Z.\nVisibility: {}% · Stick dead zone: {}%",
-            settings.opacity, settings.dead_zone
-        ),
-        vec![
-            (13, "Less visible controls".into()),
-            (14, "More visible controls".into()),
-            (
-                15,
-                if settings.haptics {
-                    "Turn touch feedback off".into()
-                } else {
-                    "Turn touch feedback on".into()
-                },
-            ),
-            (16, "Change stick dead zone".into()),
-            (11, "Back to your games".into()),
-        ],
         runtime,
+        ntx::n64_controls::Editor::new(width, height, settings),
     );
 }
 fn render_menu_with_games(
@@ -1158,7 +1161,7 @@ fn render_menu_with_games(
     actions: Vec<(i32, String)>,
     runtime: u64,
     games: Vec<(String, String)>,
-    controls: Option<ntx::controls::Editor>,
+    controls: Option<controls_ui::Editing>,
 ) {
     let epoch = EPOCH.load(Ordering::Acquire);
     let generation = MENU_GENERATION.fetch_add(1, Ordering::AcqRel) + 1;
@@ -1189,7 +1192,7 @@ fn render_menu_with_games(
                 "window.policy.begin",
                 if show { "menu" } else { "playing" },
             );
-            playing_window(env, activity, !show)?;
+            playing_window(env, activity, !show, editing)?;
             trace(runtime, generation, "window.policy.end", "ok");
             let old = MENU.lock().map_err(|_| "menu lock poisoned")?.take();
             if let Some(dialog) = old {
@@ -1737,7 +1740,6 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_uiAction(
             }
         }
         11 => push(Command::ControlsBack(menu as u64)),
-        13..=16 => push(Command::N64Comfort(menu as u64, action)),
         17 => push(Command::ConfirmLegacyMedia(menu as u64)),
         20..=25 if controls_ui::action(&mut env, action, menu as u64).is_err() => {
             let _ = env.exception_clear();

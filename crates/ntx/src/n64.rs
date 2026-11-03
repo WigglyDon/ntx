@@ -43,7 +43,7 @@ impl Cartridge {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[repr(usize)]
 pub enum Button {
     A,

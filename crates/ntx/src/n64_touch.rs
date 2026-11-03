@@ -8,7 +8,7 @@ use crate::{
 };
 use std::collections::BTreeMap;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum Target {
     Button(Button),
     Stick,
@@ -28,8 +28,18 @@ pub struct View {
     pulses: [bool; 14],
     pub sampled: Pad,
     dead_zone: u8,
+    profiles: Vec<crate::n64_controls::Profile>,
 }
 impl View {
+    pub fn configure(&mut self, settings: &crate::controls::Settings) {
+        self.configure_dead_zone(settings.dead_zone);
+        if self.profiles != settings.n64_profiles {
+            self.cancel();
+            self.profiles.clone_from(&settings.n64_profiles);
+            let geometry = self.measured.take();
+            self.measure(geometry);
+        }
+    }
     pub fn configure_dead_zone(&mut self, percent: u8) {
         let percent = percent.min(25);
         if self.dead_zone != percent {
@@ -132,6 +142,7 @@ impl View {
             Target::Button(Button::Start),
             "S",
         );
+        crate::n64_controls::apply_profile(&self.profiles, &mut self.zones, a, g.density);
     }
     pub fn cancel(&mut self) {
         self.pointers.clear();
