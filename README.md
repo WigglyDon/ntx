@@ -7,20 +7,19 @@ named gcx. It is the Nintendo member of Machine Rhythm's five emulator products.
 GameCube works through the maintained direct Dolphin adapter. Nintendo 64 through
 Mupen64Plus-Next now has a verified playable Ocarina slice on Pixel4.
 
-Active crates/native/JNI/build/branding now use ntx and com.machinerhythm.ntx.
-An offline staged migration tool preserves identities, ordinary progress and
-legacy recovery scenes; schema 2 separates system/backend routing. The retained
-legacy GameCube installation remains retained. The canonical ntx package is also
-installed with migrated data. A renamed GameCube APK has been built, signed and preserved with its exact
-source. The pinned ARM64 N64 core now compiles, with Rust host, graphics/audio,
-controls and independent profile/save/scene routing implemented. A combined GameCube/N64 package is also built and privately preserved with its
-source. Pixel4 data migration now preserves both original game/profile pairs and exact
-ordinary data, with source retained and return verified. Pixel4 media grants and a
-short canonical-package GameCube boundary are also verified. Fresh-process scenes and cross-system return are now verified. N64 editable-layout
-and simultaneous-input/persistence qualification are the remaining alpha boundary. The audio handoff repair now reaches first-room
-N64 control with clear sound and an observed ordinary-file cold reload. The GL error attribution repair now passes the affected in-game pause/Save route;
-ordinary saves survive a full-process cold reload into the room and controls respond. See the
-[migration boundary](docs/IDENTITY_MIGRATION.md) and [N64 pin/audit](native/mupen/README.md).
+Canonical source, Android package/JNI, data and links now use ntx. Protected
+Pixel4 migration preserves both original GameCube game/profile identities and
+ordinary progress; the source installation and recovery material are retained.
+Ocarina shares the collection with both GameCube games. Its controls, in-game
+Save, ordinary cold reload, fresh-process scene return and sequential cross-system
+switching are verified. Clear sound retains its prior human-observed build bounds;
+intro hitches and historical lifecycle incidents remain disclosed.
+
+The N64 Rust layout editor is implemented and its signed candidate/source are
+privately preserved. Actual-target drag/resize, simultaneous input and layout
+persistence remain the next alpha check through normal custody. See the
+[migration boundary](docs/IDENTITY_MIGRATION.md), [acceptance](docs/ACCEPTANCE.md)
+and [N64 pin/audit](native/mupen/README.md).
 
 Read [AGENTS.md](AGENTS.md), [successor handoff](docs/NTX_HANDOFF.md),
 [NTX-5](https://github.com/WigglyDon/ntx/issues/5) and its

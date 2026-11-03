@@ -20,8 +20,12 @@ now passes the affected in-game pause/Save route, normal joined Stop, verified
 full-process ordinary-save cold reload directly into the room, and analog movement.
 One preexisting backend GL0502 flag was observed at game pause while host
 presentation continued; its renderer cause is not claimed fixed. Independent
-GameCube profiles were unchanged and actual return passed. Supported machine
-restore and cross-system acceptance remain open.
+GameCube profiles were unchanged and actual return passed. Later focused checks
+verified sequential native-unloaded scene return, fresh-process N64 and GameCube
+scenes, and GameCube/N64/GameCube switching with independent ordinary saves.
+The ready source87f3641 N64 layout editor still needs actual-target simultaneous
+input and layout-persistence qualification. Concurrent native instances, broader
+compatibility and performance are not inferred.
 
 ## Source and reproduction
 
