@@ -8,7 +8,7 @@ pre_succession_head = "b3a02e570e9f63e94d897c688a2f5f850b054ae6"
 active_issue = "https://github.com/WigglyDon/ntx/issues/5"
 architecture_amendment = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6505289270"
 handoff = "docs/NTX_HANDOFF.md"
-source_status = "Canonical identity/migration verified. Installed1cb/source1dc passes N64 play/Save/cold reload, native-unloaded scene return, fresh-process GC and N64 scenes and GC/N64/GC switching; independent saves retained. Installed source87f3641/APK97930ed passes N64 drag/resize Save, Cancel, fresh-process runtime layout and shared GameCube editor boundaries; protected update and exact preference undo verified. Actual-target simultaneous stick/A, independent release and cancellation pass. Canonical GC title/attract Home/HOT return/Pause/Resume/joined Stop is now observed with current cards unchanged; review and disclosed limits remain open"
+source_status = "Canonical identity/migration verified. Baseline1cb/source1dc earned N64 play/Save/cold reload, native-unloaded scene return, fresh-process GC and N64 scenes and GC/N64/GC switching; independent saves retained. Installed source87f3641/APK97930ed passes N64 drag/resize Save, Cancel, fresh-process runtime layout and shared GameCube editor boundaries; protected update and exact preference undo verified. Actual-target simultaneous stick/A, independent release and cancellation pass. Canonical GC title/attract Home/HOT return/Pause/Resume/joined Stop is now observed with current cards unchanged; review and disclosed limits remain open"
 active_systems = ["GameCube: retained direct Dolphin and canonical package", "Nintendo64: pinned Mupen Rust host; one-cartridge play/Save/cold reload verified on Pixel4"]
 axes = "Host platform/device, emulated system and execution backend are independent"
 session_model = "Many independent open/resumable games; one foreground runtime initially is scheduling policy, not permanent architecture"
@@ -154,3 +154,7 @@ installed_source = "87f364167bd5b34f299dc785b410a370c3132a2d"
 observed = "Canonical direct Dolphin WW title/attract execution, stock Home verified without launcher capture, native pause and durable checkpoint, normal HOT return in same process with new frames, app Pause/Resume with new native playing/presentation acknowledgments and subsequent image advancement, then normal joined Stop"
 return = "Current GameCube cards, N64 ordinary data, untouched second profile and exact original preferences unchanged; own process absent and actual physical OFF return verified. No NTX held lease, pending phone task or recovery"
 limits = "One title/attract route, not a new in-world or current-file load qualification, timing/endurance campaign or historical freeze cure. USB briefly refused read-only focus queries before reentry; same held lease reverified current Home after transport recovered before normal return. Initial black Resume image was followed by actual advancing images; not called frozen"
+
+[acceptance_review]
+status = "Open; bounded Pixel outcomes reported, no issue closed or public binary released"
+final_outcome = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6594210587"

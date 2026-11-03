@@ -8,7 +8,8 @@ No second worker, sibling change, donor reset or retired campaign.
 
 Canonical ntx identity/package/data migration is implemented and verified on
 Pixel4 with original GameCube identities/progress and source installation retained.
-Installed source1dc7db2/APK1cb108de now runs Ocarina alongside both GameCube games.
+First-playable source1dc7db2/APK1cb108de verified Ocarina alongside both GameCube
+games; the current installed successor is source87f3641/APK97930edd below.
 In-game Save, ordinary cold reload and analog movement passed. Sequential native
 scene return, fresh-process GameCube and N64 scene restores, and GC/N64/GC passed.
 Normal Stop/actual return were verified after USB reconnection; original GCcards,
@@ -28,7 +29,8 @@ This was title/attract execution, not a new in-world/current-file load check or 
 historical-freeze cure. Brief USB read failure before reentry recovered under the
 same lease; no failed mutation was replayed.
 
-The requested playable N64 and bounded Pixel alpha evidence are ready for review.
+The [final NTX-5 handback](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6594210587)
+records the playable N64 and bounded Pixel alpha evidence for review.
 Keep issues open and all earned results/build limits. Next concrete defects remain
 unmeasured N64 intro hitches/backend GL origin and the retained historical Pixel/
 Fold reports. Do not start another device/quest/save/timing campaign merely from
