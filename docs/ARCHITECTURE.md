@@ -8,7 +8,9 @@ preserved; Pixel4 app-side data migration is verified with the original IDs and
 ordinary bytes retained. Document regrant and a short current-package GameCube
 boundary are verified. The pinned N64 core compiles
 and the Rust execution/Android resource/save/scene implementation is in source;
-A combined package is linked/audited; device acceptance remains unfinished. The preserved GameCube baseline is documented in
+The combined package has bounded Pixel4 play, ordinary-save/cold reload, scene return
+and alpha-control observations; acceptance remains open at the exact build bounds
+in docs/state.toml. The preserved GameCube baseline is documented in
 [historical architecture](history/GCX_ARCHITECTURE.md) and native/README.md.
 
 ## Three independent axes
@@ -115,7 +117,8 @@ Mupen's libco callbacks can run on an alternate stack on that same owner thread.
 The audio callback only copies PCM into an instance-owned bounded Rust queue;
 Android drains it through AudioTrack JNI after the core returns to the host stack.
 Pause clears queued samples before silencing output. This repairs the observed
-managed-runtime boundary; actual device qualification remains required.
+managed-runtime boundary; the retained Pixel4 slice has human clear-audio and
+ordinary-save/scene observations at their recorded build bounds.
 N64 ordinary generations and checkpoints have their own Rust owners and do not
 reuse Dolphin cards or machine containers. Exact native/options/architecture/
 media/profile/ordinary bindings are checked; failed restores cannot publish native

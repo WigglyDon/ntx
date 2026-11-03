@@ -129,3 +129,30 @@ passed; custodian completed/returned=true with no NTX hold or recovery. Keep the
 historical GL0502/Pixel/Fold incidents and acceptance issues open. Do not replay
 closed save/scene/timing campaigns from this result.
 [Verified cache outcome](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6614505085).
+
+
+Sourcec3086e2/APKa2f46b65 is now installed and verified on Pixel4. The new Rust
+cache guard covers both native locations, including direct backend fallback.
+Its fixture fails before and passes after while preserving exact malformed bytes,
+same-name recovery candidates, unknown progress and idempotent retry. All116
+library tests, host/ARM64 warnings-denied checks and signed corresponding-source
+bindings pass; native core43508a7b/options remain unchanged.
+
+The bounded same-call CPU diagnostic obtained4096 valid readings. Eight calls
+exceeded40ms; all eight spent at least half their elapsed time on the owner thread,
+including seven without measured shader work. Matched slow-call means were
+180.651ms elapsed/169.972ms CPU/10.678ms remainder. This narrows work inside the
+owner thread; guest/dynarec/CPU-driver routine is still unknown. A shader-bearing
+startup call reached946.435ms after the package update; same-call residual maximum
+was132.936ms. Driver warmth differs from the previous same-installation pair; no
+new speed improvement or regression is established. Both cache files were accepted
+and expanded normally at Stop. Initial title rendered; a single pre-Pause capture
+had a gray field, followed by the normal Pause menu. Its cause/duration is unknown,
+not an established sustained freeze or renderer cure.
+
+Normal Stop/native join, exact preferences/protected ordinary/cards/untouched
+profile/identities/source installation and physicalOFF return passed. Custodian
+completed/returned=true; no NTX task/hold/recovery remains. Preserve prior earned
+campaign/build bounds and open incidents; do not repeat closed campaigns from this
+report. The earlier unacquired trace request was cancelled with no acquisition.
+[Latest guarded-cache/CPU outcome](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6615662768).

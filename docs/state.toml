@@ -1,6 +1,6 @@
 schema_version = 1
 product = "ntx"
-classification = "NTX5_N64_SHADER_CACHE_VERIFIED_RESIDUAL_STALLS_OPEN"
+classification = "NTX5_N64_SLOW_CALL_CPU_OBSERVED_ROUTINE_OPEN"
 repository = "WigglyDon/ntx"
 repository_id = 1429193278
 branch = "main"
@@ -9,10 +9,10 @@ active_issue = "https://github.com/WigglyDon/ntx/issues/5"
 architecture_amendment = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6505289270"
 handoff = "docs/NTX_HANDOFF.md"
 source_status = "Canonical identity/migration verified. Baseline1cb/source1dc earned N64 play/Save/cold reload, native-unloaded scene return, fresh-process GC and N64 scenes and GC/N64/GC switching; independent saves retained. Earlier source87f3641/APK97930ed passes N64 drag/resize Save, Cancel, fresh-process runtime layout and shared GameCube editor boundaries; protected update and exact preference undo verified. Actual-target simultaneous stick/A, independent release and cancellation pass. Canonical GC title/attract Home/HOT return/Pause/Resume/joined Stop is now observed with current cards unchanged; review and disclosed limits remain open"
-current_editor_source = "a9e465f92ae3330b0f6b22871063ecef56e5e8ae"
-installed_editor_source = "a9e465f92ae3330b0f6b22871063ecef56e5e8ae"
-installed_editor_apk_sha256 = "e98f7e4e3369f905a960ea42963aa58dbaef97f5c6a02a785781f5c7d761f18a"
-ready_editor_apk_sha256 = "e98f7e4e3369f905a960ea42963aa58dbaef97f5c6a02a785781f5c7d761f18a"
+current_editor_source = "c3086e2dac6270b55ba619de917c0a27f0b62778"
+installed_editor_source = "c3086e2dac6270b55ba619de917c0a27f0b62778"
+installed_editor_apk_sha256 = "a2f46b6533fd0b0acb9f6f6ec9bf62fb08ee4051cd8858436dcbae361e338a24"
+ready_editor_apk_sha256 = "a2f46b6533fd0b0acb9f6f6ec9bf62fb08ee4051cd8858436dcbae361e338a24"
 active_systems = ["GameCube: retained direct Dolphin and canonical package", "Nintendo64: pinned Mupen Rust host; one-cartridge play/Save/cold reload verified on Pixel4"]
 axes = "Host platform/device, emulated system and execution backend are independent"
 session_model = "Many independent open/resumable games; one foreground runtime initially is scheduling policy, not permanent architecture"
@@ -27,10 +27,10 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Review the verified cache remedy and investigate residual N64 core-call stalls using narrower source evidence. Warm title first4096 now has7 calls above40ms/max130.280ms versus cold24/max238.431ms in one same-build pair. Preserve actual fingerprints, progress and prior evidence. No NTX task, hold or recovery remains; no automatic repeat of closed campaigns, Fold operation or public binary release"
+next_step = "Narrow work within the pinned core owner thread: eight slow calls all met >=50% calling-thread CPU, including seven without measured shader work. Exact guest/dynarec/driver routine remains open. Preserve earned play/save/layout evidence and actual native/options bindings. No pending NTX phone task/hold/recovery or automatic closed-campaign repeat"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
-open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 intro hitches reduced in one cache cold/warm pair:24 to7 core calls above40ms, maximum238.431 to130.280ms. Residual stalls remain; whole-game hitch cure and exact residual cause unqualified", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
+open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 hitches: prior same-installation cache pair24 to7 slow calls. New package trace has8 slow CPU-heavy calls, shader-bearing startup946.435ms/residual132.936ms. Exact routine unqualified", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Single pre-Pause gray field in latest bounded title check: duration/cause unknown; normal Pause and Stop followed", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
 resources = "No outstanding gcx return obligation at succession reconciliation; no phone test or new reservation authorized by relocation; normal installed policy remains authoritative"
 legacy_detail = "docs/history/gcx-state.toml and docs/history/GCX_ACCEPTANCE.md are historical evidence, never active priorities or proof retired inputs exist"
 
@@ -54,7 +54,7 @@ resume_limit = "Checked native restore results and state-job yields implemented;
 device_actions = "Installed87f3641/APK97930ed protected update retains original signer, all three identities and every prior file. N64 layout Save/Cancel/cold native loading, actual isolated two-pointer release/cancel and shared GC editor verified. Canonical GC title/attract Home return/Pause/Resume/Stop observed; exact preferences/current cards/N64 ordinary/untouched profile and actual OFF return verified. No Fold operation or outstanding NTX custody"
 
 [validation]
-host = "114 portable library tests passed, including N64 layout/persistence/independent-input fixtures and GLES3 callback ABI, deferred copied PCM ordering/bounds/silence/failure handling, foreground game identity and frame deadlines; retained 15 decoder and 3 integration checks; host all-targets and ARM64 Android lints deny warnings"
+host = "116 portable library tests passed, including N64 layout/persistence/independent-input fixtures and GLES3 callback ABI, deferred copied PCM ordering/bounds/silence/failure handling, foreground game identity and frame deadlines; retained 15 decoder and 3 integration checks; host all-targets and ARM64 Android lints deny warnings"
 helpers = "99 offline packet fixtures passed, including bounded prepared inspection, expiry/focus rejection, single-use contacts and empty viewport-read retries"
 n64_inspector = "Protected-copy-only native-free inspector source63a7479 validates the actual N64 container against an independent binding and current ordinary generation/image. Focused integration fixture preserves valid-copy bytes and rejects wrong-core and changed-ordinary inputs; warnings-denied bin/test Clippy passed. No native restore or device result follows"
 lints = "Warnings-denied host all-targets including native declarations and ARM64 Android Clippy passed; no mock native library or fingerprints"
@@ -266,3 +266,31 @@ warm_first4096 = "Core above40ms7, max130280us; shader frames1; compile59 max277
 return = "Both normal Stops/native joins, unchanged N64 ordinary/cards/untouched TP, original preferences/source installation/identities and physicalOFF verified. Custodian COMPLETED/returned=true; no NTX request/hold/recovery"
 limits = "One same-build title pair, includes startup/preloading and driver warmth. Reused files plus native program checks observed; no isolation of all driver-cache effects or whole-game hitch cure. Seven residual core calls remain above40ms. No new audible-output/display-rate/CPU utilization, portrait/Fold/concurrency or old-scene compatibility claim"
 report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6614505085"
+
+[n64_core_work]
+source = "c3086e2dac6270b55ba619de917c0a27f0b62778"
+ready_apk_sha256 = "a2f46b6533fd0b0acb9f6f6ec9bf62fb08ee4051cd8858436dcbae361e338a24"
+core_sha256 = "43508a7be6e934eed68075ed50c396b437a02589a474446c8b66404738066edc"
+implementation = "Bounded Rust same-call elapsed/owner-thread CPU comparison for slow core calls, first4096 only. Unavailable/invalid clocks reported, no scheduling or core/options changes"
+validation = "116 library tests; matched call/strict threshold/missing-invalid-clock/fixed-bound fixture; host all-targets and ARM64 warnings-denied checks; signed package/original signer/source inventory/corresponding source verified"
+status = "PIXEL_MATCHED_CPU_OBSERVED_NATIVE_ROUTINE_OPEN"
+
+[n64_cache_fallback_guard]
+source = "c3086e2dac6270b55ba619de917c0a27f0b62778"
+problem = "Pinned getStorageFileName falls back directly into backend if its shaders-directory creation fails; validating only the nested directory left that native read path uncovered"
+repair = "Rust checks both exact native loader locations and retains malformed derivatives in separate fresh recovery directories. Matching names never overwrite each other; unknown ordinary files remain untouched"
+validation = "Focused fixture fails before and passes after, covering missing shaders directory, malformed same-name files in both locations, exact recovery bytes, retained earlier recovery, idempotent retry and untouched progress. All116 library tests and host/ARM64 warnings-denied checks pass"
+limits = "Source regression proof, no deliberate corrupt-cache or low-storage phone campaign"
+
+[n64_core_work.pixel_v31]
+coverage = "4096 calls, zero unavailable or invalid CPU-clock readings. Eight calls above40ms, all eight with at least half their elapsed time on the calling thread; seven had no measured shader work"
+matched_wall = { samples = 8, mean_us = 180651, max_us = 946435 }
+matched_thread_cpu = { samples = 8, mean_us = 169972, max_us = 899332 }
+matched_off_thread = { samples = 8, mean_us = 10678, max_us = 47103 }
+shader = "One shader-bearing startup call;59 compiles max23446us and46 links max19711us,37 binary program checks. Same-call shader subtraction leaves eight residuals over40ms, max132936us. No unrelated maxima subtraction"
+cache = "Guard accepted both previous files; normal Stop expanded derived keys725 to744bytes and binary211493 to217640bytes. Ordinary data unchanged. Native core/options unchanged; APK update/driver warmth differs from prior same-installation warm pair"
+observation = "Initial full-height title rendered. One fresh pre-Pause capture showed a solid gray game field, followed by the normal Pause menu and joined Stop; no sustained freeze or gray-frame cause established. Zero backend GL flags observed on this route"
+return = "COMPLETED/returned=true; normal native join, exact original preferences, protected N64 ordinary/cards/untouched profile, all IDs/source installation and physicalOFF verified. No NTX hold/request/recovery"
+inference = "Slow calls consume substantial owner-thread CPU, including seven without shader work; waiting/descheduling alone does not explain them. Guest/dynarec/CPU-driver cause remains unqualified. New shader-bearing startup maximum946.435ms is disclosed, not a before/after speed regression or new hitch cure"
+limits = "First4096 title calls including startup; no fresh audible/display rate, complete-game rendering, Fold/concurrency/portrait or old-scene compatibility claim. Corrupt-cache/low-storage behavior has source fixture proof only"
+report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6615662768"

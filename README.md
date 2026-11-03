@@ -36,12 +36,13 @@ editing, GameCube field resize, saved native placement and Cancel. See
 [current state](docs/state.toml) for exact build and verification bounds. Android
 currently requests landscape; portrait geometry has portable model coverage.
 
-N64 deadlines retain cadence through wake-up jitter. A corrected Pixel4 trace
-observes shader compile/link work in19 of24 slow core calls; eight residual
-stalls remain above40ms after subtracting each call’s own shader time.
-The host now guards and retains per-profile shader caches before native loading.
-See the [shader report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6614505085)
-and [current state](docs/state.toml) for target results and remaining limits.
+N64 deadlines retain cadence through wake-up jitter. A bounded same-installation
+cold/warm title pair verifies shader-cache reuse and reduces core calls above40ms
+from24 to7. The host now guards both native cache locations. A subsequent trace
+finds substantial owner-thread CPU in the remaining slow calls, including seven
+without measured shader work; exact native routines and intro hitches remain open.
+See the [latest diagnostic](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6615662768)
+and [current state](docs/state.toml) for startup costs and verification limits.
 
 Read [AGENTS.md](AGENTS.md), [successor handoff](docs/NTX_HANDOFF.md),
 [NTX-5](https://github.com/WigglyDon/ntx/issues/5) and its
