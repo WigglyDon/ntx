@@ -53,3 +53,20 @@ Speedrunner/quest-progression automation is retired. Preserve historical defects
 without requiring that every unrepeatable report be disproved before product work.
 Use short representative changed-behavior checks, protected saves and honest limits.
 Optional shortcut limitations do not block the whole alpha.
+
+
+## Default picture and touch placement
+
+Every game defaults to the largest complete picture at its backend-reported
+aspect within the full drawable: full height in landscape and full width in
+portrait when that aspect permits. Do not reserve control rails or gesture/content
+margins inside the picture, stretch it, or crop gameplay. Place console-correct
+touch controls in the unused side/bottom space without overlap. Preserve semantic
+button groups when a narrow region needs a compact arrangement. Rendering,
+editing and hit testing use the same measured geometry.
+
+Existing custom layouts retain their explicit meaning. Fitting the picture around
+controls and allowing overlap are explicit alternatives. If the drawable leaves
+no usable control space, pause for that choice; do not silently change the default
+or publish an unusable layout. Picture/control preferences remain separate from
+game identity, ordinary saves and machine continuation.

@@ -18,6 +18,8 @@ pub struct Profile {
     /// Normalized game-field bounds within the complete drawable.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub picture: Option<Area>,
+    #[serde(default = "crate::layout_edit::PicturePolicy::legacy")]
+    pub picture_policy: crate::layout_edit::PicturePolicy,
 }
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -138,6 +140,48 @@ fn preview(width: f32, height: f32, settings: &Settings) -> View {
     }));
     view
 }
+pub(crate) fn groups(zones: &[Zone]) -> Vec<Vec<usize>> {
+    let mut groups = vec![
+        zones
+            .iter()
+            .enumerate()
+            .filter(|(_, z)| {
+                matches!(
+                    z.target,
+                    Target::Button(crate::n64::Button::A | crate::n64::Button::B)
+                )
+            })
+            .map(|(i, _)| i)
+            .collect(),
+    ];
+
+    for buttons in [
+        [
+            crate::n64::Button::CUp,
+            crate::n64::Button::CDown,
+            crate::n64::Button::CLeft,
+            crate::n64::Button::CRight,
+        ],
+        [
+            crate::n64::Button::Up,
+            crate::n64::Button::Down,
+            crate::n64::Button::Left,
+            crate::n64::Button::Right,
+        ],
+    ] {
+        groups.push(
+            zones
+                .iter()
+                .enumerate()
+                .filter(|(_, z)| matches!(z.target,Target::Button(b) if buttons.contains(&b)))
+                .map(|(i, _)| i)
+                .collect(),
+        );
+    }
+
+    groups.retain(|g: &Vec<usize>| g.len() > 1);
+    groups
+}
 pub struct Editor {
     pub settings: Settings,
     pub zones: Vec<Zone>,
@@ -156,52 +200,17 @@ impl Editor {
         default_settings.n64_profiles.clear();
         let defaults = preview(width, height, &default_settings);
         let layout = &test;
-        let mut groups = vec![
-            layout
-                .zones
-                .iter()
-                .enumerate()
-                .filter(|(_, z)| {
-                    matches!(
-                        z.target,
-                        Target::Button(crate::n64::Button::A | crate::n64::Button::B)
-                    )
-                })
-                .map(|(i, _)| i)
-                .collect(),
-        ];
-
-        for buttons in [
-            [
-                crate::n64::Button::CUp,
-                crate::n64::Button::CDown,
-                crate::n64::Button::CLeft,
-                crate::n64::Button::CRight,
-            ],
-            [
-                crate::n64::Button::Up,
-                crate::n64::Button::Down,
-                crate::n64::Button::Left,
-                crate::n64::Button::Right,
-            ],
-        ] {
-            groups.push(
-                layout
-                    .zones
-                    .iter()
-                    .enumerate()
-                    .filter(|(_, z)| matches!(z.target,Target::Button(b) if buttons.contains(&b)))
-                    .map(|(i, _)| i)
-                    .collect(),
-            );
-        }
-
-        groups.retain(|g: &Vec<usize>| g.len() > 1);
+        let groups = groups(&layout.zones);
         let picture = settings
             .n64_profiles
             .iter()
             .find(|p| p.display == display_key(width, height))
             .and_then(|p| p.picture);
+        let picture_policy = settings
+            .n64_profiles
+            .iter()
+            .find(|p| p.display == display_key(width, height))
+            .map_or(Default::default(), |p| p.picture_policy);
         let draft = crate::layout_edit::Draft::new(
             width,
             height,
@@ -210,9 +219,10 @@ impl Editor {
             groups,
             picture,
             16.,
-        );
+        )
+        .with_picture_policy(picture_policy);
 
-        Self {
+        let mut editor = Self {
             zones: test.zones.clone(),
             test,
             settings,
@@ -222,7 +232,57 @@ impl Editor {
             testing: false,
             rejected: false,
             draft,
-        }
+        };
+        editor.configure_frame(
+            Area {
+                left: 0.,
+                top: 0.,
+                right: width,
+                bottom: height,
+            },
+            4. / 3.,
+        );
+        editor
+    }
+    pub fn configure_frame(&mut self, frame: Area, _aspect: f32) {
+        let safe = Area {
+            left: 0.,
+            top: 0.,
+            right: self.width,
+            bottom: self.height,
+        };
+        let window = WindowGeometry {
+            window: frame,
+            surface: frame,
+            content: safe,
+            input_origin: (0., 0.),
+            clearance: Default::default(),
+            density: 1.,
+        };
+        let mut view = View::default();
+        view.configure(&self.settings);
+        view.measure(Some(window));
+        let mut settings = self.settings.clone();
+        let key = display_key(self.width, self.height);
+        settings.n64_profiles.retain(|p| p.display != key);
+        settings.n64_profiles.push(Profile {
+            display: key,
+            zones: Vec::new(),
+            picture: None,
+            picture_policy: crate::layout_edit::PicturePolicy::Overlay,
+        });
+        let mut defaults = View::default();
+        defaults.configure(&settings);
+        defaults.measure(Some(window));
+        self.zones = view.zones.clone();
+        self.test = view;
+        self.draft.rebase(
+            self.zones.iter().map(|z| z.area).collect(),
+            defaults.zones.iter().map(|z| z.area).collect(),
+            frame,
+            4. / 3.,
+        );
+        self.sync();
     }
     pub fn sync(&mut self) {
         for (zone, area) in self.zones.iter_mut().zip(self.draft.areas()) {
@@ -294,11 +354,12 @@ impl Editor {
     }
     pub fn finish(&mut self) -> io::Result<Settings> {
         self.cancel();
+        let defaults = self.draft.default_areas();
         let zones = self
             .zones
             .iter()
             .enumerate()
-            .filter(|(i, z)| z.area != self.draft.default_area(*i))
+            .filter(|(i, z)| !crate::layout_edit::same_area(z.area, defaults[*i]))
             .map(|(_, z)| Placement {
                 target: z.target,
                 bounds: crate::layout_edit::normalized(
@@ -315,11 +376,13 @@ impl Editor {
         let key = display_key(self.width, self.height);
         self.settings.n64_profiles.retain(|p| p.display != key);
         let picture = self.draft.picture_preference();
-        if !zones.is_empty() || picture.is_some() {
+        let picture_policy = self.draft.picture_policy();
+        if !zones.is_empty() || picture.is_some() || !picture_policy.is_game_first() {
             self.settings.n64_profiles.push(Profile {
                 display: key,
                 zones,
                 picture,
+                picture_policy,
             });
         }
         self.settings.validate()?;
@@ -348,7 +411,7 @@ mod tests {
             .area;
         let (x, y) = a.center();
         assert!(draft.down(7, x, y));
-        draft.moved(7, x + 80., y);
+        draft.moved(7, x, y + 40.);
         draft.up(7);
         let saved = draft.finish().unwrap();
         let mut runtime = preview(840., 420., &settings);
@@ -409,6 +472,7 @@ mod tests {
         let mut settings = Settings::default();
         settings.profiles.push(GcProfile {
             picture: None,
+            picture_policy: Default::default(),
             display: display_key(840., 420.),
             zones: vec![GcPlacement {
                 target: GcTarget::Pause,

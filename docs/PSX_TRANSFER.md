@@ -208,3 +208,22 @@ Focused portable fixtures check grouped movement/scaling, anchored corners,
 one undo per gesture, cancellation, collision priority, spacing/mirror, snapping
 escape and preference reload into both renderers across safe insets/density.
 These source checks alone do not qualify the physical editor or a Fold layout.
+
+
+## Game-first default clarification, 2026-11-03
+
+After actual Pixel4 inspection, the owner clarified that full width means full
+height in landscape, while portrait uses full width. Preserve the entire native
+aspect and maximize game real estate first; controls occupy unused space without
+overlap. This is the default across games/products. The prior clear-picture
+solver remains an explicit alternative, alongside intentional overlap. This
+supersedes an initial overlay-default interpretation, which was corrected with
+the existing sibling owners at the owner's request.
+
+NTX's shared free-space placement and compact semantic-group fallback are original
+Rust. Actual backend aspect, surface/content/gesture mapping and console targets
+remain independent; no new PSX code, masks, persistence or frontend was copied.
+Legacy custom profiles retain their old policy and bytes until an explicit Save.
+Host fixtures now check full-height/full-width fields, non-overlap, native/editor
+coordinate equality, actual aspect changes, legacy compatibility and explicit
+no-space choices. Device results are recorded separately from these fixtures.

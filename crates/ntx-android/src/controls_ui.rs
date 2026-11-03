@@ -163,8 +163,12 @@ fn with_n64_editor<T>(menu: u64, f: impl FnOnce(&mut ntx::n64_controls::Editor) 
 }
 pub(super) fn applied(menu: u64) -> Option<Settings> {
     with_editing(menu, |e| match e {
-        Editing::GameCube(e) => e.finish().ok(),
-        Editing::Nintendo64(e) => e.finish().ok(),
+        Editing::GameCube(e) => (!e.draft.requires_choice())
+            .then(|| e.finish().ok())
+            .flatten(),
+        Editing::Nintendo64(e) => (!e.draft.requires_choice())
+            .then(|| e.finish().ok())
+            .flatten(),
     })
     .flatten()
 }
@@ -338,14 +342,17 @@ pub(super) fn build_dialog(
     let safe = geometry.control_bounds().ok_or("No safe display")?;
     let density = geometry.density;
     with_editing(menu, |e| {
-        let d = e.draft();
-        d.frame = Area {
+        let frame = Area {
             left: (geometry.surface.left - safe.left) / density,
             top: (geometry.surface.top - safe.top) / density,
             right: (geometry.surface.right - safe.left) / density,
             bottom: (geometry.surface.bottom - safe.top) / density,
         };
-        d.aspect = last_frame(runtime).map_or(4. / 3., |f| f.aspect);
+        let aspect = last_frame(runtime).map_or(4. / 3., |f| f.aspect);
+        match e {
+            Editing::GameCube(e) => e.configure_frame(frame, aspect),
+            Editing::Nintendo64(e) => e.configure_frame(frame, aspect),
+        }
     })
     .ok_or("Editor expired")?;
     let content = env.new_object(
@@ -409,6 +416,7 @@ pub(super) fn build_dialog(
         (10, "Done"),
         (11, "Cancel"),
         (26, "Game field"),
+        (38, "Fill game field"),
         (27, "Move"),
         (28, "Resize"),
         (29, "Undo"),
@@ -416,6 +424,8 @@ pub(super) fn build_dialog(
         (31, "Group"),
         (32, "Mirror"),
         (33, "Reset selected"),
+        (39, "Fit game around controls"),
+        (40, "Allow overlap"),
         (36, "Dock bottom"),
         (37, "Options"),
     ] {
@@ -765,6 +775,18 @@ pub(super) fn action(env: &mut JNIEnv<'_>, action: i32, menu: u64) -> Result<()>
             e.draft().reset_selected();
             e.sync();
         }
+        38 => {
+            e.draft().fill_picture();
+            e.sync();
+        }
+        39 | 40 => {
+            e.draft().set_picture_policy(if action == 39 {
+                ntx::layout_edit::PicturePolicy::KeepClear
+            } else {
+                ntx::layout_edit::PicturePolicy::Overlay
+            });
+            e.sync();
+        }
         34 | 35 => {
             e.draft().spacing(if action == 34 { -8. } else { 8. });
             e.sync();
@@ -876,7 +898,13 @@ pub(super) fn refresh(env: &mut JNIEnv<'_>, menu: u64) -> Result<()> {
             if d.rejected {
                 "Keep the game field clear of controls and inside the screen".into()
             } else {
-                "Game field · move or resize; console aspect stays intact".into()
+                if d.picture_policy().is_game_first() {
+                    "Game field · full drawable; aspect intact; controls use free space".into()
+                } else if d.picture_policy().is_overlay() {
+                    "Game field · full drawable; aspect intact; overlap allowed".into()
+                } else {
+                    "Game field · kept clear of controls; aspect intact".into()
+                }
             }
         } else {
             hint
@@ -892,6 +920,13 @@ pub(super) fn refresh(env: &mut JNIEnv<'_>, menu: u64) -> Result<()> {
         )
     })
     .ok_or("Editor expired")?;
+    let needs_choice =
+        with_editing(menu, |e| e.draft().requires_choice()).ok_or("Editor expired")?;
+    let hint = if needs_choice {
+        "No spare control space: choose Fit game around controls or Allow overlap.".to_owned()
+    } else {
+        hint
+    };
     let bound = MENU
         .lock()
         .map_err(|_| "menu lock poisoned")?
@@ -935,12 +970,40 @@ pub(super) fn refresh(env: &mut JNIEnv<'_>, menu: u64) -> Result<()> {
             set_text(env, &b, title)?;
         }
     }
+    let policy = with_editing(menu, |e| e.draft().picture_policy()).ok_or("Editor expired")?;
+    let b = find(env, &root, "ntx-action-39")?;
+    set_text(
+        env,
+        &b,
+        if policy == ntx::layout_edit::PicturePolicy::KeepClear {
+            "Fit game around controls ✓"
+        } else {
+            "Fit game around controls"
+        },
+    )?;
+    let b = find(env, &root, "ntx-action-40")?;
+    set_text(
+        env,
+        &b,
+        if policy.is_overlay() {
+            "Allow overlap ✓"
+        } else {
+            "Allow overlap"
+        },
+    )?;
     let b = find(env, &root, "ntx-action-29")?;
     env.call_method(
         b,
         "setEnabled",
         "(Z)V",
         &[JValue::Bool(u8::from(undo && !testing))],
+    )?;
+    let done = find(env, &root, "ntx-action-10")?;
+    env.call_method(
+        done,
+        "setEnabled",
+        "(Z)V",
+        &[JValue::Bool(u8::from(!needs_choice))],
     )?;
     let preview = find(env, &root, "ntx-controls-preview")?;
     if !preview.is_null() {
@@ -1513,15 +1576,29 @@ struct Frame {
 }
 static FRAME: Mutex<Option<Frame>> = Mutex::new(None);
 pub(super) fn record_frame(picture: Area, width: f32, height: f32, aspect: f32) {
-    if let Ok(mut frame) = FRAME.lock() {
-        *frame = Some(Frame {
+    if let Ok(mut slot) = FRAME.lock() {
+        let frame = Frame {
             runtime: TRACE_RUNTIME.load(Ordering::Relaxed),
             activity: EPOCH.load(Ordering::Acquire),
             picture,
             width,
             height,
             aspect,
+        };
+        let changed = slot.is_none_or(|f| {
+            f.runtime != frame.runtime
+                || f.activity != frame.activity
+                || f.width != width
+                || f.height != height
+                || f.aspect != aspect
+                || !ntx::layout_edit::same_area(f.picture, picture)
         });
+        *slot = Some(frame);
+        if changed {
+            trace_presentation(&format!(
+                "game_field buffer={width}x{height} aspect={aspect} bounds={picture:?}"
+            ));
+        }
     }
 }
 fn last_frame(runtime: u64) -> Option<Frame> {
@@ -1536,6 +1613,9 @@ fn request_frame(
     runtime: u64,
     g: ntx::viewport::WindowGeometry,
 ) -> Result<()> {
+    if with_editing(menu, |e| e.draft().picture_policy().is_overlay()).unwrap_or(false) {
+        return Ok(());
+    }
     let Some(f) = last_frame(runtime) else {
         return Ok(());
     };

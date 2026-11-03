@@ -78,6 +78,7 @@ static TRACE_INPUT: ntx::lifecycle::DiagnosticBudget = ntx::lifecycle::Diagnosti
 static TRACE_INPUT_FAILURES: ntx::lifecycle::DiagnosticBudget =
     ntx::lifecycle::DiagnosticBudget::new(16);
 static TRACE_GEOMETRY: ntx::lifecycle::DiagnosticBudget = ntx::lifecycle::DiagnosticBudget::new(24);
+static LAYOUT_REQUESTED: AtomicBool = AtomicBool::new(false);
 static TRACE_RUNTIME: AtomicU64 = AtomicU64::new(0);
 static TRACE_PRESENT_CAP_REPORTED: AtomicBool = AtomicBool::new(false);
 static TRACE_OPTIONAL_CAP_REPORTED: AtomicBool = AtomicBool::new(false);
@@ -1187,6 +1188,9 @@ fn render_menu_with_games(
         trace(runtime, generation, "menu.execute", "");
         let result = with_env(|env, activity| {
             PLAYING.store(!show, Ordering::Release);
+            if !show {
+                LAYOUT_REQUESTED.store(false, Ordering::Release);
+            }
             trace(
                 runtime,
                 generation,
@@ -1746,12 +1750,12 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_uiAction(
         }
         11 => push(Command::ControlsBack(menu as u64)),
         17 => push(Command::ConfirmLegacyMedia(menu as u64)),
-        20..=37 if controls_ui::action(&mut env, action, menu as u64).is_err() => {
+        20..=40 if controls_ui::action(&mut env, action, menu as u64).is_err() => {
             let _ = env.exception_clear();
         }
         _ => {}
     }
-    if matches!(action, 1..=17 | 20..=37) {
+    if matches!(action, 1..=17 | 20..=40) {
         feedback(&mut env, &activity);
     }
 }
@@ -2085,4 +2089,18 @@ pub extern "C" fn dispatch(
 
 pub fn record_editor_frame(picture: ntx::touch::Area, width: f32, height: f32, aspect: f32) {
     controls_ui::record_frame(picture, width, height, aspect);
+}
+
+pub fn request_layout_choice() {
+    let Some((w, h)) = crate::player::control_display() else {
+        return;
+    };
+    if LAYOUT_REQUESTED.swap(true, Ordering::AcqRel) {
+        return;
+    }
+    push(Command::Controls(
+        MENU_GENERATION.load(Ordering::Acquire),
+        w,
+        h,
+    ));
 }

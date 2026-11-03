@@ -339,6 +339,13 @@ impl Graphics {
             {
                 return Err("N64 drawable size unavailable".into());
             }
+            if !view.controls_fit {
+                platform::request_layout_choice();
+                return Ok(());
+            }
+            let Some(picture) = view.picture(w as f32, h as f32, 4. / 3.) else {
+                return Ok(());
+            };
             glBindFramebuffer(0x8ca9, 0);
             glDisable(0x0c11);
             glDisable(0x0b71);
@@ -348,9 +355,6 @@ impl Graphics {
             glColorMask(1, 1, 1, 1);
             glClearColor(0., 0., 0., 1.);
             glClear(0x4000);
-            let picture = view
-                .picture(w as f32, h as f32, 4. / 3.)
-                .ok_or("N64 picture geometry unavailable")?;
             platform::record_editor_frame(picture, w as f32, h as f32, 4. / 3.);
             glBindFramebuffer(0x8ca8, self.fbo);
             glBlitFramebuffer(

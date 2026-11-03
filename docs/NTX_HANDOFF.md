@@ -49,6 +49,17 @@ and actual physical return were verified. Short-screen GC group validation and
 N64 landscape auxiliary-control picture crowding were found and repaired in
 source with focused fixtures; the repair's new target check is pending.
 
+Owner's latest steering supersedes the earlier clear-picture default: maximize
+uncropped native-aspect game real estate first (height in landscape, width in
+portrait), then fit controls in unused space without overlap. This is a default
+for every game, not an opt-in. Existing PSX/PCX/XBX/FN64/Pokémon owners were informed;
+only NTX is implemented here. The new game-first source has103 portable fixtures;
+its signed build and bounded Pixel4 verification are the next unfinished work.
+Installed75e73ae/APKaa2f2933 already passed GC grouped move/Save/reopen/Cancel/cold
+process, real GC paused image and movable dock; larger-but-not-edge N64 field and
+relocated Pause were observed. That field prompted the correction. Exact test
+preferences/protected ordinary data and actual return passed; no NTX hold remains.
+
 Read docs/state.toml for exact source/artifact and earned-result bounds. Installed
 android-device admission/return is authoritative; older returns establish no
 current availability. Prepare ready artifacts, protected undo and finite cleanup

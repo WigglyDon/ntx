@@ -559,20 +559,25 @@ unsafe extern "C" fn event(context: *mut std::ffi::c_void, id: u32, message: *co
         platform::push(Command::Notice(message));
     }
 }
+pub(crate) fn control_display() -> Option<(f32, f32)> {
+    UI.lock().ok()?.control_display()
+}
 extern "C" fn draw(phase: u32, width: f32, height: f32, aspect: f32) -> Rect {
     let observed = {
         let Ok(mut ui) = UI.lock() else {
             return Rect::default();
         };
         let fresh = !ui.has_presented_geometry();
-        ui.present(width, height).cloned().map(|geometry| {
-            let pad = if phase == 1 { ui.pad() } else { Pad::default() };
-            let centers = [
-                ui.stick_center(ntx::Control::StickX),
-                ui.stick_center(ntx::Control::CX),
-            ];
-            (geometry, pad, centers, fresh, ui.controls_opacity())
-        })
+        ui.present_aspect(width, height, aspect)
+            .cloned()
+            .map(|geometry| {
+                let pad = if phase == 1 { ui.pad() } else { Pad::default() };
+                let centers = [
+                    ui.stick_center(ntx::Control::StickX),
+                    ui.stick_center(ntx::Control::CX),
+                ];
+                (geometry, pad, centers, fresh, ui.controls_opacity())
+            })
     };
     let Some((geometry, pad, centers, fresh, opacity)) = observed else {
         if !MISSING_PRESENT_REPORTED.swap(true, Ordering::Relaxed) {
@@ -588,6 +593,10 @@ extern "C" fn draw(phase: u32, width: f32, height: f32, aspect: f32) -> Rect {
         ));
     }
     if phase == 0 {
+        if !geometry.controls_fit {
+            platform::request_layout_choice();
+            return Rect::default();
+        }
         let a = geometry.picture(aspect);
         platform::record_editor_frame(a, width, height, aspect);
         return Rect {

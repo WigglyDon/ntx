@@ -148,3 +148,22 @@ Both backend presentation paths fit their aspect inside that box. Automatic
 picture placement maximizes the clear area around real targets. Controls, ordinary
 saves and machine checkpoints remain separate. Version1 preferences without a
 picture member keep their existing behavior and are never rewritten at load.
+
+
+The owner clarified the family-wide default on2026-11-03: maximize the complete
+native-aspect picture first, then place controls in unused space without overlap.
+`PicturePolicy::GameFirst` implements that contract. Preferred console controls
+are fitted into actual free side/bottom regions; a compact fallback stacks whole
+semantic groups rather than flattening their directional/face relationships.
+The immutable presented GameCube geometry records the actual backend aspect;
+changing it cancels obsolete captures. N64 uses the same portable placement policy
+through its own typed targets. The editor rebases from these runtime adapters at
+actual frame/density/origin, instead of inventing a second layout.
+
+Old version1 profiles without a policy are isolated compatibility reads of their
+previous keep-clear behavior. New profiles persist explicit policy. Keep-clear
+picture fitting and overlap are user choices, and geometry with no usable spare
+space opens the existing editor with Save disabled until a valid choice. Native
+video delivery waits through missing measured geometry instead of treating a
+transient host measurement as a console execution failure. None of these host
+preferences changes a GameId, SaveProfile or checkpoint fingerprint.

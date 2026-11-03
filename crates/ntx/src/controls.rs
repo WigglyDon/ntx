@@ -37,6 +37,8 @@ pub struct Profile {
     /// Normalized game-field bounds within the complete drawable.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub picture: Option<Area>,
+    #[serde(default = "crate::layout_edit::PicturePolicy::legacy")]
+    pub picture_policy: crate::layout_edit::PicturePolicy,
 }
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(deny_unknown_fields)]
@@ -142,64 +144,88 @@ impl Settings {
         let mut layout = Layout::new(width, height);
         let key = display_key(width, height);
         if let Some(profile) = self.profiles.iter().find(|p| p.display == key) {
-            // Admit the complete profile atomically. A transient tiny drawable
-            // or malformed placement never partly shifts drawn/hit targets.
-            let mut candidate = layout.clone();
-            let mut valid = true;
-            for placement in &profile.zones {
-                let Some(zone) = candidate
-                    .zones
-                    .iter_mut()
-                    .find(|z| z.target == placement.target)
-                else {
-                    valid = false;
-                    break;
-                };
-                let minimum = 48_f32
-                    .min(zone.area.right - zone.area.left)
-                    .min(zone.area.bottom - zone.area.top);
-                let a = placement.bounds;
-                zone.area = Area {
-                    left: a.left * width,
-                    top: a.top * height,
-                    right: a.right * width,
-                    bottom: a.bottom * height,
-                };
-                if !usable(zone.area, width, height, minimum) {
-                    valid = false;
-                    break;
-                }
-            }
-            if valid
-                && profile.zones.iter().all(|p| {
-                    let a = candidate
-                        .zones
-                        .iter()
-                        .find(|z| z.target == p.target)
-                        .unwrap()
-                        .area;
-                    candidate
-                        .zones
-                        .iter()
-                        .all(|z| z.target == p.target || !overlaps(a, z.area))
-                })
-            {
-                layout = candidate;
-            }
+            apply_profile_to(
+                profile,
+                &mut layout,
+                Area {
+                    left: 0.,
+                    top: 0.,
+                    right: width,
+                    bottom: height,
+                },
+                1.,
+            );
         }
         layout
     }
 }
-fn usable(a: Area, w: f32, h: f32, minimum: f32) -> bool {
-    finite(a)
-        && a.left >= 0.
-        && a.top >= 0.
-        && a.right <= w
-        && a.bottom <= h
-        && a.right - a.left + 0.01 >= minimum.min(w)
-        && a.bottom - a.top + 0.01 >= minimum.min(h)
+pub(crate) fn apply_profile_to(profile: &Profile, layout: &mut Layout, safe: Area, density: f32) {
+    let mut candidate = layout.clone();
+    for placement in &profile.zones {
+        let Some(zone) = candidate
+            .zones
+            .iter_mut()
+            .find(|z| z.target == placement.target)
+        else {
+            return;
+        };
+        let minimum = (16. * density)
+            .min(zone.area.right - zone.area.left)
+            .min(zone.area.bottom - zone.area.top);
+        zone.area = crate::layout_edit::denormalized(placement.bounds, safe);
+        let a = zone.area;
+        if !finite(a)
+            || a.left < safe.left - 0.01
+            || a.top < safe.top - 0.01
+            || a.right > safe.right + 0.01
+            || a.bottom > safe.bottom + 0.01
+            || a.right - a.left + 0.01 < minimum
+            || a.bottom - a.top + 0.01 < minimum
+        {
+            return;
+        }
+    }
+    if profile.zones.iter().any(|p| {
+        let a = candidate
+            .zones
+            .iter()
+            .find(|z| z.target == p.target)
+            .unwrap()
+            .area;
+        candidate
+            .zones
+            .iter()
+            .any(|z| z.target != p.target && overlaps(a, z.area))
+    }) {
+        return;
+    }
+    *layout = candidate;
 }
+
 /// The editor cannot emit game input. Its test pad is independent of LiveRuntime.
+pub(crate) fn groups(zones: &[crate::touch::Zone]) -> Vec<Vec<usize>> {
+    let mut groups = vec![
+        zones
+            .iter()
+            .enumerate()
+            .filter(|(_, z)| {
+                matches!(
+                    z.target,
+                    Target::Button(
+                        crate::Control::A
+                            | crate::Control::B
+                            | crate::Control::X
+                            | crate::Control::Y
+                    )
+                )
+            })
+            .map(|(i, _)| i)
+            .collect(),
+    ];
+
+    groups.retain(|g: &Vec<usize>| g.len() > 1);
+    groups
+}
 pub struct Editor {
     pub settings: Settings,
     pub layout: Layout,
@@ -215,32 +241,17 @@ impl Editor {
     pub fn new(width: f32, height: f32, settings: Settings) -> Self {
         let layout = settings.layout(width, height);
         let defaults = Layout::new(width, height);
-        let mut groups = vec![
-            layout
-                .zones
-                .iter()
-                .enumerate()
-                .filter(|(_, z)| {
-                    matches!(
-                        z.target,
-                        Target::Button(
-                            crate::Control::A
-                                | crate::Control::B
-                                | crate::Control::X
-                                | crate::Control::Y
-                        )
-                    )
-                })
-                .map(|(i, _)| i)
-                .collect(),
-        ];
-
-        groups.retain(|g: &Vec<usize>| g.len() > 1);
+        let groups = groups(&layout.zones);
         let picture = settings
             .profiles
             .iter()
             .find(|p| p.display == display_key(width, height))
             .and_then(|p| p.picture);
+        let picture_policy = settings
+            .profiles
+            .iter()
+            .find(|p| p.display == display_key(width, height))
+            .map_or(Default::default(), |p| p.picture_policy);
         let draft = crate::layout_edit::Draft::new(
             width,
             height,
@@ -249,10 +260,11 @@ impl Editor {
             groups,
             picture,
             48.,
-        );
+        )
+        .with_picture_policy(picture_policy);
         let mut test_pad = TouchPad::new();
         test_pad.configure(settings.dead_zone, settings.floating_sticks);
-        Self {
+        let mut editor = Self {
             layout,
             test_pad,
             settings,
@@ -262,7 +274,78 @@ impl Editor {
             testing: false,
             rejected: false,
             draft,
+        };
+        editor.configure_frame(
+            Area {
+                left: 0.,
+                top: 0.,
+                right: width,
+                bottom: height,
+            },
+            4. / 3.,
+        );
+        editor
+    }
+    pub fn configure_frame(&mut self, frame: Area, aspect: f32) {
+        let safe = Area {
+            left: 0.,
+            top: 0.,
+            right: self.width,
+            bottom: self.height,
+        };
+        let window = crate::viewport::WindowGeometry {
+            window: frame,
+            surface: frame,
+            content: safe,
+            input_origin: (0., 0.),
+            clearance: Default::default(),
+            density: 1.,
+        };
+        let Some(g) = crate::viewport::Geometry::with_controls_aspect(
+            window,
+            frame.right - frame.left,
+            frame.bottom - frame.top,
+            Some(&self.settings),
+            aspect,
+        ) else {
+            return;
+        };
+        let mut settings = self.settings.clone();
+        let key = display_key(self.width, self.height);
+        settings.profiles.retain(|p| p.display != key);
+        settings.profiles.push(Profile {
+            display: key,
+            zones: Vec::new(),
+            picture: None,
+            picture_policy: crate::layout_edit::PicturePolicy::Overlay,
+        });
+        let Some(default) = crate::viewport::Geometry::with_controls_aspect(
+            window,
+            frame.right - frame.left,
+            frame.bottom - frame.top,
+            Some(&settings),
+            aspect,
+        ) else {
+            return;
+        };
+        let local = |a: Area| Area {
+            left: a.left + frame.left,
+            top: a.top + frame.top,
+            right: a.right + frame.left,
+            bottom: a.bottom + frame.top,
+        };
+        self.layout = g.layout.clone();
+        for z in &mut self.layout.zones {
+            z.area = local(z.area);
         }
+        self.layout.game = frame;
+        self.draft.rebase(
+            self.layout.zones.iter().map(|z| z.area).collect(),
+            default.layout.zones.iter().map(|z| local(z.area)).collect(),
+            frame,
+            aspect,
+        );
+        self.sync();
     }
     pub fn sync(&mut self) {
         for (zone, area) in self.layout.zones.iter_mut().zip(self.draft.areas()) {
@@ -353,12 +436,13 @@ impl Editor {
     }
     pub fn finish(&mut self) -> io::Result<Settings> {
         self.cancel();
+        let defaults = self.draft.default_areas();
         let zones = self
             .layout
             .zones
             .iter()
             .enumerate()
-            .filter(|(i, z)| z.area != self.draft.default_area(*i))
+            .filter(|(i, z)| !crate::layout_edit::same_area(z.area, defaults[*i]))
             .map(|(_, z)| Placement {
                 target: z.target,
                 bounds: crate::layout_edit::normalized(
@@ -375,11 +459,13 @@ impl Editor {
         let key = display_key(self.width, self.height);
         self.settings.profiles.retain(|p| p.display != key);
         let picture = self.draft.picture_preference();
-        if !zones.is_empty() || picture.is_some() {
+        let picture_policy = self.draft.picture_policy();
+        if !zones.is_empty() || picture.is_some() || !picture_policy.is_game_first() {
             self.settings.profiles.push(Profile {
                 display: key,
                 zones,
                 picture,
+                picture_policy,
             });
         }
         self.settings.validate()?;
@@ -425,6 +511,8 @@ mod tests {
     #[test]
     fn editor_moves_one_target_and_rejects_collision_without_changing_other_controls() {
         let mut e = Editor::new(840., 420., Settings::default());
+        e.draft
+            .set_picture_policy(crate::layout_edit::PicturePolicy::KeepClear);
         let target = Target::Pause;
         let a = e
             .layout
@@ -492,6 +580,8 @@ mod tests {
     #[test]
     fn saved_positions_are_per_display_and_reset_is_local() {
         let mut e = Editor::new(840., 420., Settings::default());
+        e.draft
+            .set_picture_policy(crate::layout_edit::PicturePolicy::KeepClear);
         e.select(Target::Pause);
         e.place(Area {
             left: 390.,
@@ -547,6 +637,7 @@ mod tests {
         s.dead_zone = 12;
         s.profiles.push(Profile {
             picture: None,
+            picture_policy: Default::default(),
             display: display_key(840., 420.),
             zones: vec![Placement {
                 target: Target::Pause,
@@ -615,8 +706,7 @@ mod picture_tests {
             bottom: 432.,
         };
         let mut gc = Editor::new(840., 420., old);
-        gc.draft.frame = frame;
-        gc.draft.aspect = 1.25;
+        gc.configure_frame(frame, 1.25);
         gc.draft.selected = Some(Selection::Picture);
         gc.resize(-100.);
         let gc_picture = gc.draft.picture();
@@ -624,7 +714,7 @@ mod picture_tests {
         assert_eq!(settings.profiles.len(), 1);
         assert!(settings.profiles[0].zones.is_empty());
         let mut n = crate::n64_controls::Editor::new(840., 420., settings);
-        n.draft.frame = frame;
+        n.configure_frame(frame, 4. / 3.);
         n.draft.selected = Some(Selection::Picture);
         n.resize(-80.);
         let n_picture = n.draft.picture();

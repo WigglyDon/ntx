@@ -30,6 +30,8 @@ pub struct View {
     dead_zone: u8,
     profiles: Vec<crate::n64_controls::Profile>,
     picture: Option<Area>,
+    picture_policy: crate::layout_edit::PicturePolicy,
+    pub controls_fit: bool,
 }
 impl View {
     /// Picture and controls use the same measured window and buffer transform.
@@ -52,11 +54,19 @@ impl View {
         });
         if let Some(p) = self.picture {
             let a = crate::layout_edit::fit(crate::layout_edit::denormalized(p, frame), aspect);
-            if !zones.clone().any(|b| crate::controls::overlaps(a, b)) {
+            if self.picture_policy.is_overlay()
+                || !zones.clone().any(|b| crate::controls::overlaps(a, b))
+            {
                 return Some(a);
             }
         }
-        Some(crate::layout_edit::clear_picture(frame, zones, aspect))
+        Some(
+            if self.picture_policy != crate::layout_edit::PicturePolicy::KeepClear {
+                crate::layout_edit::edge_picture(frame, aspect)
+            } else {
+                crate::layout_edit::clear_picture(frame, zones, aspect)
+            },
+        )
     }
     pub fn configure(&mut self, settings: &crate::controls::Settings) {
         self.configure_dead_zone(settings.dead_zone);
@@ -81,7 +91,9 @@ impl View {
         self.cancel();
         self.measured = geometry;
         self.zones.clear();
+        self.controls_fit = true;
         self.picture = None;
+        self.picture_policy = Default::default();
         let Some(g) = geometry else {
             return;
         };
@@ -92,11 +104,9 @@ impl View {
             (a.right - a.left) / g.density,
             (a.bottom - a.top) / g.density,
         );
-        self.picture = self
-            .profiles
-            .iter()
-            .find(|p| p.display == key)
-            .and_then(|p| p.picture);
+        let profile = self.profiles.iter().find(|p| p.display == key);
+        self.picture = profile.and_then(|p| p.picture);
+        self.picture_policy = profile.map_or(Default::default(), |p| p.picture_policy);
         let w = a.right - a.left;
         let h = a.bottom - a.top;
         let r = (22.0 * g.density).min(w / 22.0).min(h / 9.0);
@@ -150,32 +160,37 @@ impl View {
                 label,
             );
         }
+        let landscape = w > h * 1.25;
+        let shoulder_y = if landscape {
+            a.top + 1.2 * r
+        } else {
+            y - 8.2 * r
+        };
         add(
             x + 1.4 * r,
-            a.top + 1.2 * r,
+            shoulder_y,
             0.9 * r,
             Target::Button(Button::L),
             "L",
         );
         add(
             x + 3.7 * r,
-            a.top + 1.2 * r,
+            shoulder_y,
             0.9 * r,
             Target::Button(Button::Z),
             "Z",
         );
         add(
             right - 1.4 * r,
-            a.top + 1.2 * r,
+            shoulder_y,
             0.9 * r,
             Target::Button(Button::R),
             "R",
         );
         // Keep auxiliary controls out of the landscape game field. A centered
         // Pause/Start pair needlessly reduced the clear 4:3 picture's height.
-        let landscape = w > h * 1.25;
         let aux = if landscape { x + 6.8 * r } else { x + w * 0.5 };
-        add(aux, a.top + 1.2 * r, 0.8 * r, Target::Pause, "II");
+        add(aux, shoulder_y, 0.8 * r, Target::Pause, "II");
         add(
             aux,
             if landscape {
@@ -187,7 +202,51 @@ impl View {
             Target::Button(Button::Start),
             "S",
         );
+        if self.picture_policy.is_game_first() {
+            let frame = Area {
+                left: g.surface.left.max(g.window.left),
+                top: g.surface.top.max(g.window.top),
+                right: g.surface.right.min(g.window.right),
+                bottom: g.surface.bottom.min(g.window.bottom),
+            };
+            let mut areas = self.zones.iter().map(|z| z.area).collect::<Vec<_>>();
+            self.controls_fit = crate::layout_edit::place_free(
+                &mut areas,
+                a,
+                crate::layout_edit::edge_picture(frame, 4. / 3.),
+                16. * g.density,
+                &crate::n64_controls::groups(&self.zones),
+            );
+            for (z, area) in self.zones.iter_mut().zip(areas) {
+                z.area = area;
+            }
+        }
+        let defaults = self.zones.clone();
         crate::n64_controls::apply_profile(&self.profiles, &mut self.zones, a, g.density);
+        if self.picture_policy.is_game_first() {
+            let frame = Area {
+                left: g.surface.left.max(g.window.left),
+                top: g.surface.top.max(g.window.top),
+                right: g.surface.right.min(g.window.right),
+                bottom: g.surface.bottom.min(g.window.bottom),
+            };
+            let picture = self.picture.map_or_else(
+                || crate::layout_edit::edge_picture(frame, 4. / 3.),
+                |p| crate::layout_edit::fit(crate::layout_edit::denormalized(p, frame), 4. / 3.),
+            );
+            if self
+                .zones
+                .iter()
+                .any(|z| crate::controls::overlaps(z.area, picture))
+            {
+                self.zones = defaults;
+            }
+            self.controls_fit = (!self
+                .zones
+                .iter()
+                .any(|z| crate::controls::overlaps(z.area, picture)))
+                && (self.controls_fit || self.picture.is_some());
+        }
     }
     pub fn cancel(&mut self) {
         self.pointers.clear();

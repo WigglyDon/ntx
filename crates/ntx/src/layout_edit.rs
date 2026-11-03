@@ -15,10 +15,39 @@ pub enum Mode {
     Move,
     Resize,
 }
+/// Picture placement is presentation policy, independently of control hit boxes.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PicturePolicy {
+    #[default]
+    GameFirst,
+    Overlay,
+    KeepClear,
+}
+impl PicturePolicy {
+    pub fn legacy() -> Self {
+        Self::KeepClear
+    }
+    pub fn is_game_first(&self) -> bool {
+        *self == Self::GameFirst
+    }
+    pub fn is_overlay(&self) -> bool {
+        *self == Self::Overlay
+    }
+}
+/// Maximal uncropped picture in the full drawable; tall screens use the top edge.
+pub fn edge_picture(frame: Area, aspect: f32) -> Area {
+    let mut a = fit(frame, aspect);
+    let h = a.bottom - a.top;
+    a.top = frame.top;
+    a.bottom = frame.top + h;
+    a
+}
 #[derive(Clone, PartialEq)]
 struct State {
     areas: Vec<Area>,
     picture: Option<Area>,
+    picture_policy: PicturePolicy,
 }
 struct Drag {
     id: i32,
@@ -82,6 +111,17 @@ pub fn denormalized(a: Area, frame: Area) -> Area {
         bottom: frame.top + a.bottom * h,
     }
 }
+pub fn same_area(a: Area, b: Area) -> bool {
+    [
+        a.left - b.left,
+        a.top - b.top,
+        a.right - b.right,
+        a.bottom - b.bottom,
+    ]
+    .iter()
+    .all(|v| v.abs() < 0.001)
+}
+
 pub fn valid_picture(a: Area) -> bool {
     finite(a)
         && a.left >= 0.
@@ -144,7 +184,11 @@ impl Draft {
         minimum: f32,
     ) -> Self {
         Self {
-            state: State { areas, picture },
+            state: State {
+                areas,
+                picture,
+                picture_policy: PicturePolicy::default(),
+            },
             defaults,
             groups,
             selected: None,
@@ -169,13 +213,33 @@ impl Draft {
     }
     fn minimum_for(&self, index: usize) -> f32 {
         let a = self.defaults[index];
-        self.minimum.min(a.right - a.left).min(a.bottom - a.top)
+        let current = self.state.areas[index];
+        self.minimum
+            .min(a.right - a.left)
+            .min(a.bottom - a.top)
+            .min(current.right - current.left)
+            .min(current.bottom - current.top)
     }
     pub fn areas(&self) -> &[Area] {
         &self.state.areas
     }
-    pub fn default_area(&self, index: usize) -> Area {
-        self.defaults[index]
+    pub fn default_areas(&self) -> Vec<Area> {
+        let mut areas = self.defaults.clone();
+        if self.state.picture_policy.is_game_first() {
+            let _ = place_free(
+                &mut areas,
+                Area {
+                    left: 0.,
+                    top: 0.,
+                    right: self.width,
+                    bottom: self.height,
+                },
+                edge_picture(self.frame, self.aspect),
+                16.,
+                &self.groups,
+            );
+        }
+        areas
     }
     #[cfg(test)]
     pub fn set_selected_area(&mut self, area: Area) {
@@ -189,13 +253,69 @@ impl Draft {
     pub fn picture_preference(&self) -> Option<Area> {
         self.state.picture
     }
-    pub fn picture(&self) -> Area {
-        self.state
-            .picture
-            .map(|p| fit(denormalized(p, self.frame), self.aspect))
-            .unwrap_or_else(|| {
-                clear_picture(self.frame, self.state.areas.iter().copied(), self.aspect)
+    pub fn rebase(&mut self, areas: Vec<Area>, defaults: Vec<Area>, frame: Area, aspect: f32) {
+        assert!(self.history.is_empty() && self.drag.is_none());
+        self.state.areas = areas;
+        self.defaults = defaults;
+        self.frame = frame;
+        self.aspect = aspect;
+    }
+    pub fn with_picture_policy(mut self, policy: PicturePolicy) -> Self {
+        self.state.picture_policy = policy;
+        self
+    }
+    pub fn requires_choice(&self) -> bool {
+        self.state.picture_policy.is_game_first()
+            && self
+                .state
+                .areas
+                .iter()
+                .any(|a| overlaps(*a, self.picture()))
+    }
+    pub fn picture_policy(&self) -> PicturePolicy {
+        self.state.picture_policy
+    }
+    pub fn set_picture_policy(&mut self, policy: PicturePolicy) {
+        self.cancel();
+        let before = self.state.clone();
+        self.state.picture_policy = policy;
+        if policy == PicturePolicy::KeepClear
+            && self.state.picture.is_some_and(|p| {
+                let a = fit(denormalized(p, self.frame), self.aspect);
+                self.state.areas.iter().any(|b| overlaps(a, *b))
             })
+        {
+            self.state.picture = None;
+        }
+        self.remember(before);
+    }
+    pub fn fill_picture(&mut self) {
+        self.cancel();
+        let full = edge_picture(self.frame, self.aspect);
+        if self.state.areas.iter().any(|a| overlaps(*a, full)) {
+            self.rejected = true;
+            return;
+        }
+        let before = self.state.clone();
+        self.state.picture = None;
+        self.state.picture_policy = PicturePolicy::GameFirst;
+        self.selected = Some(Selection::Picture);
+        self.remember(before);
+    }
+    pub fn picture(&self) -> Area {
+        if let Some(p) = self.state.picture {
+            let a = fit(denormalized(p, self.frame), self.aspect);
+            if self.state.picture_policy != PicturePolicy::KeepClear
+                || !self.state.areas.iter().any(|b| overlaps(a, *b))
+            {
+                return a;
+            }
+        }
+        if self.state.picture_policy == PicturePolicy::KeepClear {
+            clear_picture(self.frame, self.state.areas.iter().copied(), self.aspect)
+        } else {
+            edge_picture(self.frame, self.aspect)
+        }
     }
     fn indices(&self) -> Vec<usize> {
         let Some(Selection::Control(i)) = self.selected else {
@@ -365,7 +485,10 @@ impl Draft {
         let mut candidate = before.clone();
         if self.selected == Some(Selection::Picture) {
             let p = fit(to, self.aspect);
-            if !inside(p, self.frame, 48.) || candidate.areas.iter().any(|a| overlaps(*a, p)) {
+            if !inside(p, self.frame, 48.)
+                || (candidate.picture_policy != PicturePolicy::Overlay
+                    && candidate.areas.iter().any(|a| overlaps(*a, p)))
+            {
                 self.rejected = true;
                 return;
             }
@@ -391,15 +514,24 @@ impl Draft {
             };
             let invalid = ids.iter().any(|i| {
                 let a = candidate.areas[*i];
-                !inside(a, bounds, self.minimum_for(*i))
+                (candidate.picture_policy.is_game_first()
+                    && overlaps(
+                        a,
+                        before.picture.map_or_else(
+                            || edge_picture(self.frame, self.aspect),
+                            |p| fit(denormalized(p, self.frame), self.aspect),
+                        ),
+                    ))
+                    || !inside(a, bounds, self.minimum_for(*i))
                     || candidate
                         .areas
                         .iter()
                         .enumerate()
                         .any(|(j, b)| j != *i && overlaps(a, *b))
-                    || candidate
-                        .picture
-                        .is_some_and(|p| overlaps(a, fit(denormalized(p, self.frame), self.aspect)))
+                    || (candidate.picture_policy != PicturePolicy::Overlay
+                        && candidate.picture.is_some_and(|p| {
+                            overlaps(a, fit(denormalized(p, self.frame), self.aspect))
+                        }))
             });
             if invalid {
                 self.rejected = true;
@@ -458,11 +590,13 @@ impl Draft {
         let before = self.state.clone();
         if self.selected == Some(Selection::Picture) {
             self.state.picture = None;
+            self.state.picture_policy = PicturePolicy::GameFirst;
         } else {
             let ids = self.indices();
+            let defaults = self.default_areas();
             let mut candidate = self.state.clone();
             for i in &ids {
-                candidate.areas[*i] = self.defaults[*i];
+                candidate.areas[*i] = defaults[*i];
             }
             if ids.iter().any(|i| {
                 candidate
@@ -470,12 +604,13 @@ impl Draft {
                     .iter()
                     .enumerate()
                     .any(|(j, b)| j != *i && overlaps(candidate.areas[*i], *b))
-                    || candidate.picture.is_some_and(|p| {
-                        overlaps(
-                            candidate.areas[*i],
-                            fit(denormalized(p, self.frame), self.aspect),
-                        )
-                    })
+                    || (candidate.picture_policy != PicturePolicy::Overlay
+                        && candidate.picture.is_some_and(|p| {
+                            overlaps(
+                                candidate.areas[*i],
+                                fit(denormalized(p, self.frame), self.aspect),
+                            )
+                        }))
             }) {
                 self.rejected = true;
                 return;
@@ -487,9 +622,23 @@ impl Draft {
     pub fn reset_display(&mut self) {
         self.cancel();
         let before = self.state.clone();
+        let mut areas = self.defaults.clone();
+        let _ = place_free(
+            &mut areas,
+            Area {
+                left: 0.,
+                top: 0.,
+                right: self.width,
+                bottom: self.height,
+            },
+            edge_picture(self.frame, self.aspect),
+            16.,
+            &self.groups,
+        );
         self.state = State {
-            areas: self.defaults.clone(),
+            areas,
             picture: None,
+            picture_policy: PicturePolicy::GameFirst,
         };
         self.remember(before);
     }
@@ -559,12 +708,13 @@ impl Draft {
                 .iter()
                 .enumerate()
                 .all(|(j, b)| j == *i || !overlaps(self.state.areas[*i], *b))
-                && self.state.picture.is_none_or(|p| {
-                    !overlaps(
-                        self.state.areas[*i],
-                        fit(denormalized(p, self.frame), self.aspect),
-                    )
-                })
+                && (self.state.picture_policy == PicturePolicy::Overlay
+                    || self.state.picture.is_none_or(|p| {
+                        !overlaps(
+                            self.state.areas[*i],
+                            fit(denormalized(p, self.frame), self.aspect),
+                        )
+                    }))
         });
         if !valid {
             self.state = before;
@@ -613,6 +763,146 @@ fn snap(edges: [f32; 3], guides: &[f32], origin: f32) -> (f32, f32) {
     })
 }
 
+/// Place the preferred console controls into actual unused picture space.
+/// Uniform scaling preserves each console's relative targets and analog geometry.
+/// False means there is no geometric space: the host must offer a layout choice.
+pub fn place_free(
+    areas: &mut [Area],
+    safe: Area,
+    picture: Area,
+    minimum: f32,
+    groups: &[Vec<usize>],
+) -> bool {
+    if areas.is_empty() {
+        return true;
+    }
+    let left = Area {
+        right: picture.left.min(safe.right),
+        ..safe
+    };
+    let right = Area {
+        left: picture.right.max(safe.left),
+        ..safe
+    };
+    let bottom = Area {
+        top: picture.bottom.max(safe.top),
+        ..safe
+    };
+    let top = Area {
+        bottom: picture.top.min(safe.bottom),
+        ..safe
+    };
+    let mut candidate = areas.to_vec();
+    let pack = |indices: Vec<usize>, space: Area, candidate: &mut [Area]| -> bool {
+        if indices.is_empty() {
+            return true;
+        }
+        let Some(bounds) = indices.iter().map(|i| areas[*i]).reduce(union) else {
+            return true;
+        };
+        if space.right - space.left < 1. || space.bottom - space.top < 1. {
+            return false;
+        }
+        let scale = ((space.right - space.left) / (bounds.right - bounds.left))
+            .min((space.bottom - space.top) / (bounds.bottom - bounds.top))
+            .min(1.);
+        if indices.iter().all(|i| {
+            (areas[*i].right - areas[*i].left) * scale + 0.01 >= minimum
+                && (areas[*i].bottom - areas[*i].top) * scale + 0.01 >= minimum
+        }) {
+            let (cx, cy) = space.center();
+            let (ox, oy) = bounds.center();
+            for i in indices {
+                let a = areas[i];
+                candidate[i] = Area {
+                    left: cx + (a.left - ox) * scale,
+                    top: cy + (a.top - oy) * scale,
+                    right: cx + (a.right - ox) * scale,
+                    bottom: cy + (a.bottom - oy) * scale,
+                };
+            }
+            return true;
+        }
+        // A narrow rail can stack whole semantic groups without turning a
+        // D-pad/C diamond into a row or squeezing every key below its minimum.
+        let mut units: Vec<Vec<usize>> = groups
+            .iter()
+            .filter(|g| !g.is_empty() && g.iter().all(|i| indices.contains(i)))
+            .cloned()
+            .collect();
+        for i in indices {
+            if !units.iter().any(|g| g.contains(&i)) {
+                units.push(vec![i]);
+            }
+        }
+        let group_bounds = |g: &Vec<usize>| g.iter().map(|i| areas[*i]).reduce(union).unwrap();
+        units.sort_by(|a, b| {
+            group_bounds(a)
+                .center()
+                .1
+                .total_cmp(&group_bounds(b).center().1)
+        });
+        let gap = minimum * 0.25;
+        let gaps = gap * units.len().saturating_sub(1) as f32;
+        let items = units
+            .iter()
+            .map(|g| {
+                let a = group_bounds(g);
+                let scale = ((space.right - space.left) / (a.right - a.left)).min(1.);
+                (a, scale)
+            })
+            .collect::<Vec<_>>();
+        let height = items
+            .iter()
+            .map(|(a, s)| (a.bottom - a.top) * s)
+            .sum::<f32>();
+        let scale = ((space.bottom - space.top - gaps) / height).min(1.);
+        if scale <= 0. {
+            return false;
+        }
+        let mut y = space.top + ((space.bottom - space.top) - height * scale - gaps) / 2.;
+        for (g, (a, s)) in units.iter().zip(items) {
+            let factor = s * scale;
+            let (cx, cy) = a.center();
+            let h = (a.bottom - a.top) * factor;
+            for i in g {
+                let b = areas[*i];
+                candidate[*i] = Area {
+                    left: space.center().0 + (b.left - cx) * factor,
+                    right: space.center().0 + (b.right - cx) * factor,
+                    top: y + h / 2. + (b.top - cy) * factor,
+                    bottom: y + h / 2. + (b.bottom - cy) * factor,
+                };
+            }
+            y += h + gap;
+        }
+        true
+    };
+    let okay = if left.right > left.left + 1. && right.right > right.left + 1. {
+        let (l, r): (Vec<_>, Vec<_>) =
+            (0..areas.len()).partition(|i| areas[*i].center().0 < safe.center().0);
+        pack(l, left, &mut candidate) && pack(r, right, &mut candidate)
+    } else {
+        let band = if bottom.bottom - bottom.top >= top.bottom - top.top {
+            bottom
+        } else {
+            top
+        };
+        pack((0..areas.len()).collect(), band, &mut candidate)
+    };
+    if !okay
+        || candidate.iter().any(|a| {
+            overlaps(*a, picture)
+                || a.right - a.left + 0.01 < minimum
+                || a.bottom - a.top + 0.01 < minimum
+        })
+    {
+        return false;
+    }
+    areas.copy_from_slice(&candidate);
+    true
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -631,6 +921,7 @@ mod tests {
             rect(700., 300., 48., 48.),
         ];
         Draft::new(840., 420., a.clone(), a, vec![vec![0, 1]], None, 48.)
+            .with_picture_policy(PicturePolicy::Overlay)
     }
     #[test]
     fn grouped_gesture_is_one_undo_corner_keeps_anchor_and_cancel_restores_draft() {
@@ -670,7 +961,7 @@ mod tests {
     }
     #[test]
     fn game_field_has_equal_collision_priority_and_preserves_aspect_and_cancel() {
-        let mut d = draft();
+        let mut d = draft().with_picture_policy(PicturePolicy::KeepClear);
         d.selected = Some(Selection::Picture);
         let original = d.picture();
         d.resize(-100.);

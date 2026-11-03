@@ -27,9 +27,10 @@ Controller editing now uses a play-size canvas with grouped movement, corner
 resize, snapping, mirror, undo and scoped reset. The game field has the same
 selection and editing priority as controls, with aspect-correct preferences used
 by both renderers. Pixel4 observes GC field move/resize/undo/Save and N64 paused
-image/resize/Save/native-picture mapping. The short-screen group repair and larger
-N64 default field are source/package checked; their focused target check remains
-queued. See [current state](docs/state.toml) for exact build and verification bounds.
+image/resize/Save/native-picture mapping. The short-screen group repair, Save/Cancel/cold editor reload and movable tools
+dock are observed on Pixel4. The owner clarified a new game-first default: maximal
+uncropped picture first, then controls in free space without overlap. Its source
+models are checked; the new signed build and target check remain pending. See [current state](docs/state.toml) for exact build and verification bounds.
 
 Read [AGENTS.md](AGENTS.md), [successor handoff](docs/NTX_HANDOFF.md),
 [NTX-5](https://github.com/WigglyDon/ntx/issues/5) and its

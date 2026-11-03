@@ -1,6 +1,6 @@
 schema_version = 1
 product = "ntx"
-classification = "NTX5_CONTROLLER_EDITOR_REPAIR_TARGET_PENDING"
+classification = "NTX5_GAME_FIRST_DEFAULT_SOURCE_IN_PROGRESS"
 repository = "WigglyDon/ntx"
 repository_id = 1429193278
 branch = "main"
@@ -10,8 +10,8 @@ architecture_amendment = "https://github.com/WigglyDon/ntx/issues/5#issuecomment
 handoff = "docs/NTX_HANDOFF.md"
 source_status = "Canonical identity/migration verified. Baseline1cb/source1dc earned N64 play/Save/cold reload, native-unloaded scene return, fresh-process GC and N64 scenes and GC/N64/GC switching; independent saves retained. Earlier source87f3641/APK97930ed passes N64 drag/resize Save, Cancel, fresh-process runtime layout and shared GameCube editor boundaries; protected update and exact preference undo verified. Actual-target simultaneous stick/A, independent release and cancellation pass. Canonical GC title/attract Home/HOT return/Pause/Resume/joined Stop is now observed with current cards unchanged; review and disclosed limits remain open"
 current_editor_source = "75e73aeb54b2575b12cf51e50304e7695037a6a6"
-installed_editor_source = "6e80b9994a9fce16f356e5dbf6b7194eead711cb"
-installed_editor_apk_sha256 = "f809ee0251329d50988c54f4232dc751902bddb003f2d3434b38867d0b199986"
+installed_editor_source = "75e73aeb54b2575b12cf51e50304e7695037a6a6"
+installed_editor_apk_sha256 = "aa2f29334fa929dd55f93e696753df6bf482da04cc5e36794ea028b0b462084e"
 ready_editor_apk_sha256 = "aa2f29334fa929dd55f93e696753df6bf482da04cc5e36794ea028b0b462084e"
 active_systems = ["GameCube: retained direct Dolphin and canonical package", "Nintendo64: pinned Mupen Rust host; one-cartridge play/Save/cold reload verified on Pixel4"]
 axes = "Host platform/device, emulated system and execution backend are independent"
@@ -27,7 +27,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Complete the ready controller-editor repair check through normal custody; do not replay earned campaigns. Then review the recorded bounded Pixel4 NTX-5 outcomes and disclosed defects. Ocarina playable/save/cold reload, supported per-game scenes/switches, layout persistence/input and GC title/attract Home return are observed. Retain historical incidents, unmeasured hitches and backend GL origin; no automatic campaign repeat, new console/Fold port, concurrent native instances or public binary release"
+next_step = "Build and verify the clarified game-first default through normal custody: full drawable, complete native-aspect picture and controls in unused space without overlap. Do not replay earned campaigns. Then review the recorded bounded Pixel4 NTX-5 outcomes and disclosed defects. Ocarina playable/save/cold reload, supported per-game scenes/switches, layout persistence/input and GC title/attract Home return are observed. Retain historical incidents, unmeasured hitches and backend GL origin; no automatic campaign repeat, new console/Fold port, concurrent native instances or public binary release"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 intro hitches: owner observed, unmeasured", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -178,3 +178,17 @@ apk_sha256 = "f809ee0251329d50988c54f4232dc751902bddb003f2d3434b38867d0b199986"
 observed = "Full-size GC/N64 editor; GC game-field anchored corner resize, move, undo and Save; N64 actual paused game image, anchored corner resize, Save and live native-renderer picture change"
 retained = "Protected same-signer update, exact original preferences restored, all three identities, original installation, GC cards/N64 ordinary/untouched TP and physical OFF actual return verified; no outstanding NTX custody"
 found = "GC grouped move rejected default scaled caps below48DP on actual832x328 display. N64 centered Pause/Start reduced clear picture unnecessarily. Both source repairs have affected-boundary tests; new target check pending"
+
+
+[layout_editor_increment.pixel_v22]
+source = "75e73aeb54b2575b12cf51e50304e7695037a6a6"
+apk_sha256 = "aa2f29334fa929dd55f93e696753df6bf482da04cc5e36794ea028b0b462084e"
+observed = "Repaired GC grouped movement/Save/reopen; Cancel preserves exact saved bytes; verified old process absence and cold editor reload; actual GC paused image; dock top/bottom; larger N64 clear-picture field and relocated Pause"
+return = "Normal native Stop, original preferences restored, all protected ordinary/cards/untouched profile/identities/source installation and physical OFF verified. No held NTX custody/request/recovery"
+owner_feedback = "Field still not edge-to-edge. Default must maximize complete native-aspect image first: height in landscape, width in portrait; controls use remaining space without overlap. Important consistency across emulators"
+
+[game_first_default]
+status = "SOURCE_HOST_MODELS_CHECKED_BUILD_TARGET_PENDING"
+validation = "103 library tests: full-height picture, non-overlapping typed controls, exact runtime/editor density/origin mapping, portrait fixtures, legacy policy compatibility, explicit no-space alternatives, aspect-change cancellation, prior storage/input/scene fixtures"
+policy = "GameFirst default; full drawable, preserved aspect and complete picture; touch controls occupy actual free space. Compact layout preserves semantic groups. Keep-clear and overlap are explicit alternatives"
+coordination = "Clarification delivered to existing sibling owners at the owner's explicit request; receipt is private. Their implementation/runtime uptake is not inferred"

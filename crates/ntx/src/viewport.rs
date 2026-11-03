@@ -99,7 +99,9 @@ fn intersection(a: Area, b: Area) -> Area {
 pub struct Geometry {
     pub layout: Layout,
     pub density: f32,
+    pub controls_fit: bool,
     picture: Option<Area>,
+    picture_policy: crate::layout_edit::PicturePolicy,
     window: WindowGeometry,
     buffer: (f32, f32),
 }
@@ -112,6 +114,15 @@ impl Geometry {
         width: f32,
         height: f32,
         settings: Option<&crate::controls::Settings>,
+    ) -> Option<Self> {
+        Self::with_controls_aspect(window, width, height, settings, 4. / 3.)
+    }
+    pub fn with_controls_aspect(
+        window: WindowGeometry,
+        width: f32,
+        height: f32,
+        settings: Option<&crate::controls::Settings>,
+        aspect: f32,
     ) -> Option<Self> {
         let safe = window.control_bounds()?;
         if !width.is_finite() || !height.is_finite() || width < 2.0 || height < 2.0 {
@@ -131,7 +142,7 @@ impl Geometry {
             safe.right - safe.left,
             safe.bottom - safe.top,
             window.density,
-            settings,
+            None,
         );
         let sx = width / (window.surface.right - window.surface.left);
         let sy = height / (window.surface.bottom - window.surface.top);
@@ -155,19 +166,75 @@ impl Geometry {
             right: (picture.right - window.surface.left) * sx,
             bottom: (picture.bottom - window.surface.top) * sy,
         };
-        let picture = settings
-            .and_then(|s| {
-                s.profiles.iter().find(|p| {
-                    p.display
-                        == crate::controls::display_key(
-                            (safe.right - safe.left) / window.density,
-                            (safe.bottom - safe.top) / window.density,
-                        )
-                })
+        let profile = settings.and_then(|s| {
+            s.profiles.iter().find(|p| {
+                p.display
+                    == crate::controls::display_key(
+                        (safe.right - safe.left) / window.density,
+                        (safe.bottom - safe.top) / window.density,
+                    )
             })
-            .and_then(|p| p.picture);
+        });
+        let picture = profile.and_then(|p| p.picture);
+        let picture_policy = profile.map_or(Default::default(), |p| p.picture_policy);
+        let mut areas = layout.zones.iter().map(|z| z.area).collect::<Vec<_>>();
+        let safe_buffer = Area {
+            left: (safe.left - window.surface.left) * sx,
+            top: (safe.top - window.surface.top) * sy,
+            right: (safe.right - window.surface.left) * sx,
+            bottom: (safe.bottom - window.surface.top) * sy,
+        };
+        let controls_fit = !picture_policy.is_game_first()
+            || crate::layout_edit::place_free(
+                &mut areas,
+                safe_buffer,
+                crate::layout_edit::edge_picture(layout.game, aspect),
+                16. * window.density * sx.min(sy),
+                &crate::controls::groups(&layout.zones),
+            );
+        for (zone, area) in layout.zones.iter_mut().zip(areas) {
+            zone.area = area;
+        }
+        let defaults = layout.clone();
+        if let Some(profile) = profile {
+            crate::controls::apply_profile_to(
+                profile,
+                &mut layout,
+                safe_buffer,
+                window.density * sx.min(sy),
+            );
+            let p = picture.map_or_else(
+                || crate::layout_edit::edge_picture(layout.game, aspect),
+                |p| {
+                    crate::layout_edit::fit(
+                        crate::layout_edit::denormalized(p, layout.game),
+                        aspect,
+                    )
+                },
+            );
+            if picture_policy.is_game_first()
+                && layout
+                    .zones
+                    .iter()
+                    .any(|z| crate::controls::overlaps(z.area, p))
+            {
+                layout = defaults;
+            }
+        }
+        let active_picture = picture.map_or_else(
+            || crate::layout_edit::edge_picture(layout.game, aspect),
+            |p| crate::layout_edit::fit(crate::layout_edit::denormalized(p, layout.game), aspect),
+        );
+        let controls_fit = (!picture_policy.is_game_first()
+            || layout
+                .zones
+                .iter()
+                .all(|z| !crate::controls::overlaps(z.area, active_picture)))
+            && (controls_fit || picture.is_some());
         Some(Self {
             picture,
+            controls_fit,
+            picture_policy,
             layout,
             density: window.density * sx.min(sy),
             window,
@@ -205,20 +272,25 @@ impl Geometry {
                 crate::layout_edit::denormalized(p, self.layout.game),
                 aspect,
             );
-            if !self
-                .layout
-                .zones
-                .iter()
-                .any(|z| crate::controls::overlaps(a, z.area))
+            if self.picture_policy.is_overlay()
+                || !self
+                    .layout
+                    .zones
+                    .iter()
+                    .any(|z| crate::controls::overlaps(a, z.area))
             {
                 return a;
             }
         }
-        crate::layout_edit::clear_picture(
-            self.layout.game,
-            self.layout.zones.iter().map(|z| z.area),
-            aspect,
-        )
+        if self.picture_policy != crate::layout_edit::PicturePolicy::KeepClear {
+            crate::layout_edit::edge_picture(self.layout.game, aspect)
+        } else {
+            crate::layout_edit::clear_picture(
+                self.layout.game,
+                self.layout.zones.iter().map(|z| z.area),
+                aspect,
+            )
+        }
     }
 }
 
@@ -229,6 +301,7 @@ pub struct PlayerView {
     presented: Option<Arc<Geometry>>,
     touch: TouchPad,
     controls: Option<Arc<crate::controls::Settings>>,
+    aspect: f32,
 }
 impl PlayerView {
     pub const fn new() -> Self {
@@ -237,6 +310,7 @@ impl PlayerView {
             presented: None,
             touch: TouchPad::new(),
             controls: None,
+            aspect: 4. / 3.,
         }
     }
     pub fn configure_controls(&mut self, settings: crate::controls::Settings) {
@@ -279,6 +353,18 @@ impl PlayerView {
     pub fn cancel(&mut self) {
         self.touch.cancel();
     }
+    pub fn present_aspect(
+        &mut self,
+        width: f32,
+        height: f32,
+        aspect: f32,
+    ) -> Option<&Arc<Geometry>> {
+        if aspect.is_finite() && aspect > 0. && (self.aspect - aspect).abs() > 0.0001 {
+            self.aspect = aspect;
+            self.invalidate();
+        }
+        self.present(width, height)
+    }
     pub fn present(&mut self, width: f32, height: f32) -> Option<&Arc<Geometry>> {
         if self
             .presented
@@ -288,7 +374,15 @@ impl PlayerView {
             self.invalidate();
             self.presented = self
                 .window
-                .and_then(|w| Geometry::with_controls(w, width, height, self.controls.as_deref()))
+                .and_then(|w| {
+                    Geometry::with_controls_aspect(
+                        w,
+                        width,
+                        height,
+                        self.controls.as_deref(),
+                        self.aspect,
+                    )
+                })
                 .map(Arc::new);
         }
         self.presented.as_ref()
@@ -533,9 +627,19 @@ mod tests {
         inset.surface = rect(100.0, 266.0, 2380.0, 1214.0);
         inset.content = inset.surface;
         let fitted = Geometry::new(inset, 2280.0, 948.0).unwrap();
-        for (a, b) in full.layout.zones.iter().zip(&fitted.layout.zones) {
-            assert_eq!(a.area.left, b.area.left);
-            assert!((a.area.top - b.area.top - 66.0).abs() < 0.001);
+        for g in [&full, &fitted] {
+            assert!(g.controls_fit);
+            let picture = g.picture(4. / 3.);
+            for z in &g.layout.zones {
+                assert!(!crate::controls::overlaps(z.area, picture));
+            }
+            let p = g.layout.zones[0].area.center();
+            let screen = (
+                g.window.surface.left - g.window.input_origin.0 + p.0,
+                g.window.surface.top - g.window.input_origin.1 + p.1,
+            );
+            let mapped = g.input_to_buffer(screen.0, screen.1);
+            assert!((mapped.0 - p.0).abs() < 0.001 && (mapped.1 - p.1).abs() < 0.001);
         }
         assert_eq!(full.layout.game.top, 0.0);
         assert_eq!(fitted.layout.game.top, 0.0);
@@ -686,8 +790,8 @@ mod tests {
     }
     #[test]
     fn edge_to_edge_picture_uses_full_height_and_actual_engine_aspect_clear_of_targets() {
-        let g = Geometry::new(window(), 2280.0, 1080.0).unwrap();
         for aspect in [1.25, 4.0 / 3.0, 16.0 / 9.0] {
+            let g = Geometry::with_controls_aspect(window(), 2280., 1080., None, aspect).unwrap();
             let p = g.picture(aspect);
             assert_eq!(p.top, 0.0);
             assert!(((p.right - p.left) / (p.bottom - p.top) - aspect).abs() < 0.0001);
@@ -702,6 +806,7 @@ mod tests {
                 );
             }
         }
+        let g = Geometry::with_controls_aspect(window(), 2280., 1080., None, 1.25).unwrap();
         let p = g.picture(1.25);
         assert_eq!(p.bottom, 1080.0);
         assert!((p.right - p.left - 1350.0).abs() < 0.01);
@@ -721,8 +826,8 @@ mod tests {
                 },
                 density,
             };
-            let g = Geometry::new(w, 2076., 2152.).unwrap();
             for aspect in [1.25, 4. / 3.] {
+                let g = Geometry::with_controls_aspect(w, 2076., 2152., None, aspect).unwrap();
                 let picture = g.picture(aspect);
                 assert!(
                     picture.left.abs() < 0.01 && (picture.right - 2076.).abs() < 0.01,
@@ -756,7 +861,166 @@ mod tests {
         for (a, b) in hidden.layout.zones.iter().zip(&shown.layout.zones) {
             assert_eq!(a.area, b.area);
             let (x, y) = a.area.center();
-            assert_eq!(shown.input_to_buffer(x, y), (x, y));
+            let mapped = shown.input_to_buffer(x, y);
+            assert!((mapped.0 - x).abs() < 0.001 && (mapped.1 - y).abs() < 0.001);
         }
+    }
+}
+
+#[cfg(test)]
+mod game_first_tests {
+    use super::*;
+    use crate::{
+        controls::{Editor, Settings},
+        layout_edit::{PicturePolicy, same_area},
+        n64_touch::View,
+    };
+    fn fixture() -> WindowGeometry {
+        let a = Area {
+            left: 0.,
+            top: 0.,
+            right: 2280.,
+            bottom: 1080.,
+        };
+        WindowGeometry {
+            window: a,
+            surface: a,
+            content: a,
+            input_origin: (0., 0.),
+            density: 2.75,
+            clearance: Insets {
+                top: 84.,
+                bottom: 84.,
+                ..Default::default()
+            },
+        }
+    }
+    #[test]
+    fn full_height_picture_and_free_space_controls_share_runtime_and_editor_coordinates() {
+        let w = fixture();
+        let safe = w.control_bounds().unwrap();
+        let (cw, ch) = w.control_size().unwrap();
+        let frame = Area {
+            left: (w.surface.left - safe.left) / w.density,
+            top: (w.surface.top - safe.top) / w.density,
+            right: (w.surface.right - safe.left) / w.density,
+            bottom: (w.surface.bottom - safe.top) / w.density,
+        };
+        for aspect in [1.25, 4. / 3., 16. / 9.] {
+            let g = Geometry::with_controls_aspect(w, 1140., 540., None, aspect).unwrap();
+            assert!(g.controls_fit);
+            let p = g.picture(aspect);
+            assert_eq!(p.top, 0.);
+            assert_eq!(p.bottom, 540.);
+            assert!(((p.right - p.left) / 540. - aspect).abs() < 0.0001);
+            let mut editor = Editor::new(cw, ch, Settings::default());
+            editor.configure_frame(frame, aspect);
+            for (runtime, draft) in g.layout.zones.iter().zip(&editor.layout.zones) {
+                assert_eq!(runtime.target, draft.target);
+                assert!(!crate::controls::overlaps(runtime.area, p));
+                let map = |a: Area| Area {
+                    left: (a.left * w.density + safe.left) * 0.5,
+                    top: (a.top * w.density + safe.top) * 0.5,
+                    right: (a.right * w.density + safe.left) * 0.5,
+                    bottom: (a.bottom * w.density + safe.top) * 0.5,
+                };
+                assert!(same_area(runtime.area, map(draft.area)));
+            }
+            assert!(editor.finish().unwrap().profiles.is_empty());
+        }
+        let mut view = View::default();
+        view.measure(Some(w));
+        let p = view.picture(2280., 1080., 4. / 3.).unwrap();
+        assert!(view.controls_fit);
+        assert_eq!((p.top, p.bottom), (0., 1080.));
+        let mut editor = crate::n64_controls::Editor::new(cw, ch, Settings::default());
+        editor.configure_frame(frame, 4. / 3.);
+        for (runtime, draft) in view.zones.iter().zip(&editor.zones) {
+            assert_eq!(runtime.target, draft.target);
+            assert!(!crate::controls::overlaps(runtime.area, p));
+            assert!(same_area(
+                runtime.area,
+                Area {
+                    left: draft.area.left * w.density + safe.left,
+                    top: draft.area.top * w.density + safe.top,
+                    right: draft.area.right * w.density + safe.left,
+                    bottom: draft.area.bottom * w.density + safe.top
+                }
+            ));
+        }
+        assert!(editor.finish().unwrap().n64_profiles.is_empty());
+    }
+    #[test]
+    fn legacy_preferences_and_explicit_alternatives_preserve_their_meaning_without_silent_overlap()
+    {
+        let settings: Settings =
+            serde_json::from_str(r#"{"profiles":[{"display":"800x600","zones":[]}]}"#).unwrap();
+        assert_eq!(
+            settings.profiles[0].picture_policy,
+            PicturePolicy::KeepClear
+        );
+        let a = Area {
+            left: 0.,
+            top: 0.,
+            right: 800.,
+            bottom: 600.,
+        };
+        let w = WindowGeometry {
+            window: a,
+            surface: a,
+            content: a,
+            input_origin: (0., 0.),
+            density: 1.,
+            clearance: Insets::default(),
+        };
+        let g = Geometry::new(w, 800., 600.).unwrap();
+        assert!(
+            !g.controls_fit,
+            "a matching-aspect drawable leaves no free space"
+        );
+        let mut editor = Editor::new(800., 600., Settings::default());
+        assert!(editor.draft.requires_choice());
+        editor.draft.set_picture_policy(PicturePolicy::KeepClear);
+        assert!(!editor.draft.requires_choice());
+        let clear = editor.draft.picture();
+        assert!(clear.right - clear.left < 800.);
+        editor.draft.undo();
+        assert!(editor.draft.requires_choice());
+        editor.draft.set_picture_policy(PicturePolicy::Overlay);
+        assert!(!editor.draft.requires_choice());
+        let saved = editor.finish().unwrap();
+        assert_eq!(saved.profiles[0].picture_policy, PicturePolicy::Overlay);
+        assert_eq!(
+            Geometry::with_controls(w, 800., 600., Some(&saved))
+                .unwrap()
+                .picture(4. / 3.),
+            a
+        );
+    }
+    #[test]
+    fn changed_backend_aspect_reflows_only_ephemeral_geometry_and_releases_old_contacts() {
+        let mut view = PlayerView::new();
+        view.measure(Some(fixture()));
+        let a = view
+            .present_aspect(2280., 1080., 1.25)
+            .unwrap()
+            .layout
+            .zones
+            .iter()
+            .find(|z| z.target == crate::touch::Target::Button(crate::Control::A))
+            .unwrap()
+            .area
+            .center();
+        view.down(1, a.0, a.1);
+        assert_eq!(view.pad().values()[crate::Control::A as usize], 1.);
+        let next = view.present_aspect(2280., 1080., 16. / 9.).unwrap().clone();
+        assert!(view.pad().values().iter().all(|v| *v == 0.));
+        assert_eq!(next.picture(16. / 9.).bottom, 1080.);
+        assert!(
+            next.layout
+                .zones
+                .iter()
+                .all(|z| !crate::controls::overlaps(z.area, next.picture(16. / 9.)))
+        );
     }
 }
