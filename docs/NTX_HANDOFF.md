@@ -24,42 +24,48 @@ geometry has model coverage. Sibling owners were informed, never modified here.
 
 ## Current installed result and next repair
 
-Installed sourcee112aa9314dca411e2978d0deb30b4798da2169d,
-APK53defacb9cb745fd8ff6188af46cfadb4fe236382e574b1c0a224cc0ad66e6da,
-core70ec78b934e0b9298ab87cb3bc5b66900ac6a76e2caeeab6e714699f2a94a7fc.
-Original signer and exact corresponding source are retained privately.
+Installed sourcefb7ec4f1004ab3cc9388084d5ae7ff17430ec041,
+APK60949b173f02c3b9ca02801592bb5eb69231c48c77a869e3d4f484c513ac2eed,
+core9d36c6d547e02cb21f95948515cb2e9f624996a2cd2a3214b9163f70ae254244.
+Original signer and exact corresponding source/symbols are retained privately.
 
-The latest bounded compiler-pass check has4096 calls/5577 completed compiler
-scopes, zero invalid frames/unknown events. Eight core calls exceed40ms; compiler
-time in one call reaches128.300ms. Register culling is the largest measured pass
-(matched eight-call mean17.681ms, frame maximum41.324ms), followed by assembly
-(14.721/34.036ms) and allocation (7.971/18.654ms). Maxima can be different calls;
-cache overlaps other passes and is never added to them. Cache maintenance peaks
-at1.408ms; raw IDC/DIC intersection/union0/0,8316 scopes, tail completions0.
-Individual-scope duration statistics cap separately at4096; no extrapolation.
+First4096 calls again produced5577 compiler scopes, zero invalid/unknown events.
+The first immutable-map substitutions did not show a material timing gain:
+culling frame mean64us/max41.056ms versus64us/41.324ms before; compiler frame
+maximum126.801ms versus128.300ms, with five totals above40ms in both. Seven outer
+slow calls versus eight is not attributed to the change; slow-call cohorts differ.
+Assembly peaks33.335ms, allocation18.446ms and cache maintenance1.460ms. Maxima
+may be different calls; cache overlaps other passes and is never added to them.
+Cache scopes8316, tail completions0, raw IDC/DIC intersection/union0/0. Individual
+scope-duration statistics cap separately at4096; do not extrapolate their maximum.
 
-Patch7 repairs an actual trailing dirty-page batch and signed-shift defect in its
-batcher, with normal/UBSan-trap regression coverage. Current ARM64 link patches
-flush directly; the repaired tail did not execute in this title window. No hitch
-or historical-incident cure follows. Do not change cache operations/barriers/A53
-workaround or blanket compiler flags from this result.
+Patch7 fixes an actual trailing-batch/unsigned-shift defect, covered by native
+normal/UBSan-trap fixtures. Current ARM64 link patches flush directly; its tail
+was not exercised in either title window. No title-hitch or historical-incident
+cure follows, and no cache instruction/barrier/A53 or blanket optimizer tuning.
+Patch8 retains exact output and bounds immutable membership work; no measured
+hitch improvement is advertised. The private incoming-branch prototype remains
+unintegrated and targets the smaller allocation cost.
 
-Continue directly with the measured register-culling pass. Patch8 replaces two
-immutable entry-map membership scans with exact bounded masks, preserving the
-original exclusion rule, signed-byte handling, final loop index and remaining
-compiler operations. Actual-helper equivalence fixtures and exact compiler-body
-comparison cover this change. One-unit native build,119 library/remaining host
-tests and warnings-denied host/ARM64 lints pass; complete package/target verification before
-claiming a performance improvement. A private incoming-branch index prototype
-passed isolated checks but targets the smaller allocation cost and is unintegrated.
+Continue with patch9: lazy counts for the remaining queried values as culling
+actually erases map entries. Counts initialize at the original query point and
+update with every relevant erase, preserving negative/free values, duplicates,
+excluded slots and short-circuit queries. Actual helper/getter comparison covers
+over1million changing-map steps per mode, normal/UBSan trap. Exact compiler-body
+comparison permits only declared culling substitutions and phase notifications;
+nine patches reproduce active source. The one-unit native build is complete;
+119 library tests and warnings-denied host/ARM64 lints pass. Finish package/target
+verification before claiming a benefit.
+No new compiler yield, SIMD implementation or block-limit change is introduced.
 
-The latest check observed rendered initial/pre-Pause attract scenes, with a black
-late capture between them. No persistent black/gray freeze was established.
-Normal Stop/join, protected ordinary/cards/untouched profile, exact preferences,
-IDs/source installation and physicalOFF passed; custodian completed/returned=true.
-No NTX request, hold or recovery remains at this handoff. Its actual service work
-was945s; first4096 is the diagnostic collection bound, not total custody duration.
-[Measured outcome](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6618617072).
+The latest self-contained title check used116s of work and completed actual
+return. All five images are opened: initial, late and pre-Pause scenes rendered,
+then the actual Pause menu. Normal Stop/join, protected ordinary/cards/untouched
+profile, exact preferences, IDs/source installation and physicalOFF passed;
+custodian completed/returned=true. No NTX request/hold/recovery remains here.
+No gameplay input, Save or Restore occurred. Preserve the earlier isolated
+black/gray captures and historical reports; no sustained freeze was established.
+[Latest outcome](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6619208261).
 
 ## Preservation and admission
 

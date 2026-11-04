@@ -230,6 +230,7 @@ pub fn prepare(root: &Path, source: &Path) -> Result<()> {
         "0006-compiler-phase-observer.patch",
         "0007-complete-cache-batch.patch",
         "0008-cull-register-membership.patch",
+        "0009-cull-query-counts.patch",
     ] {
         copy(
             &root.join("native/mupen").join(name),

@@ -1,0 +1,104 @@
+NTX targeted lazy live-query counts in measured register culling; original pin/licenses retained.
+
+--- a/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
++++ b/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
+@@ -1,3 +1,4 @@
++/* Modified by ntx 2026-11-03: preserve exact live-map query counts through register-culling erases. */
+ /* Modified by ntx 2026-11-03: exact immutable entry-map membership in register culling; original exclusion and downstream operations retained. */
+ /* Modified by ntx 2026-11-03: optional host observer around the unchanged compiler implementation. */
+ /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+@@ -418,6 +419,30 @@
+       missing|=UINT64_C(1)<<hr;
+   }
+   return missing;
++}
++
++/* ntx: track one queried value while the culling loop erases map entries.
++ * Negative/free values and duplicates retain the original getter semantics. */
++static unsigned ntx_reg_matches(const signed char map[],int key)
++{
++  unsigned count=0;
++  int hr;
++  for(hr=0;hr<HOST_REGS;hr++)
++    if(hr!=EXCLUDE_REG && map[hr]==key) count++;
++  return count;
++}
++static int ntx_query_present(const signed char map[],int key,unsigned *count)
++{
++  if(*count==~0u) *count=ntx_reg_matches(map,key);
++  return *count!=0;
++}
++static void ntx_erase_queried_reg(signed char map[],int hr,int key,unsigned *count)
++{
++  if(*count!=~0u && hr!=EXCLUDE_REG) {
++    *count-=(map[hr]==key);
++    *count+=(-1==key);
++  }
++  map[hr]=-1;
+ }
+ 
+ // Find a register that is available for two consecutive cycles
+@@ -10639,6 +10664,9 @@
+     // Save it
+     needed_reg[i]=nr;
+ 
++    // Only count a query when first needed; subsequent erases keep it exact.
++    int ntx_query=((itype[i]==RJUMP||itype[i]==UJUMP||itype[i]==CJUMP||itype[i]==SJUMP||itype[i]==FJUMP)?rt1[i+1]:rt1[i])|64;
++    unsigned ntx_current_matches=~0u,ntx_branch_matches=~0u;
+     // Deallocate unneeded registers
+     for(hr=0;hr<HOST_REGS;hr++)
+     {
+@@ -10651,7 +10679,7 @@
+           if(itype[i]!=RJUMP&&itype[i]!=UJUMP&&(source[i]>>16)!=0x1000)
+           {
+             if(likely[i]) {
+-              regs[i].regmap[hr]=-1;
++              ntx_erase_queried_reg(regs[i].regmap,hr,ntx_query,&ntx_current_matches);
+               regs[i].isconst&=~(1<<hr);
+               if(i<slen-2) {
+                 regmap_pre[i+2][hr]=-1;
+@@ -10663,7 +10691,7 @@
+         if(itype[i]==RJUMP||itype[i]==UJUMP||itype[i]==CJUMP||itype[i]==SJUMP||itype[i]==FJUMP)
+         {
+           int d1=0,d2=0,map=0,temp=0;
+-          if(get_reg(regs[i].regmap,rt1[i+1]|64)>=0||get_reg(branch_regs[i].regmap,rt1[i+1]|64)>=0)
++          if(ntx_query_present(regs[i].regmap,ntx_query,&ntx_current_matches)||ntx_query_present(branch_regs[i].regmap,ntx_query,&ntx_branch_matches))
+           {
+             d1=dep1[i+1];
+             d2=dep2[i+1];
+@@ -10691,7 +10719,7 @@
+              regs[i].regmap[hr]!=RTEMP && regs[i].regmap[hr]!=CCREG &&
+              regs[i].regmap[hr]!=map )
+           {
+-            regs[i].regmap[hr]=-1;
++            ntx_erase_queried_reg(regs[i].regmap,hr,ntx_query,&ntx_current_matches);
+             regs[i].isconst&=~(1<<hr);
+             if((branch_regs[i].regmap[hr]&63)!=rs1[i] && (branch_regs[i].regmap[hr]&63)!=rs2[i] &&
+                (branch_regs[i].regmap[hr]&63)!=rt1[i] && (branch_regs[i].regmap[hr]&63)!=rt2[i] &&
+@@ -10704,7 +10732,7 @@
+                branch_regs[i].regmap[hr]!=RTEMP && branch_regs[i].regmap[hr]!=CCREG &&
+                branch_regs[i].regmap[hr]!=map)
+             {
+-              branch_regs[i].regmap[hr]=-1;
++              ntx_erase_queried_reg(branch_regs[i].regmap,hr,ntx_query,&ntx_branch_matches);
+               branch_regs[i].regmap_entry[hr]=-1;
+               if(itype[i]!=RJUMP&&itype[i]!=UJUMP&&(source[i]>>16)!=0x1000)
+               {
+@@ -10722,7 +10750,7 @@
+           if(i>0)
+           {
+             int d1=0,d2=0,map=-1,temp=-1;
+-            if(get_reg(regs[i].regmap,rt1[i]|64)>=0)
++            if(ntx_query_present(regs[i].regmap,ntx_query,&ntx_current_matches))
+             {
+               d1=dep1[i];
+               d2=dep2[i];
+@@ -10757,7 +10785,7 @@
+                 if(regs[i+1].regmap_entry[hr]==CCREG) regs[i+1].regmap_entry[hr]=-1;
+                 regs[i+1].wasconst&=~(1<<hr);
+               }
+-              regs[i].regmap[hr]=-1;
++              ntx_erase_queried_reg(regs[i].regmap,hr,ntx_query,&ntx_current_matches);
+               regs[i].isconst&=~(1<<hr);
+             }
+           }

@@ -27,7 +27,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Package and verify exact immutable-map membership in the measured hot register-culling pass. Preserve old cores/progress and do not stop at measurement; normal capacity/custody still govern"
+next_step = "Verify lazy live-query counts in the measured register-culling pass. First immutable-map substitutions gave no material title-window timing gain; preserve exact semantics/progress and use actual capacity/custody"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 hitches: prior same-installation cache pair24 to7 slow calls. New package trace has8 slow CPU-heavy calls, shader-bearing startup946.435ms/residual132.936ms. Exact routine unqualified", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Single pre-Pause gray field in latest bounded title check: duration/cause unknown; normal Pause and Stop followed", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -336,3 +336,20 @@ implementation = "Replace two immutable29-register entry-map membership scans wi
 validation = "Actual helper vs retained native getter for all signed-byte codes/slots, duplicates, selected and in-range exclusions,25000 changing map pairs/read-only aliasing; normal/UBSan trap. Exact compiler remainder/eight-patch/source/ABI fixtures,119 library and remaining host tests, host all-targets/ARM64 warnings-denied lints pass"
 core_sha256 = "9d36c6d547e02cb21f95948515cb2e9f624996a2cd2a3214b9163f70ae254244"
 limits = "One-unit native build and full host tests pass; package/target effect pending. No incoming-branch index, blanket optimizer/block-limit change or new compiler yield"
+
+[n64_culling_observation]
+source = "fb7ec4f1004ab3cc9388084d5ae7ff17430ec041"
+apk_sha256 = "60949b173f02c3b9ca02801592bb5eb69231c48c77a869e3d4f484c513ac2eed"
+coverage = "4096 calls/5577 compiler scopes, invalid0/unknown0. Seven outer slow calls vs8 before is not attributed; different slow-call cohort. Same five compiler-frame totals above40ms"
+culling_frame = { samples = 4096, mean_us = 64, max_us = 41056 }
+compiler_frame_max_us = 126801
+conclusion = "No material title-window gain versus culling64us/41324us and compiler128300us before. Exact-output/worst-case membership bound retained; no hitch cure"
+return = "COMPLETED/returned=true; self-contained116s work; all five images opened and initial/late/pre-Pause scenes rendered; normal Pause/Stop/native join, protected ordinary/cards/untouched profile/IDs/source/prefs/OFF verified; no NTX hold/recovery"
+report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6619208261"
+
+[n64_culling_query_source]
+implementation = "Initialize one count per queried live map lazily at its original query point; update every culling erase exactly. Preserve negative/free/duplicate/excluded values and short-circuit evaluation"
+core_sha256 = "583496282b87993665657fbea23d495939ef9150a8bef766d05cd3ee2f944e0f"
+validation = "Actual native helper vs retained getter through over1million changing-map steps per mode, normal/UBSan trap; declared compiler-body remainder, nine-patch/source/ABI fixtures and one-unit native build pass"
+validation_host = "119 Rust library tests and host all-targets/ARM64 warnings-denied lints pass"
+limits = "Package and target effect pending; no incoming-branch index, SIMD or blanket optimizer/block-limit/yield change"

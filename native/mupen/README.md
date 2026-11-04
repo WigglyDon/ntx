@@ -101,9 +101,19 @@ original excluded-register rule, signed-byte range and final caller loop index;
 all downstream compiler operations remain unchanged. The actual helper is checked
 against the retained getter for every signed-byte code/slot, duplicates, selected
 and in-range exclusions, changing maps and aliasing, with normal/UBSan-trap runs.
-The full compiler-body comparison permits only these two declared substitutions
-and observation statements. This targets the measured hot pass; target speed
-impact remains unqualified until the new artifact is observed.
+The full compiler-body comparison permits only declared culling substitutions
+and observation statements. The first immutable-map change preserves the actual
+title route but shows no material timing gain; it is not a measured hitch cure.
+
+The live-query count patch targets the remaining repeated getter calls. Counts
+start uninitialized and are evaluated only at the original query point. Every
+relevant map erase updates an initialized count, including when a free-register
+query gains a match; duplicate and excluded slots retain their original meaning.
+Actual helpers are checked against the unchanged getter through over1million
+changing-map steps per mode, with pre-query erases, short-circuit lookup and
+negative/free/duplicate/excluded values in normal and UBSan trap mode. Compiler
+remainder comparison checks the declared call sites and every map erase; no
+compiler yield or persistence format is changed. Target effect remains pending.
 
 ## Actual backend boundaries
 
