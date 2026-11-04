@@ -1,0 +1,14 @@
+NTX2026-11-04: use the low register bit for an upper-half constant mask.
+Upstream15bada85906593376e8fd697f1b0b3af3a20f512; original licenses retained.
+
+--- a/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
++++ b/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
+@@ -1835,7 +1835,7 @@
+   if(reg<64) {
+     return !((unneeded_reg[i+1]>>reg)&1);
+   }else{
+-    return !((unneeded_reg_upper[i+1]>>reg)&1);
++    return !((unneeded_reg_upper[i+1]>>(reg&63))&1);
+   }
+ }
+ 

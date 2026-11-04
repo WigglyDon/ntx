@@ -24,127 +24,56 @@ geometry has model coverage. Sibling owners were informed, never modified here.
 
 ## Current installed result and next repair
 
-GameCube now also has source-level healthy-RAM storage refusal handling after
-verified native capture/ordinary commit, with explicit fatal native/acknowledgement
-guards.140 library tests and relevant lints pass; signed candidate6829b98b/
-sourceaf0230e/core2426 has checked source/raw symbols/original signer and is
-preserved. Target verification remains pending.
-Prepared candidate6b8567d2/sourcec05bcab/core2426 is the preceding budget+observer
-build, signed and preserved with source/raw debug inputs, uninstalled. It does
-not contain this latest GameCube continuation. The N64 warning check now passes with actual return at036/core76: two quota
-refusals keep same-process Resume, exact fixtures retire after native join, then
-a fresh title publishes normally and Stop leaves zero. Nine new captures opened;
-ordinary/cards/profiles/preferences/source/IDs preserved. A new finite observer
-request is separate; no second implementation worker.
+Installed sourceaf0230ef0e6f3b80c3f6716a2bfced8901bf5223,
+APK6829b98b146ec85d1222171d9cbc1d796277bf5549c15adceeaa4ee0dd4ff71a,
+core2426bddb80e57891c17b58f0ab057973a2089388086e76aacc6bbc83249026b0.
+Original signer, exact corresponding source, all raw native debug inputs and
+previous core76/candidate036 remain retained privately.
 
-A host restart interrupted the storage-warning target check. Cleanup-only recovery
-now verifies APK036f9827/source06d2b33/core76 installed, all three entries stopped,
-owned processes absent, protected data/source/preferences/collection unchanged
-and actual physical OFF/stock return. Empty original operator records remain
-private evidence; no functional pass is inferred. The separate fresh warning/Resume
-check now passes as described above; the original interrupted check stays unqualified. Local JSON receipt publication now syncs both file and
-directory;102 offline packet tests cover persistence failures. The installation
-paragraph below describes the preceding fully qualified retention result.
+The bounded observer now covers all15 phases/5577 compiler scopes in4096 core
+calls, with zero invalid frames/unknown events. Assembly emission leads its
+children: mean43us/max27087us; stubs11us/7055us, setup0us/456us, tail0us/113us.
+Enclosing assembly56us/35233us; total compiler184us/119602us, five compiler-frame
+sums above40ms and seven outer slow calls. Nested stages overlap; do not add
+maxima or infer an improvement from this instrumented title interval. Five new
+images opened; intro/title/attract rendered, followed by normal Pause/Stop/join.
+Ordinary/cards/independent profile/preferences/source/IDs and actual OFF return
+verified. No NTX hold/recovery remains at that result.
+[Observer report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6639297000).
 
-Source now also protects GC interrupted same-identity writes and adds per-profile
-recovery-file/byte and free-space admission (137 library tests; host/ARM64 lints pass)
-and preserves all raw native debug inputs automatically; those are independent
-from the prepared storage-warning target candidate. A new observer-only Mupen
-patch12 splits the assembly parent into four bounded child scopes: native source
-reproduction/fixtures, one-unit build/core2426bddb and134 library tests pass.
-No compiler algorithm/cache/barrier/SIMD/block-limit change or speed result.
-Do not install this changed core over a live N64 session; keep core76 and its
-source/symbols/scenes. Package/target observations remain separate work.
+Continue the measured emission path, not another broad timing campaign. Its
+actual constant reader has an upper-half mask shift by a register number>=64.
+The retained original traps under UBSan. Patch13 masks that bit index to0..63;
+126208 actual-function value/scan/branch cases pass normal and UBSan-trap modes.
+Thirteen-patch source/ABI/helper fixtures, relevant xtask lint and one-unit
+native build/core15d2a030 pass. It is retained but uninstalled/unpackaged. This is a defined-behavior correction, not a speed
+result or cure. Keep installed core2426/source/symbols/scenes until a new checked
+candidate and explicit already-stopped boundary are ready.
 
-Continuation source now separates checkpoint-only storage refusal from fatal
-native/save failure: retain a verified healthy paused runtime and offer Resume,
-with an explicit RAM-only warning; do not clear quarantine or claim durable
-scene recovery. 131 library tests pass; package/target verification is pending.
-Installed source below remains its earned earlier bounds.
+Separately qualify the installed GameCube checkpoint-only storage warning using
+existing Wind Waker, with current cards and independent profiles protected. Its
+Rust implementation has140 library tests and host/ARM64 warnings-denied lints;
+no affected GameCube target pass is claimed yet. Native/save/restore/uncertain
+collection-publication errors retain recovery. The N64 warning path already
+passes at036/core76: two quota refusals keep same-process Resume, native join
+precedes exact tagged-fixture removal, then normal publication/Stop leaves zero.
+Nine new images opened, protected data and actual return verified.
+[Storage report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6638969957).
 
-Owner storage request is now the priority: Pixel4 has a fixed minimal demo set
-(WW+OOT); further media provisioning must substitute rather than accumulate.
-The Fold remains the permanent library. Engineering uses existing games.
+Per-game scene/recovery limits now cover N64 and GameCube. Identical complete
+GameCube scenes reuse verified bytes; pending/unknown candidates stay. A global
+collection quota and storage-management UI remain unfinished. See
+[storage policy](RESUME_STORAGE.md). Pixel4 keeps WW+OOT only; additional media
+must substitute under explicit scope, never accumulate. The Fold is the permanent
+library. Read .local/storage-cleanup-20261104.txt before old paths/backups; never
+rehydrate retired test history.
 
-Minimal lab media with the Fold as
-the permanent library, preserving game/profile identities and ordinary progress.
-Read .local/storage-cleanup-20261104.txt before older phone paths or backup recipes.
-Do not rehydrate retired test history. Existing owners coordinate their own areas.
-
-The N64 resume writer lacked successful-generation retirement. The Rust repair
-adds post-acknowledgement/Stop cleanup, host-supplied free-space admission, bounded
-recovery files and scene-pinned ordinary-history retirement. See
-[storage policy](RESUME_STORAGE.md). 127 library tests and warnings-denied host/ARM64
-checks pass. Core76c4621a includes the previously pending literal-log patch; its
-one-unit build/eleven-patch/ABI fixtures pass. Signed package and focused Pixel4
-retention verification pass: four distinct title Pause publications each leave
-one current16MiB scene; joined/durably published Stop leaves none. All ten images
-are opened; current ordinary/cards/profiles/preferences/identities/source remain
-unchanged and actual return is verified. No NTX request/hold/recovery remains.
-No closed quest/save/timing campaign is reopened.
-
-
-Installed source8b92f1d296136ece3190ee26c38b3b49aab42f63,
-APKef9808fcc06fb7940b0f215cfb509b672f44a6226c8c26255dbc9c66a62f052b,
-core76c4621a83861c07558c442403d1f9a68e368e1754be50a7f5f0b27faab1e358.
-Original signer and exact corresponding source/symbols are retained privately.
-
-The preceding source3b225d4/coree2999fbd title check produced5577 compiler scopes
-in its first4096 calls, zero invalid/unknown events
-and complete coverage of all11 phases. Patch10 shows no material allocation gain:
-mean31us/max19.779ms versus31us/19.600ms. Compiler mean185us/max120.742ms,
-four totals above40ms; six outer slow calls are not attributed to the change.
-Assembly mean56us/max36.001ms. Exact-output/linear analysis bound is retained.
-
-The preceding patch9 lazy query counts reduced culling frame
-mean64us to43us and maximum41.056ms to28.821ms (about30%); culling frames above40ms
-fall1 to0. Total compiler mean203us to186us, maximum126.801ms to119.095ms, but
-five compiler totals above40ms and seven outer slow calls remain. This is a
-bounded targeted improvement, not a controlled thermal/load or whole-game cure.
-Assembly now leads measured phase mean56us/max35.211ms; allocation max19.600ms,
-cache max1.484ms. Maxima may refer to different calls; nested stages are not added.
-Individual-scope duration statistics cap separately at4096, not all5577 scopes.
-
-Patch7 fixes an actual trailing-batch/unsigned-shift defect, covered by native
-normal/UBSan-trap fixtures. ARM64 links flush directly; title tail completions0
-and raw IDC/DIC intersection/union0/0. No cache/barrier/A53 tuning follows.
-Patch8's immutable membership bound showed no material title-window timing gain;
-patch9 initializes mutable-map counts at the original query point and updates
-every relevant erase. Negative/free values, duplicates, exclusions and short
-circuit queries retain exact getter semantics. Actual helpers match through
-over1million changing-map steps per mode, normal/UBSan trap. Nine patches reproduce
-active source; exact compiler-body checks permit only declared substitutions and
-notifications. One-unit native build,119 library tests and warnings-denied
-host/ARM64 lints pass. No new compiler yield, SIMD or block-limit change.
-Patch10 now integrates the incoming-branch destination index in the separately
-measured allocation pass (previous frame maximum19.600ms). Two4096-entry arrays
-index destinations once per block; analysis values remain live, including the
-original forward-branch provisional reset rule. Actual helpers match four
-retained searches through283350 changing-value queries per mode, normal/UBSan
-trap. Exact provisional/compiler comparisons and ten-patch reproduction pass.
-One-unit native build/coree2999fbd and xtask warnings-denied lint pass.
-Package/title verification is complete; no material timing benefit is claimed.
-Patch11 fixes a concrete varargs bridge issue: already-formatted debug text is
-passed through literal percent-s, preserving percent-bearing messages as text.
-The actual callback fixture covers percent directives, bounded truncation and
-absent sink under normal/UBSan trap. The coordinated capacity deferral is released and the one-unit native build is
-complete. Signed package and narrow target title/Pause/Stop retention evidence
-now pass. This adds no new gameplay/audio/restore or performance qualification.
-
-Next narrow actual function/line CPU costs before more compiler optimization.
-Optional app-only Simpleperf is unavailable under current operating constraints;
-it supplied no function-level samples or new performance result. No privileged
-retry or global property/security change is authorized by that refusal. Continue
-the measured-pass work off-device; no profiling overhead is treated as speed proof.
-
-The preceding performance title check used116s of work and completed actual return.
-All five images are opened: initial, late and pre-Pause scenes rendered, followed
-by the actual Pause menu. Normal Stop/native join, protected ordinary/cards/
-untouched profile, exact preferences, IDs/source installation and physicalOFF
-passed; custodian completed/returned=true. No NTX request/hold/recovery remains.
-No gameplay input, Save or Restore occurred. Preserve earlier black/gray captures
-and historical reports; no sustained freeze or historical cure was established.
-[Latest outcome](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6621210896).
+A host restart interrupted the earlier target task. Its empty operator records
+remain evidence; cleanup-only recovery verified actual state/return, without
+inventing a test result. The fresh N64 check above is independent. Local JSON
+receipt publication now syncs file and directory;102 offline tests cover failure
+cases. Earlier detailed continuation notes are [historical](history/NTX_HANDOFF_20261104_BEFORE_OBSERVER.md);
+[state](state.toml) and [acceptance](ACCEPTANCE.md) retain exact earned bounds.
 
 ## Preservation and admission
 

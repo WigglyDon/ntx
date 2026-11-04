@@ -182,3 +182,13 @@ trap fixtures; the complete compiler body still matches upstream plus declared
 analysis substitutions after removing only maintained notification lines. This
 adds elapsed observations, not CPU/GPU attribution or a hitch-cure claim. Native
 build/package/target results must be recorded separately.
+
+Patch13 corrects the emission constant reader's upper-half mask shift: its
+register number includes64, while the64-bit unneeded mask uses the low0..63
+bit. The actual retained function traps under UBSan for register65; the corrected
+function passes126208 value/scan/branch cases in normal and UBSan-trap modes,
+including all register slots/codes, branch/target/constant/map boundaries and a
+4096-instruction run. Scan endpoints, returned values and the existing FJUMP rule
+remain unchanged. This is defined-behavior repair, not an assembly speed result.
+Keep older core fingerprints/source/symbols/scenes; new native build/package and
+actual target observations have independent bounds.
