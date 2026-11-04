@@ -404,11 +404,11 @@ policy = "docs/RESUME_STORAGE.md"
 
 [current_installation]
 # Older per-feature installed_* fields retain their exact observation bounds.
-source = "cf84b0524b06ff80bb284995f2fd3ee8456d0ce9"
-apk_sha256 = "d92614bbe3862e8c64a0086d121d10bf2eda7116dd5be94d22193448d930fd12"
+source = "a78415a6c008cd0e5a7fb5be2725aeaf6052711c"
+apk_sha256 = "1bb628aa222559cd117c83f858947d9f8c489136bfac4f06bdc322162d4aba41"
 mupen_core_sha256 = "1a2273cbbc5158030abfc89ce458dc4ddd45429680f85f312c739863d31617d9"
-qualification = "Fresh no-install affected native14 check completed/returned49.98s. Existing OOT title/normal Pause one-scene publication/native Stop-join0; all5new images reviewed, current ordinary/cards/independent profile/source/preferences/IDs and OFF return verified"
-limits = "Original private-checker failure remains independently failed. Earlier observer/GC warning results stay at6829/core2426 and N64 warning at036/core76; no new gameplay/Save/restore/audio/speed/hitch-cure or global saturation claim. Storage-page candidate1bb remains separately prepared"
+qualification = "Storage UI affected check completed/returned137.15s;15new images reviewed. Both capture/join paths, Library/no-runtime storage16.0MiB, Keep exact ref/file/ordinary, confirmed Close ->0.0MiB/final0 scenes. Current cards/N64 ordinary/TP/source/preferences/IDs preserved, legitimate WW SRAM updates kept; actual OFF/client/stock return verified"
+limits = "Global saturation/unsafe-file/failure-ordering and held-writer retry remain host-fixture verified; no phone disk fill, newmedia/gameplay/Save/restore/audio/performance or historical-cure claim. Eight-second GC sample was controls over black, so no new GC visible-game qualification. Earlier earned results retain their exact bounds"
 
 [checkpoint_storage_continuation_source]
 implementation = "Checkpoint-only storage/query/write failure after successful capture and verified ordinary commit retains healthy live RAM and offers Resume; fatal capture/save or uncertain collection-publication failure keeps recovery handling"
@@ -496,14 +496,14 @@ limits = "Signed combined d926/sourcecf84 installed, rendered title and cleanup 
 implementation = "Shared1GiB logical machine-file budget across all profiles/GC+N64 directories, counting orphan/pending/unknown/legacy regular files; bounded no-symlink inventory. Separate host availability and machine allowance after ordinary commit, preserve identical reuse/full histories and existing per-game/reserve guards"
 ui = "Library Resume storage shows aggregate/per-game usage. Explicit unloaded-place confirmation validates exact game/profile/media/container under ProfileLock; publish cleared reference before deleting only that scene. Live games use normal joined Stop; recovery/unknown files and all ordinary progress stay"
 validation = "151 library tests pass, including cross-system/orphan inventory, both ordinary-verified quota refusals, identical reuse and explicit release failure ordering. Host all-targets and ARM64 warnings-denied lints pass; affected standalone N64 inspector test passes. Existing3 loopback-only transport tests pass outside sandbox after localhost bind refusal"
-limits = "Initial cd8ff3f/APK7a0e8f61 checked/preserved PREPARED ONLY, never requested. Library navigation omission caught during review; corrected a78415a signed pair1bb628aa adds Library/unloaded/start access alongside Pause and is checked/preserved, uninstalled. No target storage-page, disk-fill, general recovery purge or new native runtime qualification"
+limits = "Initial cd8ff3f/APK7a0e8f61 checked/preserved PREPARED ONLY, never requested. Library navigation omission caught during review; corrected a78415a signed pair1bb628aa is installed and passes the affected storage-page/Keep/Close and both publication adapters. No phone disk-fill/global saturation, general recovery purge or new gameplay qualification"
 
 [prepared_collection_storage_candidate]
 source = "a78415a6c008cd0e5a7fb5be2725aeaf6052711c"
 apk_sha256 = "1bb628aa222559cd117c83f858947d9f8c489136bfac4f06bdc322162d4aba41"
 mupen_core_sha256 = "1a2273cbbc5158030abfc89ce458dc4ddd45429680f85f312c739863d31617d9"
 validation = "Signed APK/ELF/package checks and exact corresponding source preserved; original signer and all4 raw native inputs rehashed. Reviewed Library/unloaded/start navigation correction has ARM64 warnings-denied lint; portable150-test result remains at unchanged policy code"
-limits = "Prepared storage page unqualified on target; fresh finite UI request queued normally after independent native14 check completed/returned with all five new captures reviewed. Existing demos only; new global saturation is host-fixture qualified, no actual disk fill or general recovery purge"
+limits = "Installed and storage-page affected boundary verified below. Existing demos only; new global saturation remains host-fixture qualified, no actual disk fill or general recovery purge"
 
 [n64_combined_mask_observation]
 source = "cf84b0524b06ff80bb284995f2fd3ee8456d0ce9"
@@ -513,3 +513,11 @@ result = "Bounded existing OOT title rendering, normal Pause complete one-scene 
 preservation = "Current ordinary/cards/independent profile/source/preferences/IDs/media retained; actual OFF/client/stock return verified,49.98s work, no installation"
 limits = "Earlier checker NameError stays failed independently. No new media/gameplay/Save/restore/audio/performance or hitch-cure; earlier snapshots/source/rollback/debug material retained"
 report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6642248269"
+
+[collection_resume_storage_observation]
+source = "a78415a6c008cd0e5a7fb5be2725aeaf6052711c"
+apk_sha256 = "1bb628aa222559cd117c83f858947d9f8c489136bfac4f06bdc322162d4aba41"
+result = "Normal OOT capture/joined departure, GC capture/normal joined Stop; Library with no runtime shows independent16.0MiB place. Keep exact reference/file/ordinary, then confirmed Close durable stopped/no-ref and only known scene retired; page0.0MiB/final0 for both tested profiles"
+preservation = "All15new captures opened; current cards/N64 ordinary/TP/source/preferences/IDs/media kept, normal WW SRAM/generation updates retained; actual OFF/clients/stock return verified,137.15s work"
+limits = "GC8s image controls over black, not new visible-game evidence. No newmedia/diskfill/gameplay/Save/restore/audio/performance/cure; global saturation and recovery edge cases have151-test host coverage. Unknown candidates kept, no general purge"
+report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6642574184"

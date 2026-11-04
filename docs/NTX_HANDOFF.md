@@ -24,17 +24,22 @@ geometry has model coverage. Sibling owners were informed, never modified here.
 
 ## Current installed result and next repair
 
-Installed sourcecf84b0524b06ff80bb284995f2fd3ee8456d0ce9,
-APKd92614bbe3862e8c64a0086d121d10bf2eda7116dd5be94d22193448d930fd12,
+Installed sourcea78415a6c008cd0e5a7fb5be2725aeaf6052711c,
+APK1bb628aa222559cd117c83f858947d9f8c489136bfac4f06bdc322162d4aba41,
 core1a2273cbbc5158030abfc89ce458dc4ddd45429680f85f312c739863d31617d9.
-The fresh no-install native14 check now completed/returned49.98s: existing OOT
-field/title renders, normal Pause publishes one scene and normal Stop/join leaves
-zero. All five new captures opened; current ordinary/cards/independent profile/
-source/preferences/IDs and actual OFF/return verify. The original checker NameError
-stays failed independently. No speed/hitch-cure or new gameplay/Save claim.
-[Native14 report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6642248269).
-Rollback6829/sourceaf/core2426 owns the observer and GC warning results below;
-N64's earlier warning bound stays036.
+The storage-page check completed/returned137.15s. All15new captures opened;
+Library/no-runtime usage16.0MiB, Keep exact scene/reference/ordinary, confirmed
+Close ->0.0MiB and final0 scenes. Both native capture/join paths passed. Cards,
+N64 ordinary, untouched TP, source/preferences/IDs kept; normal WW SRAM updates
+retained. Actual OFF/client/stock return verified. No NTX lease/recovery remains.
+GC's eight-second image was controls over black: no new GC visible-game claim.
+[Storage report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6642574184).
+
+The separate native14 check passed at sourcecf84/d926 with five reviewed images,
+normal OOT title/Pause one-scene/Stop0 and verified protection/return. Its original
+private checker NameError remains a separate failed run. No speed/hitch cure or
+new gameplay/Save claim. Earlier rollback6829/sourceaf/core2426 owns the observer
+and GC warning results below; N64's earlier warning bound stays036.
 Original signer, exact corresponding source, all raw native debug inputs and
 previous core76/candidate036 remain retained privately.
 
@@ -89,11 +94,13 @@ reviewed correction adds it to Library and unloaded/start menus as well as Pause
 The correction is now checked/preserved at sourcea78415a,
 APK1bb628aa222559cd117c83f858947d9f8c489136bfac4f06bdc322162d4aba41,
 with the original signer, native14 core and all four exact raw inputs retained.
-It is uninstalled. Observe the affected storage UI using the existing demos after
-the independent native check's verified actual return. The private storage recipe
-now binds that actual completed/returned status and current collection baseline;
-the finite storage-page request is queued normally. Do not infer target qualification
-from host fixtures or the separately queued native14 check.
+It is now installed and its affected storage UI passes as above. The new global
+saturation and recovery-edge conditions remain host-fixture qualified; there was
+no phone disk fill. Review found the landscape confirmation can clip its Close
+button below the visible area. Next pin Keep/Close into the existing fixed footer,
+preserving exact confirmation/data policy; use representative layout checks and
+focused package verification before any affected observation. Do not restart
+closed gameplay/save/timing campaigns or add media.
 
 Current WW SRAM/generation legitimately advanced during its native boundary;
 future protection must use actual current bytes, never reapply earlier hashes as

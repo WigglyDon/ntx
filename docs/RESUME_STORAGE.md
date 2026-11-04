@@ -154,9 +154,14 @@ ARM64 warnings-denied Rust lints and151 library tests pass. The affected standal
 N64 inspector fixture passes; existing loopback-only transport tests pass on the
 host after the sandbox refused localhost binding. The corrected sourcea78415a
 package1bb628aa is signed/checked and privately preserved with exact source and
-raw native inputs; the storage page remains uninstalled and unobserved on target.
-Its affected UI check and new global saturation remain separate from the older
-earned backend warning checks above.
+raw native inputs. Its affected Pixel4 UI now passes: Library with no runtime
+shows16.0MiB; Keep retains the exact place/reference/ordinary bytes, then confirmed
+Close clears its durable reference before retiring only that file. The page shows
+0.0MiB and both tested profiles end with zero scenes. All15new images were reviewed;
+cards, independent progress/preferences/source/IDs and actual return verify. Both
+publication adapters ran; the short GC image was black with controls, so no new
+visible-game qualification follows. Global saturation remains host-fixture verified;
+no actual disk fill or gameplay/Save/restore/performance campaign occurred.
 
 An additional cross-system fixture holds the foreground N64 profile writer through
 quota refusal, explicitly closes another game's unloaded GameCube place and then
