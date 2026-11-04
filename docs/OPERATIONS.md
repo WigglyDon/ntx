@@ -89,3 +89,10 @@ Keep signer/password, private device identifiers, games/firmware, saves,
 checkpoints, raw logs/captures and private resource bindings out of public Git.
 Publish sanitized outcomes and source/build identities. Report remaining product
 and verification gaps on NTX-5 without closing acceptance issues prematurely.
+
+Android packaging retains each exact unstripped native input, including the Rust
+player and C++ runtime, under the private content-addressed `.local/symbols` tree
+before stripping the APK copy. `native-libraries.tsv` binds both hashes. Rebuilds
+retain earlier generations; a changed retained file or symlink refuses packaging
+instead of overwriting evidence. These files are private diagnostics, not APK
+payload or a public binary release.

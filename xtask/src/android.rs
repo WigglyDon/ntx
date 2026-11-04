@@ -33,6 +33,34 @@ fn copy(source: &Path, destination: &Path) -> Result<()> {
     fs::copy(source, destination)?;
     Ok(())
 }
+fn retain_debug_image(symbols: &Path, input: &Path) -> Result<String> {
+    let hash = crate::receipt::digest(input)?;
+    let name = input
+        .file_name()
+        .and_then(|n| n.to_str())
+        .ok_or("invalid native name")?;
+    let retained = symbols.join(format!("{hash}.{name}"));
+    let absent = match retained.symlink_metadata() {
+        Ok(info) if !info.is_file() => return Err("unsafe retained debug input".into()),
+        Ok(_) => false,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => true,
+        Err(error) => return Err(error.into()),
+    };
+    if absent {
+        copy(input, &retained)?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            fs::set_permissions(&retained, fs::Permissions::from_mode(0o600))?;
+        }
+        fs::File::open(&retained)?.sync_all()?;
+        fs::File::open(symbols)?.sync_all()?;
+    }
+    if !retained.symlink_metadata()?.is_file() || crate::receipt::digest(&retained)? != hash {
+        return Err("retained native debug input differs; original retained".into());
+    }
+    Ok(hash)
+}
 pub fn prepare(root: &Path, source: &Path) -> Result<()> {
     crate::receipt::write(root, source)?;
     let tools = Tools::existing()?;
@@ -557,6 +585,9 @@ pub fn package(root: &Path, source: &Path, signed: bool) -> Result<()> {
         audit_elf(p, &ndk)?;
         let name = p.file_name().ok_or("missing native name")?;
         let packaged = native.join(name);
+        // Every input, including Rust and libc++, keeps its exact unstripped
+        // image independently of the mutable build tree and stripped APK copy.
+        let source_hash = retain_debug_image(&symbols, p)?;
         copy(p, &packaged)?;
         // Retain the unstripped build for debugging. Ship only the executable
         // image and dynamic symbols; donor dependencies can contain DWARF even
@@ -569,7 +600,7 @@ pub fn package(root: &Path, source: &Path, signed: bool) -> Result<()> {
         audit_elf(&packaged, &ndk)?;
         native_hashes.push_str(&format!(
             "{}\t{}\t{}\n",
-            crate::receipt::digest(p)?,
+            source_hash,
             crate::receipt::digest(&packaged)?,
             name.to_str().ok_or("invalid native name")?
         ));
@@ -764,4 +795,42 @@ pub fn package(root: &Path, source: &Path, signed: bool) -> Result<()> {
         "APK built and checked; signing requested={signed}; no install, gameplay or public release claimed"
     );
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn rebuild_preserves_each_debug_generation_and_refuses_changed_retained_bytes() {
+        let root = std::env::temp_dir().join(format!("ntx-debug-inputs-{}", std::process::id()));
+        fs::create_dir(&root).unwrap();
+        let symbols = root.join("symbols");
+        fs::create_dir(&symbols).unwrap();
+        let input = root.join("libntx_android.so");
+        fs::write(&input, b"first unstripped generation").unwrap();
+        let first = retain_debug_image(&symbols, &input).unwrap();
+        let kept = symbols.join(format!("{first}.libntx_android.so"));
+        fs::write(&input, b"later unstripped generation").unwrap();
+        let second = retain_debug_image(&symbols, &input).unwrap();
+        assert_ne!(first, second);
+        assert_eq!(fs::read(&kept).unwrap(), b"first unstripped generation");
+        assert_eq!(retain_debug_image(&symbols, &input).unwrap(), second);
+        let second_path = symbols.join(format!("{second}.libntx_android.so"));
+        fs::write(&second_path, b"changed retained evidence").unwrap();
+        assert!(retain_debug_image(&symbols, &input).is_err());
+        assert_eq!(fs::read(second_path).unwrap(), b"changed retained evidence");
+        assert_eq!(fs::read(&input).unwrap(), b"later unstripped generation");
+        #[cfg(unix)]
+        {
+            fs::write(&input, b"third generation").unwrap();
+            let hash = crate::receipt::digest(&input).unwrap();
+            let missing = root.join("must-not-be-created");
+            let link = symbols.join(format!("{hash}.libntx_android.so"));
+            std::os::unix::fs::symlink(&missing, &link).unwrap();
+            assert!(retain_debug_image(&symbols, &input).is_err());
+            assert!(!missing.exists());
+            assert!(link.symlink_metadata().unwrap().file_type().is_symlink());
+        }
+        fs::remove_dir_all(root).unwrap();
+    }
 }
