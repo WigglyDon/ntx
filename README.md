@@ -46,10 +46,11 @@ Intro hitches and historical incidents remain open. See the
 [latest result](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6621210896)
 and [current state](docs/state.toml) for exact build and observation limits.
 
-Resume storage is being bounded explicitly: the N64 source repair retires known
-superseded scenes only after durable publication, preserves recovery candidates,
-and checks space before new scene writes. See [storage policy](docs/RESUME_STORAGE.md)
-for source/installed verification bounds.
+N64 resume storage now retires known superseded scenes after durable publication,
+preserves recovery candidates and checks space before new scene writes. Pixel4
+verifies four replacements retain one current16MiB scene and normal Stop retires
+it, with ordinary progress unchanged. See [storage policy](docs/RESUME_STORAGE.md)
+for limits, including the unfinished collection-wide quota and storage UI.
 
 Read [AGENTS.md](AGENTS.md), [successor handoff](docs/NTX_HANDOFF.md),
 [NTX-5](https://github.com/WigglyDon/ntx/issues/5) and its

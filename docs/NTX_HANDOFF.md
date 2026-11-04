@@ -32,19 +32,23 @@ Do not rehydrate retired test history. Existing owners coordinate their own area
 The N64 resume writer lacked successful-generation retirement. The Rust repair
 adds post-acknowledgement/Stop cleanup, host-supplied free-space admission, bounded
 recovery files and scene-pinned ordinary-history retirement. See
-[storage policy](RESUME_STORAGE.md).127 library tests and warnings-denied host/ARM64
+[storage policy](RESUME_STORAGE.md). 127 library tests and warnings-denied host/ARM64
 checks pass. Core76c4621a includes the previously pending literal-log patch; its
-one-unit build/eleven-patch/ABI fixtures pass. Package and changed-boundary
-retention verification remain pending; installed source below stays its earned
-old bounds. No closed quest/save/timing campaign is reopened.
+one-unit build/eleven-patch/ABI fixtures pass. Signed package and focused Pixel4
+retention verification pass: four distinct title Pause publications each leave
+one current16MiB scene; joined/durably published Stop leaves none. All ten images
+are opened; current ordinary/cards/profiles/preferences/identities/source remain
+unchanged and actual return is verified. No NTX request/hold/recovery remains.
+No closed quest/save/timing campaign is reopened.
 
 
-Installed source3b225d46bae9e46322b62f4b951fc9c04145a545,
-APK8d25fd6da4c4021bb4b00ab843cf82a06939bd1b637e8872560a953985d472cf,
-coree2999fbd80f173c0fccae8e837a42012035ce310759e21de2b614737048e96d8.
+Installed source8b92f1d296136ece3190ee26c38b3b49aab42f63,
+APKef9808fcc06fb7940b0f215cfb509b672f44a6226c8c26255dbc9c66a62f052b,
+core76c4621a83861c07558c442403d1f9a68e368e1754be50a7f5f0b27faab1e358.
 Original signer and exact corresponding source/symbols are retained privately.
 
-Latest first4096 calls produce5577 compiler scopes, zero invalid/unknown events
+The preceding source3b225d4/coree2999fbd title check produced5577 compiler scopes
+in its first4096 calls, zero invalid/unknown events
 and complete coverage of all11 phases. Patch10 shows no material allocation gain:
 mean31us/max19.779ms versus31us/19.600ms. Compiler mean185us/max120.742ms,
 four totals above40ms; six outer slow calls are not attributed to the change.
@@ -82,8 +86,8 @@ Patch11 fixes a concrete varargs bridge issue: already-formatted debug text is
 passed through literal percent-s, preserving percent-bearing messages as text.
 The actual callback fixture covers percent directives, bounded truncation and
 absent sink under normal/UBSan trap. The coordinated capacity deferral is released and the one-unit native build is
-complete. Package and target evidence for patch11/the retention repair remain
-pending; no new runtime result is claimed from source readiness.
+complete. Signed package and narrow target title/Pause/Stop retention evidence
+now pass. This adds no new gameplay/audio/restore or performance qualification.
 
 Next narrow actual function/line CPU costs before more compiler optimization.
 Optional app-only Simpleperf is unavailable under current operating constraints;
@@ -91,7 +95,7 @@ it supplied no function-level samples or new performance result. No privileged
 retry or global property/security change is authorized by that refusal. Continue
 the measured-pass work off-device; no profiling overhead is treated as speed proof.
 
-The latest self-contained title check used116s of work and completed actual return.
+The preceding performance title check used116s of work and completed actual return.
 All five images are opened: initial, late and pre-Pause scenes rendered, followed
 by the actual Pause menu. Normal Stop/native join, protected ordinary/cards/
 untouched profile, exact preferences, IDs/source installation and physicalOFF

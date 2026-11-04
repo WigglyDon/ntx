@@ -45,10 +45,18 @@ recovery candidates, identical-generation reuse, missing/damaged replacements,
 ordinary-image pinning, incomplete candidates, insufficient space and hard budgets.
 Same-identity retry tests also preserve incomplete scene and ordinary-image
 bytes exactly. Tests distinguish acknowledged retirement from broad directory cleanup. Target
-verification and installed-build bounds remain in [state](state.toml).
+verification on Pixel4 observes four distinct16MiB title publications retaining
+one current scene each; normal joined Stop retires the accepted scene. Protected
+ordinary progress stays unchanged. Installed-build bounds remain in [state](state.toml).
 
 These N64 source limits do not claim a finished storage-management UI or a global
 quota for every backend. GameCube's existing successful-retirement ordering is
 retained; broader recovery budgets/free-space admission remain separate work.
 Routine storage pressure must offer a clear decision while preserving current
 progress, rather than silently evicting another game's unsaved scene.
+
+Per-game bounds do not make an arbitrarily large collection free: each game with
+a retained exact resume still needs space, plus temporary publication headroom.
+A collection-wide budget and clear user choices for releasing resume space while
+keeping ordinary saves remain unfinished. Storage pressure must never silently
+discard another game's unsaved place.
