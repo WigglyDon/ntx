@@ -72,11 +72,14 @@ with nine reviewed captures and independent data/return verification.
 [N64 storage report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6638969957).
 
 The collection-wide1GiB machine-resume budget and Resume storage page are now
-implemented in Rust source, with150 library tests and host/ARM64 lints. Both capture paths observe
+implemented in Rust source, with151 library tests and host/ARM64 lints. Both capture paths observe
 host free space and aggregate machine allowance after ordinary commit; identical
 complete files reuse bytes when full. The page explicitly closes only a confirmed
 unloaded stored place, under its profile lock and after durable reference clearing.
 It keeps newer ordinary data, identities, errors and unknown recovery candidates.
+The added held-writer fixture frees another system's unloaded place after quota
+refusal, preserves the active N64 writer/session/current saves and admits its retry.
+This test-only addition leaves the prepared package's production code unchanged.
 Live games still require normal Stop/join. See [storage policy](RESUME_STORAGE.md).
 The sourcecd8ff3f package7a0e8f61 is checked/preserved but PREPARED ONLY, never
 requested: source review caught the storage action missing from Library. The

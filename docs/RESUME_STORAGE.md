@@ -150,10 +150,17 @@ unsafe entries, identical reuse, both ordinary-verified storage refusals and
 explicit close. Tests preserve newer ordinary progress, identities, errors and
 unknown candidates; live locks, stale confirmations, damaged/symlinked containers,
 uncertain metadata and failed retirement retain their safe boundaries. Host and
-ARM64 warnings-denied Rust lints and150 library tests pass. The affected standalone
+ARM64 warnings-denied Rust lints and151 library tests pass. The affected standalone
 N64 inspector fixture passes; existing loopback-only transport tests pass on the
 host after the sandbox refused localhost binding. The corrected sourcea78415a
 package1bb628aa is signed/checked and privately preserved with exact source and
 raw native inputs; the storage page remains uninstalled and unobserved on target.
 Its affected UI check and new global saturation remain separate from the older
 earned backend warning checks above.
+
+An additional cross-system fixture holds the foreground N64 profile writer through
+quota refusal, explicitly closes another game's unloaded GameCube place and then
+admits the N64 retry. The held writer, selected identity, live session metadata,
+current ordinary generation and unknown sparse recovery candidate remain intact.
+This exercises release while another game is resident without instantiating two
+native cores. The prepared package's production code is unchanged by this test.

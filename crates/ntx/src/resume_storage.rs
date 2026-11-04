@@ -478,6 +478,111 @@ mod tests {
         }
     }
     #[test]
+    fn freeing_another_systems_place_preserves_the_live_writer_and_admits_its_retry() {
+        use crate::{lifecycle::CheckpointError, n64_checkpoint, n64_save::SaveStore};
+        let _serial = crate::storage::STORE_TEST_LOCK.lock().unwrap();
+        let (fixture, mut collection, stored) = stored_place(System::GameCube);
+        let active_profile = fixture.0.join("profiles").join("d".repeat(32));
+        let mut active_store = SaveStore::open(&active_profile).unwrap();
+        active_store
+            .commit(&vec![2; crate::n64::SAVE_IMAGE_BYTES])
+            .unwrap();
+        let active_binding = n64_checkpoint::Binding {
+            game_id: "c".repeat(32),
+            profile_id: "d".repeat(32),
+            media_sha256: "e".repeat(64),
+            core_sha256: "f".repeat(64),
+            options_sha256: "0".repeat(64),
+            architecture: "aarch64-android-gles3-mupen-state1".into(),
+        };
+        let mut active_entry = collection.entries[0].clone();
+        active_entry.system = System::Nintendo64;
+        active_entry.backend = Backend::Mupen64PlusNext;
+        active_entry.game_id.0 = active_binding.game_id.clone();
+        active_entry.profile_id.0 = active_binding.profile_id.clone();
+        active_entry.media_sha256 = Some(active_binding.media_sha256.clone());
+        active_entry.uri = "fixture://active-game".into();
+        active_entry.title = "Active N64 game".into();
+        active_entry.checkpoint = None;
+        active_entry.runtime_incomplete = true;
+        active_entry.last_error = Some("Resume storage full; live RAM retained".into());
+        collection.selected = Some(active_binding.game_id.clone());
+        collection.entries.push(active_entry);
+        let active_metadata = serde_json::to_vec(&collection.entries[1]).unwrap();
+        let current_ordinary = active_store.generation().cloned();
+        let used = inventory(&fixture.0).unwrap().bytes;
+        // Sparse recovery bytes leave less than the minimum bounded header
+        // headroom, without allocating or filling the actual host filesystem.
+        let orphan_length = COLLECTION_BUDGET - used - 65547;
+        fixture.file(
+            "profiles/orphan/checkpoints/retained-recovery",
+            orphan_length,
+        );
+        let refused = Capacity::observe(&fixture.0, u64::MAX).unwrap();
+        assert!(matches!(
+            n64_checkpoint::publish_captured(
+                &active_profile,
+                &active_binding,
+                &active_store,
+                b"live machine",
+                Ok(refused)
+            ),
+            Err(CheckpointError::StorageUnavailable(_))
+        ));
+        assert_eq!(
+            release_place(&fixture.0, &mut collection, &stored, |value| {
+                assert_eq!(
+                    serde_json::to_vec(&value.entries[1]).unwrap(),
+                    active_metadata
+                );
+                assert!(crate::ProfileLock::acquire(&active_profile).is_err());
+                crate::storage::atomic_replace(
+                    &fixture.0.join("collection.json"),
+                    &serde_json::to_vec(value)?,
+                )
+            })
+            .unwrap(),
+            None
+        );
+        assert!(collection.entries[0].stopped && collection.entries[0].checkpoint.is_none());
+        assert_eq!(
+            serde_json::to_vec(&collection.entries[1]).unwrap(),
+            active_metadata
+        );
+        assert!(crate::ProfileLock::acquire(&active_profile).is_err());
+        assert_eq!(active_store.generation(), current_ordinary.as_ref());
+        active_store.verify_current().unwrap();
+        let capacity = Capacity::observe(&fixture.0, u64::MAX).unwrap();
+        let id = n64_checkpoint::publish_captured(
+            &active_profile,
+            &active_binding,
+            &active_store,
+            b"live machine",
+            Ok(capacity),
+        )
+        .unwrap();
+        assert_eq!(
+            n64_checkpoint::load(&active_profile, &id, &active_binding, &active_store)
+                .unwrap()
+                .payload,
+            b"live machine"
+        );
+        assert_eq!(
+            fs::metadata(
+                fixture
+                    .0
+                    .join("profiles/orphan/checkpoints/retained-recovery")
+            )
+            .unwrap()
+            .len(),
+            orphan_length
+        );
+        assert_eq!(
+            collection.selected.as_deref(),
+            Some(active_binding.game_id.as_str())
+        );
+    }
+    #[test]
     fn retirement_failure_after_publication_keeps_durable_closed_metadata_and_reports_retained_bytes()
      {
         let (fixture, mut collection, place) = stored_place(System::Nintendo64);
