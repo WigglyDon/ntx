@@ -407,13 +407,13 @@ policy = "docs/RESUME_STORAGE.md"
 source = "06d2b333b09f71e2a5fd605c616e76c056d3e233"
 apk_sha256 = "036f9827291a08128d0a564aa01ce80cf180f9bb4ab8e0c95e0270ee562eb542"
 mupen_core_sha256 = "76c4621a83861c07558c442403d1f9a68e368e1754be50a7f5f0b27faab1e358"
-qualification = "Installed APK digest observed during cleanup-only recovery after host reboot. All three entries stopped, own processes absent, critical progress/source/preferences and collection hash match baseline; actual physical OFF and stock return verified. Interrupted storage-warning functional check remains unqualified; previous8b92 retention result above keeps its earned bounds"
+qualification = "Focused Pixel4 storage-warning boundary passes: two recovery-file-capacity refusals keep same-process Resume with explicit RAM-only warning; native Stop/join before exact fixture removal, then fresh existing-title normal scene publication/Stop. Nine new images opened; ordinary/cards/untouched profile/preferences/source/identities and actual return verified. Original host-interrupted task remains independently unqualified"
 limits = "Storage boundary only; no new gameplay, in-game Save, cold restore, audio or timing campaign. Earlier results retain original build bounds; hitches and historical incidents remain open. No collection-wide quota/storage-management UI claim"
 
 [checkpoint_storage_continuation_source]
 implementation = "Checkpoint-only storage/query/write failure after successful capture and verified ordinary commit retains healthy live RAM and offers Resume; fatal capture/save or uncertain collection-publication failure keeps recovery handling"
 identity = "GameId and runtime epoch scoped warning; never clear an existing quarantine or advertise RAM as durable process-death recovery"
-validation = "131 library tests and warnings-denied host all-targets/ARM64 Rust lints pass; focused warning/Resume target boundary pending"
+validation = "131 library tests and warnings-denied host all-targets/ARM64 Rust lints at initial change; focused warning/Resume target boundary now passes at source06d2b33/APK036/core76, without new gameplay/save/audio/performance qualification"
 
 [n64_assembly_child_source]
 implementation = "Eight observation calls per compiler block: setup/emission/fallthrough/stub scopes nested inside retained assembly parent; no compiler, register, cache/barrier, SIMD or block-limit policy change"
@@ -447,3 +447,11 @@ source = "af0230ef0e6f3b80c3f6716a2bfced8901bf5223"
 apk_sha256 = "6829b98b146ec85d1222171d9cbc1d796277bf5549c15adceeaa4ee0dd4ff71a"
 mupen_core_sha256 = "2426bddb80e57891c17b58f0ab057973a2089388086e76aacc6bbc83249026b0"
 qualification = "Signed package/resource/ABI checks and exact corresponding-source preservation pass; original certificate verified and all four raw native inputs match retained debug copies.140-test source; uninstalled and no new runtime/performance result"
+
+[n64_storage_continuation_observation]
+source = "06d2b333b09f71e2a5fd605c616e76c056d3e233"
+apk_sha256 = "036f9827291a08128d0a564aa01ce80cf180f9bb4ab8e0c95e0270ee562eb542"
+result = "Two quota refusals, enabled Resume and same process, boot logo advancing to moonlit intro after Resume. Tagged tiny fixtures unchanged until native join/process absence, then removed. Subsequent cold title Pause publishes one scene; joined Stop leaves zero"
+return = "Actual completed/returned,76.99s work; nine new captures opened. Current ordinary/cards/independent profile/preferences/source/identities preserved; own clients absent and physical OFF verified"
+limits = "No disk fill, new media, gameplay, in-game Save/restore, audio or timing qualification. Host-interrupted predecessor remains unqualified; GameCube storage warning and global quota/UI still open"
+report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6638969957"

@@ -31,15 +31,18 @@ sourceaf0230e/core2426 has checked source/raw symbols/original signer and is
 preserved. Target verification remains pending.
 Prepared candidate6b8567d2/sourcec05bcab/core2426 is the preceding budget+observer
 build, signed and preserved with source/raw debug inputs, uninstalled. It does
-not contain this latest GameCube continuation. The existing N64 warning task remains queued normally; no second implementation
-worker.
+not contain this latest GameCube continuation. The N64 warning check now passes with actual return at036/core76: two quota
+refusals keep same-process Resume, exact fixtures retire after native join, then
+a fresh title publishes normally and Stop leaves zero. Nine new captures opened;
+ordinary/cards/profiles/preferences/source/IDs preserved. A new finite observer
+request is separate; no second implementation worker.
 
 A host restart interrupted the storage-warning target check. Cleanup-only recovery
 now verifies APK036f9827/source06d2b33/core76 installed, all three entries stopped,
 owned processes absent, protected data/source/preferences/collection unchanged
 and actual physical OFF/stock return. Empty original operator records remain
-private evidence; no functional pass is inferred. A fresh narrow warning/Resume
-check is still needed. Local JSON receipt publication now syncs both file and
+private evidence; no functional pass is inferred. The separate fresh warning/Resume
+check now passes as described above; the original interrupted check stays unqualified. Local JSON receipt publication now syncs both file and
 directory;102 offline packet tests cover persistence failures. The installation
 paragraph below describes the preceding fully qualified retention result.
 

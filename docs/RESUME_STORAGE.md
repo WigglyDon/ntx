@@ -79,8 +79,11 @@ app open; Resume then Pause retries storage. It never promises process-death
 recovery without a valid durable scene. Changed ordinary data, failed capture,
 pending restore and uncertain collection publication retain recovery handling.
 Warnings are scoped to the exact live game/runtime and never clear an existing
-quarantine. Portable tests pass; package and affected target warning/Resume
-verification remain pending for this continuation.
+quarantine. Portable tests and the focused N64 target warning/Resume boundary now pass:
+two quota refusals retain same-process Resume, native Stop/join precedes exact
+fixture removal, and subsequent normal publication/Stop succeeds. Nine new
+captures were reviewed, with current ordinary data and independent profiles kept.
+This adds no gameplay/save/audio/performance qualification.
 
 GameCube retirement now also verifies a bounded regular file, recognized current
 or legacy container magic and its complete content identity before deletion.
