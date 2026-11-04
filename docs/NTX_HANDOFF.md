@@ -24,6 +24,15 @@ geometry has model coverage. Sibling owners were informed, never modified here.
 
 ## Current installed result and next repair
 
+A host restart interrupted the storage-warning target check. Cleanup-only recovery
+now verifies APK036f9827/source06d2b33/core76 installed, all three entries stopped,
+owned processes absent, protected data/source/preferences/collection unchanged
+and actual physical OFF/stock return. Empty original operator records remain
+private evidence; no functional pass is inferred. A fresh narrow warning/Resume
+check is still needed. Local JSON receipt publication now syncs both file and
+directory;102 offline packet tests cover persistence failures. The installation
+paragraph below describes the preceding fully qualified retention result.
+
 Source now also protects GC interrupted same-identity writes (133 library tests)
 and preserves all raw native debug inputs automatically; those are independent
 from the prepared storage-warning target candidate. A new observer-only Mupen

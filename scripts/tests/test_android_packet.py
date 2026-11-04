@@ -7,6 +7,7 @@ import struct
 import hashlib
 import io
 import json
+import stat
 import tarfile
 import tempfile
 import unittest
@@ -209,6 +210,47 @@ class ShadeCleanupTests(unittest.TestCase):
 
 
 class CaptureBudgetTests(unittest.TestCase):
+    def test_receipt_sync_failure_preserves_previous_receipt(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / 'receipt.private.json'
+            packet.write_private_json(path, {'stage': 'before'})
+            with patch.object(packet.os, 'fsync', side_effect=OSError('disk failure')):
+                with self.assertRaises(OSError):
+                    packet.write_private_json(path, {'stage': 'after'})
+            self.assertEqual(json.loads(path.read_text()), {'stage': 'before'})
+            self.assertEqual(list(Path(root).iterdir()), [path])
+
+    def test_receipt_publication_syncs_file_before_replace_and_parent_after(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / 'receipt.private.json'
+            synced = []
+            fsync, replace = packet.os.fsync, packet.os.replace
+            def sync(fd):
+                synced.append('directory' if stat.S_ISDIR(packet.os.fstat(fd).st_mode)
+                              else 'file')
+                fsync(fd)
+            def publish(source, target):
+                self.assertEqual(synced, ['file'])
+                self.assertEqual(json.loads(Path(source).read_text()), {'complete': True})
+                return replace(source, target)
+            with patch.object(packet.os, 'fsync', side_effect=sync), patch.object(
+                    packet.os, 'replace', side_effect=publish):
+                packet.write_private_json(path, {'complete': True})
+            self.assertEqual(synced, ['file', 'directory'])
+
+    def test_receipt_directory_sync_failure_is_not_reported_as_success(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / 'receipt.private.json'
+            fsync = packet.os.fsync
+            def sync(fd):
+                if stat.S_ISDIR(packet.os.fstat(fd).st_mode):
+                    raise OSError('directory persistence unknown')
+                fsync(fd)
+            with patch.object(packet.os, 'fsync', side_effect=sync):
+                with self.assertRaises(OSError):
+                    packet.write_private_json(path, {'complete': True})
+            self.assertEqual(json.loads(path.read_text()), {'complete': True})
+
     def test_receipt_reader_keeps_complete_prior_json_until_replacement(self):
         with tempfile.TemporaryDirectory() as root:
             path = Path(root) / 'receipt.private.json'

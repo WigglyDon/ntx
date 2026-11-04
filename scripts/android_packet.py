@@ -14,6 +14,7 @@ import subprocess
 import struct
 import hashlib
 import tarfile
+import tempfile
 import sys
 import time
 import xml.etree.ElementTree as ET
@@ -29,13 +30,27 @@ class Refused(RuntimeError):
 
 
 def write_private_json(path, value):
-    """Publish one local test receipt without exposing a truncated JSON file."""
+    """Durably publish a private receipt; report every persistence failure."""
     path = Path(path)
-    temporary = path.with_name(path.name + ".writing")
-    with temporary.open("w") as output:
-        os.fchmod(output.fileno(), 0o600)
-        json.dump(value, output, indent=2)
-    os.replace(temporary, path)
+    fd, temporary = tempfile.mkstemp(prefix=path.name + ".", suffix=".writing",
+                                     dir=path.parent)
+    try:
+        with os.fdopen(fd, "w") as output:
+            json.dump(value, output, indent=2)
+            output.write("\n")
+            output.flush()
+            os.fsync(output.fileno())
+        os.replace(temporary, path)
+        parent = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(parent)
+        finally:
+            os.close(parent)
+    finally:
+        # A failed serialization/write must leave the previous receipt intact.
+        # After replacement this unique temporary no longer exists.
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 def physical_displays_off(text):

@@ -58,7 +58,13 @@ actual client/lease release. Failed cleanup stays pending with its original erro
 
 The renamed scripts/android_packet.py remains a finite product test helper;
 it grants no custody. Its NTX_* environment and exact package/geometry/source
-bindings require a fresh prepared task for the new candidate. An explicitly
+bindings require a fresh prepared task for the new candidate. Each
+published JSON receipt syncs its private temporary file before replacement and
+the parent directory afterward. A persistence failure is an error, never a
+successful step. This reduces reboot loss; it cannot reconstruct a missing
+receipt or prove that an interrupted phone action completed. Preserve missing or
+empty records and reconcile actual state through owned cleanup-only recovery.
+An explicitly
 prepared image-inspection bound may be 1..90 seconds (default30) to accommodate
 measured model/tool turnaround. Current focus/display/geometry checks and
 single-use contacts still apply; an expired image must be captured and inspected

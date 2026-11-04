@@ -404,10 +404,10 @@ policy = "docs/RESUME_STORAGE.md"
 
 [current_installation]
 # Older per-feature installed_* fields above retain their exact observation bounds.
-source = "8b92f1d296136ece3190ee26c38b3b49aab42f63"
-apk_sha256 = "ef9808fcc06fb7940b0f215cfb509b672f44a6226c8c26255dbc9c66a62f052b"
+source = "06d2b333b09f71e2a5fd605c616e76c056d3e233"
+apk_sha256 = "036f9827291a08128d0a564aa01ce80cf180f9bb4ab8e0c95e0270ee562eb542"
 mupen_core_sha256 = "76c4621a83861c07558c442403d1f9a68e368e1754be50a7f5f0b27faab1e358"
-qualification = "Pixel4 compatible update and four distinct N64 title Pause publications: one current scene after each,16794066 bytes each; normal joined/durably published Stop leaves zero accepted scenes. All ten images opened. Current ordinary saves/cards/untouched profile/preferences/three identities and source installation preserved; verified return"
+qualification = "Installed APK digest observed during cleanup-only recovery after host reboot. All three entries stopped, own processes absent, critical progress/source/preferences and collection hash match baseline; actual physical OFF and stock return verified. Interrupted storage-warning functional check remains unqualified; previous8b92 retention result above keeps its earned bounds"
 limits = "Storage boundary only; no new gameplay, in-game Save, cold restore, audio or timing campaign. Earlier results retain original build bounds; hitches and historical incidents remain open. No collection-wide quota/storage-management UI claim"
 
 [checkpoint_storage_continuation_source]
@@ -420,3 +420,8 @@ implementation = "Eight observation calls per compiler block: setup/emission/fal
 validation = "134 Rust library tests; active/disabled actual macro/site normal/UBSan-trap fixtures and complete twelve-patch/compiler-body reproduction; one native unit plus link pass. Relevant host/ARM64 lints and package/target recorded separately"
 core_sha256 = "2426bddb80e57891c17b58f0ab057973a2089388086e76aacc6bbc83249026b0"
 limits = "Uninstalled observer build; no measured stage result or performance improvement claimed. Child elapsed times overlap parent; original first4096 core-call and per-scope caps retained"
+
+[private_test_receipt_durability]
+implementation = "Unique private temporary JSON; flush and file fsync before replacement, parent directory fsync afterward; propagate persistence failures"
+validation = "102 offline packet tests pass, including failed file sync preserving prior receipt and reported parent-sync failure. No power-loss guarantee inferred from fault injection"
+incident = "Host restart interrupted the storage-warning target task; empty operator records preserved. Cleanup-only recovery verified actual installation, unchanged protected progress and return without fabricating the lost test outcome"
