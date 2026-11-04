@@ -197,7 +197,36 @@ Both late pictures show rendered title at different positions; no persistent gra
 field was reproduced. The prior isolated gray frame and historical incidents stay
 open. [Result](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6616663647).
 
-Owner explicitly says do not stop. Continue directly into a targeted compiler
-repair, using the source-checked pass/cache observer before changing cache
-maintenance or algorithms.119 tests and host/ARM64 lints pass. Do not end merely
-at a diagnostic milestone, repeat closed campaigns or create another worker.
+At that diagnostic milestone, the owner required continuing into a targeted
+compiler repair. Subsequent measured-path repairs and exact current bounds are
+recorded in [state](state.toml) and [handoff](NTX_HANDOFF.md); this older observation
+is not a new campaign allocation. Do not repeat closed campaigns or create another
+worker.
+
+
+## Bounded collection resume storage
+
+Rust now admits new machine files against a shared1GiB collection budget, after
+ordinary commit and separately from actual host free space. Both backends retain
+per-game guards and verified identical-file reuse. Unknown/pending/orphan recovery
+files count toward the budget and are retained. Explicit unloaded-place release
+checks its exact identity/container under the profile lock, durably clears the
+reference before deleting only that file, and preserves all ordinary progress.
+151 library tests cover quota/refusal/reuse, uncertain publication and recovery,
+and freeing another system's place while keeping an active writer and its retry.
+Host all-targets and ARM64 warnings-denied checks pass.
+
+Source8f71852/APK107f2640 is installed with the original signer and core1a2273cb.
+Pixel4's affected check completed/returned152.22s with15new images reviewed. Both
+Keep and Close are fully visible in one fixed row outside scrolling content, with
+primary Keep and danger-text Close. Library without a runtime shows16.0MiB; Keep
+preserves exact reference/file/ordinary data, then confirmed Close durably clears
+the reference before exact file retirement and shows0.0MiB/final0 both systems.
+Both publication/join adapters, current ordinary/cards/independent profile/source/
+preferences/IDs/media and actual OFF/client/stock return passed; legitimate WW
+SRAM updates retained. No newmedia/diskfill/gameplay/Save/restore/audio/performance
+campaign or historical-cure claim. Global saturation and recovery edge cases
+retain host-fixture bounds. The short GC sample was controls over black, so no
+new visible-game qualification follows. Existing playable/save/scene results keep
+their earlier exact build bounds. Acceptance issues remain open.
+[Footer and preservation result](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6643491388).

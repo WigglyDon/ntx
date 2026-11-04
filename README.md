@@ -46,11 +46,13 @@ Intro hitches and historical incidents remain open. See the
 [latest result](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6621210896)
 and [current state](docs/state.toml) for exact build and observation limits.
 
-N64 resume storage now retires known superseded scenes after durable publication,
-preserves recovery candidates and checks space before new scene writes. Pixel4
-verifies four replacements retain one current16MiB scene and normal Stop retires
-it, with ordinary progress unchanged. See [storage policy](docs/RESUME_STORAGE.md)
-for limits, including the unfinished collection-wide quota and storage UI.
+Machine-resume files now share a 1 GiB collection budget across GameCube and N64,
+with per-game limits and free-space checks. Known superseded scenes retire only
+after durable publication; uncertain recovery candidates stay. Resume storage
+shows usage and lets you explicitly close an unloaded stored place while keeping
+the game and in-game saves. Pixel4 verifies Keep, confirmed Close and both visible
+confirmation choices, with protected progress retained and no added media. See
+[storage policy](docs/RESUME_STORAGE.md) for the exact limits and evidence.
 
 Read [AGENTS.md](AGENTS.md), [successor handoff](docs/NTX_HANDOFF.md),
 [NTX-5](https://github.com/WigglyDon/ntx/issues/5) and its
