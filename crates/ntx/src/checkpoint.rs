@@ -210,7 +210,18 @@ pub fn publish(
     let parts: [&[u8]; 4] = [MAGIC, &length, &metadata, payload];
     let id = parts_digest(&parts);
     fs::create_dir_all(directory(profile)?)?;
-    storage::atomic_replace_parts(&path(profile, &id)?, &parts)?;
+    let destination = path(profile, &id)?;
+    match destination.symlink_metadata() {
+        Ok(_) => {
+            // Identical complete data requires no new write. Any incomplete
+            // same-identity attempt stays untouched for explicit disposition.
+            verify_publication(profile, &id, &parts, &record.generation)?;
+            return Ok(id);
+        }
+        Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+        Err(error) => return Err(error),
+    }
+    storage::publish_immutable_parts(&destination, &parts)?;
     // The complete expected container is still borrowed from the paused core.
     // Compare every persisted byte without allocating/restoring another machine
     // image or hashing it twice again. Real restore retains all digest/binding
@@ -570,7 +581,11 @@ mod tests {
             .unwrap()
             .join(format!("{old}.ntx.ntx-pending"));
         fs::create_dir(&pending).unwrap();
-        assert!(publish(&root, &binding, true, b"earlier machine").is_err());
+        assert_eq!(
+            publish(&root, &binding, true, b"earlier machine").unwrap(),
+            old
+        );
+        assert!(pending.is_dir());
         assert_eq!(fs::read(path(&root, &old).unwrap()).unwrap(), old_bytes);
         fs::remove_dir(pending).unwrap();
         let new = publish(&root, &binding, false, b"later complete machine").unwrap();
@@ -637,6 +652,40 @@ mod tests {
         discard_successful(&root, &legacy_id).unwrap();
         discard_successful(&root, &legacy_id).unwrap();
         assert!(!legacy_path.exists());
+        drop(writer);
+        drop(lock);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn incomplete_same_identity_retry_is_retained_and_does_not_rewrite_complete_data() {
+        let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
+        let (root, lock, writer, binding) = setup("incomplete-retry");
+        let old = publish(&root, &binding, true, b"current complete scene").unwrap();
+        let next = publish(&root, &binding, true, b"new complete scene").unwrap();
+        let destination = path(&root, &next).unwrap();
+        let complete = fs::read(&destination).unwrap();
+        fs::remove_file(&destination).unwrap();
+        let pending = destination.with_file_name(format!("{next}.ntx.ntx-pending"));
+        fs::write(&pending, b"original partial attempt").unwrap();
+        assert!(publish(&root, &binding, true, b"new complete scene").is_err());
+        assert_eq!(fs::read(&pending).unwrap(), b"original partial attempt");
+        assert!(!destination.exists());
+        assert_eq!(
+            load(&root, &old, &binding).unwrap().payload,
+            b"current complete scene"
+        );
+        fs::write(&destination, &complete).unwrap();
+        let before = fs::metadata(&destination).unwrap().modified().unwrap();
+        assert_eq!(
+            publish(&root, &binding, true, b"new complete scene").unwrap(),
+            next
+        );
+        assert_eq!(
+            fs::metadata(&destination).unwrap().modified().unwrap(),
+            before
+        );
+        assert_eq!(fs::read(&pending).unwrap(), b"original partial attempt");
+        assert_eq!(fs::read(&destination).unwrap(), complete);
         drop(writer);
         drop(lock);
         fs::remove_dir_all(root).unwrap();

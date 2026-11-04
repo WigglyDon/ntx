@@ -79,3 +79,10 @@ Damaged files and symlinks remain for recovery. Healthy and legacy successful
 retirement and missing-file retries retain their existing behavior. This portable
 file-boundary repair has host regression coverage; it adds no native-execution
 or historical lifecycle qualification.
+
+GameCube scene publication also exclusively creates incomplete files, using
+borrowed payload segments so no second full machine image is allocated. A
+verified identical complete generation is reused without rewriting it; an
+incomplete same-identity attempt stays untouched. The portable suite now has
+133 passing library tests. This follow-up is source-verified and is separate
+from the earlier prepared target candidate.

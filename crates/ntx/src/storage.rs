@@ -366,6 +366,10 @@ pub fn atomic_replace(path: &Path, bytes: &[u8]) -> io::Result<()> {
 /// Publish a new immutable generation under the caller's exclusive profile
 /// writer. Preserve any incomplete prior attempt rather than truncating it.
 pub(crate) fn publish_immutable(path: &Path, bytes: &[u8]) -> io::Result<()> {
+    publish_immutable_parts(path, &[bytes])
+}
+/// Borrow native payload segments without allocating a second machine image.
+pub(crate) fn publish_immutable_parts(path: &Path, parts: &[&[u8]]) -> io::Result<()> {
     let parent = path
         .parent()
         .ok_or_else(|| io::Error::other("missing storage parent"))?;
@@ -391,7 +395,9 @@ pub(crate) fn publish_immutable(path: &Path, bytes: &[u8]) -> io::Result<()> {
                 error
             }
         })?;
-    file.write_all(bytes)?;
+    for bytes in parts {
+        file.write_all(bytes)?;
+    }
     file.sync_all()?;
     drop(file);
     std::fs::rename(temporary, path)?;
