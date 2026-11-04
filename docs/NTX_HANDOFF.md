@@ -97,9 +97,11 @@ with the original signer, native14 core and all four exact raw inputs retained.
 It is now installed and its affected storage UI passes as above. The new global
 saturation and recovery-edge conditions remain host-fixture qualified; there was
 no phone disk fill. Review found the landscape confirmation can clip its Close
-button below the visible area. Next pin Keep/Close into the existing fixed footer,
-preserving exact confirmation/data policy; use representative layout checks and
-focused package verification before any affected observation. Do not restart
+button below the visible area. Keep/Close are now pinned in source into the existing fixed footer,
+preserving exact confirmation/data policy. Source8f71852/APK107f2640 is signed and
+checked with source/raw4/original signer preserved. Menu-contract/host/ARM64 checks
+pass. Its affected footer observation is queued normally from actual1bb return,
+requiring both decisions fully inside current bounds and outside scrolling content. Do not restart
 closed gameplay/save/timing campaigns or add media.
 
 Current WW SRAM/generation legitimately advanced during its native boundary;

@@ -526,4 +526,11 @@ report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6642574184"
 problem = "Reviewed landscape storage confirmation clips Close below scrollable content"
 implementation = "Keep and Close share the existing fixed decision footer; Keep has primary styling and Close danger text. Storage navigation elsewhere remains ordinary; exact confirmation/session/data policy unchanged"
 validation = "Affected menu-contract fixture, host all-targets and ARM64 warnings-denied Rust lints pass; existing151-test persistence boundary retains its exact bounds"
-limits = "Source only, not yet packaged/observed. Installed1bb storage flow passes with scrolling; no new native/Save/timing campaign required"
+limits = "Signed candidate107f2640/source8f71852 checked/preserved with original signer/source/raw4; footer observation queued normally from actual1bb return. Installed1bb storage flow passes with scrolling; no new native/Save/timing campaign qualification"
+
+[prepared_storage_footer_candidate]
+source = "8f71852118fc0e9acdfc520eb459ece56e3d32db"
+apk_sha256 = "107f2640c67a7b650ae97ecf11b60a687c1144614c546830b41c9b6a959a46de"
+core_sha256 = "1a2273cbbc5158030abfc89ce458dc4ddd45429680f85f312c739863d31617d9"
+validation = "Menu-contract and host/ARM64 warnings-denied checks, signed package/ELF/source pair, original signer/all4 raw inputs verified. Focused footer checker rejects scrolling/clipped/overlapping/missing-Keep and changed-focus layouts before decisions"
+limits = "Queued affected UI-only observation, no target footer pass yet; data/native policy unchanged and existing two-game media set retained"
