@@ -27,12 +27,14 @@ geometry has model coverage. Sibling owners were informed, never modified here.
 Installed sourcecf84b0524b06ff80bb284995f2fd3ee8456d0ce9,
 APKd92614bbe3862e8c64a0086d121d10bf2eda7116dd5be94d22193448d930fd12,
 core1a2273cbbc5158030abfc89ce458dc4ddd45429680f85f312c739863d31617d9.
-The compatible update retained all current data/identities and rendered field/title.
-Its private checker omitted shlex before the scene assertion; that failure remains
-unqualified independently. Normal Stop/native join, protected progress/source/
-preferences and actual return verified. A corrected fresh no-install affected
-check is queued normally. Installed6829/sourceaf/core2426 remains rollback and
-owns the observer and GameCube warning results below; N64's warning bound stays036.
+The fresh no-install native14 check now completed/returned49.98s: existing OOT
+field/title renders, normal Pause publishes one scene and normal Stop/join leaves
+zero. All five new captures opened; current ordinary/cards/independent profile/
+source/preferences/IDs and actual OFF/return verify. The original checker NameError
+stays failed independently. No speed/hitch-cure or new gameplay/Save claim.
+[Native14 report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6642248269).
+Rollback6829/sourceaf/core2426 owns the observer and GC warning results below;
+N64's earlier warning bound stays036.
 Original signer, exact corresponding source, all raw native debug inputs and
 previous core76/candidate036 remain retained privately.
 
@@ -88,8 +90,9 @@ The correction is now checked/preserved at sourcea78415a,
 APK1bb628aa222559cd117c83f858947d9f8c489136bfac4f06bdc322162d4aba41,
 with the original signer, native14 core and all four exact raw inputs retained.
 It is uninstalled. Observe the affected storage UI using the existing demos after
-the independent queued native check has actually returned; the private template
-requires its real completed/returned status and current collection baseline. Do not infer target qualification
+the independent native check's verified actual return. The private storage recipe
+now binds that actual completed/returned status and current collection baseline;
+the finite storage-page request is queued normally. Do not infer target qualification
 from host fixtures or the separately queued native14 check.
 
 Current WW SRAM/generation legitimately advanced during its native boundary;
