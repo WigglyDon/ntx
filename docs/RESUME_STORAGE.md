@@ -152,5 +152,8 @@ unknown candidates; live locks, stale confirmations, damaged/symlinked container
 uncertain metadata and failed retirement retain their safe boundaries. Host and
 ARM64 warnings-denied Rust lints and150 library tests pass. The affected standalone
 N64 inspector fixture passes; existing loopback-only transport tests pass on the
-host after the sandbox refused localhost binding. Packaging and this page's target observation
-remain separate from the older earned backend warning checks above.
+host after the sandbox refused localhost binding. The corrected sourcea78415a
+package1bb628aa is signed/checked and privately preserved with exact source and
+raw native inputs; the storage page remains uninstalled and unobserved on target.
+Its affected UI check and new global saturation remain separate from the older
+earned backend warning checks above.

@@ -81,8 +81,12 @@ Live games still require normal Stop/join. See [storage policy](RESUME_STORAGE.m
 The sourcecd8ff3f package7a0e8f61 is checked/preserved but PREPARED ONLY, never
 requested: source review caught the storage action missing from Library. The
 reviewed correction adds it to Library and unloaded/start menus as well as Pause.
-Package/preserve that correction before observing
-the affected storage UI using the existing demos. Do not infer target qualification
+The correction is now checked/preserved at sourcea78415a,
+APK1bb628aa222559cd117c83f858947d9f8c489136bfac4f06bdc322162d4aba41,
+with the original signer, native14 core and all four exact raw inputs retained.
+It is uninstalled. Observe the affected storage UI using the existing demos after
+the independent queued native check has actually returned; the private template
+requires its real completed/returned status and current collection baseline. Do not infer target qualification
 from host fixtures or the separately queued native14 check.
 
 Current WW SRAM/generation legitimately advanced during its native boundary;
