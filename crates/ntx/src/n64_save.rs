@@ -4,9 +4,15 @@
 use crate::{ProfileLock, n64::SaveImage, storage};
 use serde::{Deserialize, Serialize};
 use std::{
-    fs, io,
+    collections::BTreeSet,
+    fs::{self, File},
+    io,
     path::{Path, PathBuf},
 };
+
+/// Normally only the current image and scene-pinned history remain. Refuse
+/// additional history if uncertain recovery candidates prevent safe retirement.
+pub const MAX_ORDINARY_IMAGES: usize = 16;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Generation {
@@ -17,6 +23,7 @@ pub struct Generation {
 pub struct SaveStore {
     directory: PathBuf,
     accepted: Option<Generation>,
+    acknowledged_history: BTreeSet<String>,
     _writer: ProfileLock,
 }
 fn error(message: &str) -> io::Error {
@@ -78,8 +85,17 @@ impl SaveStore {
         Ok(Self {
             directory,
             accepted,
+            acknowledged_history: BTreeSet::new(),
             _writer: writer,
         })
+    }
+    pub(crate) fn ensure_profile(&self, profile: &Path) -> io::Result<()> {
+        if self.directory != profile.join("N64") {
+            return Err(error(
+                "N64 scene and ordinary writer belong to different profiles",
+            ));
+        }
+        Ok(())
     }
     pub fn generation(&self) -> Option<&Generation> {
         self.accepted.as_ref()
@@ -102,6 +118,62 @@ impl SaveStore {
             .as_ref()
             .map(|g| read_image(&self.directory, g))
             .transpose()
+    }
+    /// After a durable ordinary reference, keep the current ordinary image
+    /// and every image pinned by a retained scene. The profile writer is held.
+    pub fn retire_unreferenced_images(&mut self, retained: &BTreeSet<String>) -> io::Result<()> {
+        self.verify_current()?;
+        let mut protected = retained.clone();
+        if let Some(current) = &self.accepted {
+            protected.insert(current.image_sha256.clone());
+        }
+        for hash in &protected {
+            if !storage::valid_digest(hash) {
+                return Err(error("Invalid retained ordinary identity"));
+            }
+            let generation = Generation {
+                schema: 1,
+                number: 1,
+                image_sha256: hash.clone(),
+            };
+            read_image(&self.directory, &generation)?;
+        }
+        let mut remove = Vec::new();
+        // Only generations this writer actually saw acknowledged are eligible.
+        // A file left by an uncertain commit or earlier process is not a cache.
+        for hash in &self.acknowledged_history {
+            if protected.contains(hash) {
+                continue;
+            }
+            let generation = Generation {
+                schema: 1,
+                number: 1,
+                image_sha256: hash.clone(),
+            };
+            let path = image_path(&self.directory, &generation);
+            match path.symlink_metadata() {
+                Ok(info) if info.is_file() => {
+                    read_image(&self.directory, &generation)?;
+                }
+                Ok(_) => return Err(error("Unrecognized ordinary history retained")),
+                Err(e) if e.kind() == io::ErrorKind::NotFound => {}
+                Err(e) => return Err(e),
+            }
+            remove.push((hash.clone(), path));
+        }
+        self.verify_current()?;
+        for (_, path) in &remove {
+            match fs::remove_file(path) {
+                Ok(()) => {}
+                Err(e) if e.kind() == io::ErrorKind::NotFound => {}
+                Err(e) => return Err(e),
+            }
+        }
+        File::open(&self.directory)?.sync_all()?;
+        for (hash, _) in remove {
+            self.acknowledged_history.remove(&hash);
+        }
+        self.verify_current()
     }
     /// Publish immutable image bytes before their durable generation reference.
     /// On any failure the caller retains its paused runtime and profile writer.
@@ -129,6 +201,25 @@ impl SaveStore {
                 return Err(error("retained N64 image collision"));
             }
         } else {
+            let mut images = 0usize;
+            for entry in fs::read_dir(&self.directory)? {
+                let entry = entry?;
+                let name = entry.file_name();
+                if name
+                    .to_str()
+                    .is_some_and(|n| n.ends_with(".m64ram") || n.ends_with(".m64ram.ntx-pending"))
+                {
+                    if !entry.path().symlink_metadata()?.is_file() {
+                        return Err(error("Unrecognized N64 ordinary recovery file retained"));
+                    }
+                    images += 1;
+                }
+            }
+            if images >= MAX_ORDINARY_IMAGES {
+                return Err(error(
+                    "Save recovery storage is full. The current ordinary save and paused runtime are retained; free space before saving again.",
+                ));
+            }
             storage::atomic_replace(&path, bytes)?;
         }
         if read_image(&self.directory, &generation)? != bytes {
@@ -142,6 +233,10 @@ impl SaveStore {
         if read_generation(&self.directory)?.as_ref() != Some(&generation) {
             return Err(error("N64 ordinary generation readback failed"));
         }
+        if let Some(previous) = &self.accepted {
+            self.acknowledged_history
+                .insert(previous.image_sha256.clone());
+        }
         self.accepted = Some(generation.clone());
         Ok(generation)
     }
@@ -154,6 +249,66 @@ mod tests {
         let p = std::env::temp_dir().join(format!("ntx-n64-{name}-{}", std::process::id()));
         fs::create_dir(&p).unwrap();
         p
+    }
+    #[test]
+    fn unacknowledged_ordinary_candidate_is_not_swept_as_history() {
+        let root = root("unknown-history");
+        let mut store = SaveStore::open(&root).unwrap();
+        let mut bytes = vec![0; crate::n64::SAVE_IMAGE_BYTES];
+        store.commit(&bytes).unwrap();
+        let old = store.generation().unwrap().clone();
+        bytes[0x800] = 2;
+        let unacknowledged = image_path(
+            &root.join("N64"),
+            &Generation {
+                schema: 1,
+                number: 2,
+                image_sha256: storage::digest(&bytes),
+            },
+        );
+        fs::write(&unacknowledged, &bytes).unwrap();
+        bytes[0x800] = 3;
+        store.commit(&bytes).unwrap();
+        store.retire_unreferenced_images(&BTreeSet::new()).unwrap();
+        assert!(!image_path(&root.join("N64"), &old).exists());
+        assert!(unacknowledged.exists());
+        assert_eq!(fs::read(unacknowledged).unwrap()[0x800], 2);
+        assert_eq!(store.load().unwrap().unwrap(), bytes);
+        drop(store);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn uncertain_history_has_a_hard_budget_and_refusal_keeps_the_current_save() {
+        let root = root("history-budget");
+        let mut store = SaveStore::open(&root).unwrap();
+        let mut bytes = vec![0; crate::n64::SAVE_IMAGE_BYTES];
+        for n in 0..MAX_ORDINARY_IMAGES {
+            bytes[0x800] = n as u8;
+            store.commit(&bytes).unwrap();
+        }
+        let current = store.generation().unwrap().clone();
+        let expected = bytes.clone();
+        bytes[0x800] = MAX_ORDINARY_IMAGES as u8;
+        assert!(store.commit(&bytes).is_err());
+        assert_eq!(store.generation(), Some(&current));
+        assert_eq!(store.load().unwrap().unwrap(), expected);
+        store.retire_unreferenced_images(&BTreeSet::new()).unwrap();
+        assert_eq!(
+            fs::read_dir(root.join("N64"))
+                .unwrap()
+                .filter(|p| p
+                    .as_ref()
+                    .unwrap()
+                    .path()
+                    .extension()
+                    .is_some_and(|e| e == "m64ram"))
+                .count(),
+            1
+        );
+        store.commit(&bytes).unwrap();
+        assert_eq!(store.load().unwrap().unwrap(), bytes);
+        drop(store);
+        fs::remove_dir_all(root).unwrap();
     }
     #[test]
     fn ordinary_progress_reopens_independently_and_a_writer_cannot_adopt_outside_changes() {

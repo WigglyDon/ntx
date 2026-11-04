@@ -24,6 +24,21 @@ geometry has model coverage. Sibling owners were informed, never modified here.
 
 ## Current installed result and next repair
 
+Owner storage request is now the priority: minimal lab media with the Fold as
+the permanent library, preserving game/profile identities and ordinary progress.
+Read .local/storage-cleanup-20261104.txt before older phone paths or backup recipes.
+Do not rehydrate retired test history. Existing owners coordinate their own areas.
+
+The N64 resume writer lacked successful-generation retirement. The Rust repair
+adds post-acknowledgement/Stop cleanup, host-supplied free-space admission, bounded
+recovery files and scene-pinned ordinary-history retirement. See
+[storage policy](RESUME_STORAGE.md).125 library tests and warnings-denied host/ARM64
+checks pass. Core76c4621a includes the previously pending literal-log patch; its
+one-unit build/eleven-patch/ABI fixtures pass. Package and changed-boundary
+retention verification remain pending; installed source below stays its earned
+old bounds. No closed quest/save/timing campaign is reopened.
+
+
 Installed source3b225d46bae9e46322b62f4b951fc9c04145a545,
 APK8d25fd6da4c4021bb4b00ab843cf82a06939bd1b637e8872560a953985d472cf,
 coree2999fbd80f173c0fccae8e837a42012035ce310759e21de2b614737048e96d8.
@@ -66,8 +81,9 @@ Package/title verification is complete; no material timing benefit is claimed.
 Patch11 fixes a concrete varargs bridge issue: already-formatted debug text is
 passed through literal percent-s, preserving percent-bearing messages as text.
 The actual callback fixture covers percent directives, bounded truncation and
-absent sink under normal/UBSan trap. Native/package work waits through the
-coordinated host capacity window; no new target result is claimed for patch11.
+absent sink under normal/UBSan trap. The coordinated capacity deferral is released and the one-unit native build is
+complete. Package and target evidence for patch11/the retention repair remain
+pending; no new runtime result is claimed from source readiness.
 
 Next narrow actual function/line CPU costs before more compiler optimization.
 Optional app-only Simpleperf is unavailable under current operating constraints;

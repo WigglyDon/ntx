@@ -195,3 +195,6 @@ preferences changes a GameId, SaveProfile or checkpoint fingerprint.
 The portable geometry includes portrait fixtures; the current Android activity
 requests landscape orientation. Those fixtures do not establish a portrait
 Android player or device qualification.
+
+Resume publication and storage admission follow [bounded storage](RESUME_STORAGE.md).
+Current/uncertain generations and ordinary progress remain separate authorities.

@@ -205,7 +205,7 @@ impl LiveRuntime {
     fn accept_checkpoint(&mut self, id: Option<String>) {
         match self {
             Self::Dolphin(r) => r.accepted_checkpoint = id,
-            Self::N64(_) => {}
+            Self::N64(r) => r.accepted_checkpoint = id,
         }
     }
 }
@@ -220,8 +220,9 @@ impl StopRuntime for LiveRuntime {
         }
     }
     fn discard_checkpoint(&mut self) {
-        if let Self::Dolphin(r) = self {
-            r.discard_checkpoint();
+        match self {
+            Self::Dolphin(r) => r.discard_checkpoint(),
+            Self::N64(r) => r.discard_checkpoint(),
         }
     }
     fn join(&mut self) -> std::result::Result<(), String> {
@@ -241,11 +242,12 @@ fn save_checkpoint(
         LiveRuntime::Dolphin(r) => save_dolphin_checkpoint(r, root, collection, index),
         LiveRuntime::N64(r) => {
             let id = r.capture()?;
-            let earlier = collection.entries[index].checkpoint.replace(id);
+            let earlier = collection.entries[index].checkpoint.replace(id.clone());
             if let Err(e) = save_collection(root, collection) {
                 collection.entries[index].checkpoint = earlier;
                 return Err(e);
             }
+            r.accept_capture(id);
             r.accept_departure();
             Ok(())
         }

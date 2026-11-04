@@ -26,6 +26,7 @@ pub(super) struct Runtime {
     pub info: RuntimeInfo,
     pub core: Option<Core>,
     pub pending: Option<Checkpoint>,
+    pub accepted_checkpoint: Option<String>,
     pub failed: bool,
     pub resources: Rc<RefCell<Resources>>,
     store: std::mem::ManuallyDrop<SaveStore>,
@@ -102,6 +103,7 @@ impl Runtime {
             info,
             core: Some(core),
             pending,
+            accepted_checkpoint: None,
             failed: false,
             resources,
             store: std::mem::ManuallyDrop::new(store),
@@ -202,6 +204,7 @@ impl Runtime {
         self.store.verify_current().map_err(|e| e.to_string())?;
         let bytes = self.core()?.ordinary_image()?;
         self.store.commit(&bytes).map_err(|e| e.to_string())?;
+        self.retire_ordinary_history();
         Ok(())
     }
     pub fn capture(&mut self) -> Result<String> {
@@ -215,9 +218,48 @@ impl Runtime {
         self.store.verify_current().map_err(|e| e.to_string())?;
         let payload = self.core()?.capture()?;
         let image = self.core()?.ordinary_image()?;
+        // Ordinary game progress has its own durable authority even if a full
+        // machine resume cannot fit. Retained scenes still pin their old images.
         self.store.commit(&image).map_err(|e| e.to_string())?;
-        n64_checkpoint::publish(&self.path, &self.binding, &self.store, &payload)
+        self.retire_ordinary_history();
+        let available = crate::n64_host::available_storage(&self.path)?;
+        n64_checkpoint::publish(&self.path, &self.binding, &self.store, &payload, available)
             .map_err(|e| e.to_string())
+    }
+    /// Called only after the collection's new reference is durable. The paused
+    /// native owner and SaveStore writer remain held through retirement.
+    pub fn accept_capture(&mut self, id: String) {
+        if let Some(old) = self.accepted_checkpoint.replace(id.clone())
+            && let Err(error) =
+                n64_checkpoint::retire_previous(&self.path, &old, &id, &self.binding, &self.store)
+        {
+            platform::diagnostic(&format!(
+                "Could not verify prior N64 checkpoint cleanup: {error}"
+            ));
+            return;
+        }
+        self.retire_ordinary_history();
+    }
+    fn retire_ordinary_history(&mut self) {
+        if let Err(error) =
+            n64_checkpoint::retire_ordinary_unreferenced(&self.path, &self.binding, &mut self.store)
+        {
+            platform::diagnostic(&format!(
+                "Could not finish N64 ordinary-history cleanup: {error}"
+            ));
+        }
+    }
+    /// stop_game calls this only after native join and durable Stop metadata.
+    pub fn discard_checkpoint(&mut self) {
+        if let Some(id) = &self.accepted_checkpoint
+            && let Err(error) = n64_checkpoint::discard_successful(&self.path, id)
+        {
+            platform::diagnostic(&format!(
+                "Could not verify stopped N64 checkpoint cleanup: {error}"
+            ));
+            return;
+        }
+        self.retire_ordinary_history();
     }
     pub fn accept_departure(&mut self) {
         self.accepted = self.store.generation().cloned();

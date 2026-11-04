@@ -27,7 +27,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Literal debug-payload bridge source/host fixture next; native/package deferred for coordinated host capacity. Incoming-index title observation shows no material timing gain. Further performance changes need narrower evidence; no privileged profiling retry"
+next_step = "Finish package and focused N64 retention/Stop check after source/storage cleanup. Normal resume must remain bounded; retain uncertain files and current progress. Minimal lab media uses the permanent Fold library; no closed campaign or privileged profiling retry"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 hitches: prior same-installation cache pair24 to7 slow calls. New package trace has8 slow CPU-heavy calls, shader-bearing startup946.435ms/residual132.936ms. Exact routine unqualified", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Single pre-Pause gray field in latest bounded title check: duration/cause unknown; normal Pause and Stop followed", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -391,4 +391,13 @@ report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6621210896"
 [n64_literal_log_source]
 implementation = "Pass already-formatted core debug payload through a literal percent-s varargs format, preserving content/bounds/absent sink"
 validation = "Actual callback versus exact original; literal percent directives,1023-byte clipped output and null sink covered in normal/UBSan-trap fixture; old callback rejected before unsafe format interpretation"
-limits = "Native/package pending coordinated host capacity; installed playable source remains3b225d4. No performance or new target claim"
+core_sha256 = "76c4621a83861c07558c442403d1f9a68e368e1754be50a7f5f0b27faab1e358"
+limits = "One native unit plus link/eleven-patch fixtures complete; package/target pending. Six preexisting const-pointer warnings in unused multi-cart loader remain; no new performance claim"
+
+[n64_resume_storage_source]
+problem = "New N64 scene generations lacked post-publication retirement and explicit Stop cleanup"
+implementation = "Retire only acknowledged predecessor after durable replacement; explicit Stop after native join+durable metadata. Current/retained scenes pin ordinary images; only writer-known acknowledged ordinary history may retire"
+limits = "Three scene-directory files including pending/recovery,64MiB payload ceiling and64MiB free-space reserve; separate16-image ordinary recovery ceiling. Unknown/damaged/incompatible candidates stay; no forced restore or cross-backend compatibility"
+validation = "125 Rust library tests including40 changing-progress replacements, retained recovery/image pinning, quotas, low-space refusal and unknown-candidate preservation; host all-targets and ARM64 warnings-denied lint, formatting pass"
+package = "Pending; installed source remains3b225d4. No new target/runtime claim from source tests"
+policy = "docs/RESUME_STORAGE.md"
