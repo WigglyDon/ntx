@@ -95,6 +95,16 @@ The primitive's instructions/barriers/A53 workaround are retained. A bounded
 completion counter can establish whether the repaired path executes on target;
 no speed benefit or historical-incident cure is presumed from the fixture.
 
+The register-culling repair replaces two repeated membership-only searches of
+immutable entry maps with a bounded two-word membership mask. It retains the
+original excluded-register rule, signed-byte range and final caller loop index;
+all downstream compiler operations remain unchanged. The actual helper is checked
+against the retained getter for every signed-byte code/slot, duplicates, selected
+and in-range exclusions, changing maps and aliasing, with normal/UBSan-trap runs.
+The full compiler-body comparison permits only these two declared substitutions
+and observation statements. This targets the measured hot pass; target speed
+impact remains unqualified until the new artifact is observed.
+
 ## Actual backend boundaries
 
 | Boundary | Implemented ownership and limit |

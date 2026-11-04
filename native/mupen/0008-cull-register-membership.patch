@@ -1,0 +1,59 @@
+NTX targeted register-culling membership repair; upstream pin/licenses retained.
+
+--- a/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
++++ b/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
+@@ -1,3 +1,4 @@
++/* Modified by ntx 2026-11-03: exact immutable entry-map membership in register culling; original exclusion and downstream operations retained. */
+ /* Modified by ntx 2026-11-03: optional host observer around the unchanged compiler implementation. */
+ /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  *   Mupen64plus - new_dynarec.c                                           *
+@@ -398,6 +399,25 @@
+   int hr;
+   for (hr=0;hr<HOST_REGS;hr++) if(hr!=EXCLUDE_REG&&regmap[hr]==r) return hr;
+   return -1;
++}
++
++/* ntx: this pass queries immutable entry-map membership repeatedly. Keep the
++ * original get_reg exclusion rule, without rescanning HOST_REGS for each query. */
++static uint64_t ntx_missing_pre_regs(const signed char pre[], const signed char entry[])
++{
++  uint64_t present[2]={0,0}, missing=0;
++  int hr;
++  for(hr=0;hr<HOST_REGS;hr++) {
++    int r=entry[hr];
++    if(hr!=EXCLUDE_REG && r>=0)
++      present[(unsigned)r>>6]|=UINT64_C(1)<<(r&63);
++  }
++  for(hr=0;hr<HOST_REGS;hr++) {
++    int r=pre[hr];
++    if(r>=0 && !(present[(unsigned)r>>6] & (UINT64_C(1)<<(r&63))))
++      missing|=UINT64_C(1)<<hr;
++  }
++  return missing;
+ }
+ 
+ // Find a register that is available for two consecutive cycles
+@@ -10507,11 +10527,8 @@
+       {
+         if(i<slen-2) {
+           nr|=needed_reg[i+2];
+-          for(hr=0;hr<HOST_REGS;hr++)
+-          {
+-            if(regmap_pre[i+2][hr]>=0&&get_reg(regs[i+2].regmap_entry,regmap_pre[i+2][hr])<0) nr&=~(1LL<<hr);
+-            //if((regmap_entry[i+2][hr])>=0) if(!((nr>>hr)&1)) DebugMessage(M64MSG_VERBOSE, "%x-bogus(%d=%d)",start+i*4,hr,regmap_entry[i+2][hr]);
+-          }
++          nr&=~ntx_missing_pre_regs(regmap_pre[i+2],regs[i+2].regmap_entry);
++          hr=HOST_REGS;
+         }
+       }
+       // Don't need stuff which is overwritten
+@@ -10562,8 +10579,8 @@
+     else // Non-branch
+     {
+       if(i<slen-1) {
++        nr&=~ntx_missing_pre_regs(regmap_pre[i+1],regs[i+1].regmap_entry);
+         for(hr=0;hr<HOST_REGS;hr++) {
+-          if(regmap_pre[i+1][hr]>=0&&get_reg(regs[i+1].regmap_entry,regmap_pre[i+1][hr])<0) nr&=~(1LL<<hr);
+           if(regs[i].regmap[hr]!=regmap_pre[i+1][hr]) nr&=~(1LL<<hr);
+           if(regs[i].regmap[hr]!=regmap_pre[i][hr]) nr&=~(1LL<<hr);
+           if(regs[i].regmap[hr]<0) nr&=~(1LL<<hr);

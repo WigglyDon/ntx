@@ -110,14 +110,14 @@ with tarfile.open(ROOT / '.local/source-archives/mupen64plus-next-15bada85.tar.g
         destination = patch_root / name
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(archive.extractfile(member).read())
-for name in ['0001-checked-state-result.patch', '0002-coherent-state-boundary.patch', '0003-host-shader-dispatch.patch', '0004-profile-shader-cache.patch', '0005-compile-observer.patch', '0006-compiler-phase-observer.patch', '0007-complete-cache-batch.patch']:
+for name in ['0001-checked-state-result.patch', '0002-coherent-state-boundary.patch', '0003-host-shader-dispatch.patch', '0004-profile-shader-cache.patch', '0005-compile-observer.patch', '0006-compiler-phase-observer.patch', '0007-complete-cache-batch.patch', '0008-cull-register-membership.patch']:
     subprocess.run(['git', 'apply', '--no-index', str(ROOT / 'native/mupen' / name)], cwd=patch_root, check=True)
 for name in ['libretro/libretro.c', 'mupen64plus-core/src/main/savestates.c', 'GLideN64/src/Graphics/OpenGLContext/GLFunctions.cpp', 'custom/GLideN64/mupenplus/CommonAPIImpl_mupenplus.cpp', 'mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c', 'mupen64plus-core/src/device/r4300/new_dynarec/arm64/assem_arm64.c']:
     assert hashlib.sha256((patch_root / name).read_bytes()).digest() == hashlib.sha256((SOURCE / name).read_bytes()).digest()
 print('All maintained patches reproduce the exact active source bytes')
 patch_temporary.cleanup()
 
-# Check the exact wrapper and registrar; native compilation remains untouched.
+# Check exact wrapper/registrar and the two declared compiler substitutions.
 compiler_path = 'mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c'
 compiler = (SOURCE / compiler_path).read_text()
 with tarfile.open(ROOT / '.local/source-archives/mupen64plus-next-15bada85.tar.gz') as archive:
@@ -127,7 +127,8 @@ with tarfile.open(ROOT / '.local/source-archives/mupen64plus-next-15bada85.tar.g
 # unmatched braces before preprocessing, so compare its complete retained tail.
 original_body = original[original.index('int new_recompile_block(int addr)\n{'):].split('{', 1)[1].strip()
 active_body = compiler[compiler.index('static int ntx_recompile_block(int addr)\n{'):compiler.index('/* Mechanical boundary:')].split('{', 1)[1].strip()
-assert original_body == ''.join(line for line in active_body.splitlines(True) if not line.strip().startswith('NTX_PHASE_EVENT(')).strip()
+from check_register_membership import declared_body
+assert declared_body(original_body) == ''.join(line for line in active_body.splitlines(True) if not line.strip().startswith('NTX_PHASE_EVENT(')).strip()
 bridge_start = libretro.index('typedef void (*ntx_compile_observer_t)')
 bridge_end = libretro.index('static bool ntx_shutdown_complete', bridge_start)
 compile_fixture = r"""
@@ -154,7 +155,7 @@ path.write_text(compile_fixture)
 executable = OUT / 'compile-observer'
 subprocess.run(['cc', '-std=c11', '-Wall', '-Wextra', '-Werror', '-D__LIBRETRO__', str(path), '-o', str(executable)], check=True)
 subprocess.run([str(executable)], check=True)
-print('Compiler entry body retained outside observation statements; exact observer ABI preserves arguments/results and nullable retirement')
+print('Compiler remainder retained outside observations and declared membership substitutions; exact observer ABI preserves arguments/results and nullable retirement')
 
 # Observation statements are the only changes inside the cache primitive too.
 cache_path = 'mupen64plus-core/src/device/r4300/new_dynarec/arm64/assem_arm64.c'
@@ -165,6 +166,8 @@ active_cache = (SOURCE / cache_path).read_text()
 cache_original_body = function(original_cache, 'static void cache_flush(char* start, char* end)').split('{', 1)[1]
 cache_active_body = function(active_cache, 'static void cache_flush(char* start, char* end)').split('{', 1)[1]
 assert cache_original_body == ''.join(line for line in cache_active_body.splitlines(True) if not line.strip().startswith(('NTX_PHASE_EVENT(', 'NTX_CACHE_BEGIN(')))
-print('Compiler entry and cache primitive retain original operations outside notifications; batch scheduling checked separately')
+print('Compiler remainder checked outside declared membership substitutions; cache primitive operations/barriers retained outside notifications, batch scheduling checked separately')
 
 subprocess.run(['python3', str(ROOT / 'native/mupen/check_cache_batch.py')], check=True)
+
+subprocess.run(['python3', str(ROOT / 'native/mupen/check_register_membership.py')], check=True)

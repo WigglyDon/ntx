@@ -38,11 +38,11 @@ currently requests landscape; portrait geometry has portable model coverage.
 
 N64 deadlines retain cadence through wake-up jitter. A bounded same-installation
 cold/warm title pair verifies shader-cache reuse and reduces core calls above40ms
-from24 to7. The host now guards both native cache locations. A subsequent trace
-finds substantial owner-thread CPU in the remaining slow calls, including seven
-without measured shader work; exact native routines and intro hitches remain open.
-See the [latest diagnostic](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6615662768)
-and [current state](docs/state.toml) for startup costs and verification limits.
+from24 to7. Same-call compiler measurements now identify register culling and
+assembly as the largest measured compilation passes; a focused culling repair is
+under verification. Intro hitches and historical incidents remain open. See the
+[latest result](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6618617072)
+and [current state](docs/state.toml) for exact build and observation limits.
 
 Read [AGENTS.md](AGENTS.md), [successor handoff](docs/NTX_HANDOFF.md),
 [NTX-5](https://github.com/WigglyDon/ntx/issues/5) and its

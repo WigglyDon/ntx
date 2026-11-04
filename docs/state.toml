@@ -1,6 +1,6 @@
 schema_version = 1
 product = "ntx"
-classification = "NTX5_N64_SLOW_CALL_CPU_OBSERVED_ROUTINE_OPEN"
+classification = "NTX5_N64_COMPILER_PASSES_OBSERVED_CULLING_REPAIR"
 repository = "WigglyDon/ntx"
 repository_id = 1429193278
 branch = "main"
@@ -27,7 +27,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Verify the ARM64 dirty-page cache-batch correctness repair and bounded compiler subphases on target, then use measured hot passes to repair remaining compilation hitches. User explicitly says do not stop; normal admission/capacity still required"
+next_step = "Package and verify exact immutable-map membership in the measured hot register-culling pass. Preserve old cores/progress and do not stop at measurement; normal capacity/custody still govern"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 hitches: prior same-installation cache pair24 to7 slow calls. New package trace has8 slow CPU-heavy calls, shader-bearing startup946.435ms/residual132.936ms. Exact routine unqualified", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Single pre-Pause gray field in latest bounded title check: duration/cause unknown; normal Pause and Stop followed", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -317,3 +317,22 @@ implementation = "Flush every dirty-page run before clearing its mask, including
 core_sha256 = "70ec78b934e0b9298ab87cb3bc5b66900ac6a76e2caeeab6e714699f2a94a7fc"
 validation = "Actual native batcher fixture fails before and passes after; all64 single bits across two groups, full/trailing/disjoint/empty masks, normal and UBSan trap mode.119 library tests, host all-targets/ARM64 warnings-denied lints, seven-patch/source/ABI checks pass. One native compilation unit plus link"
 limits = "Target exercise and performance impact pending. No hitch, gray-frame or historical lifecycle cure is claimed; old cores/scenes/artifacts retained with honest fingerprints"
+
+[n64_compiler_phase_observation]
+source = "e112aa9314dca411e2978d0deb30b4798da2169d"
+apk_sha256 = "53defacb9cb745fd8ff6188af46cfadb4fe236382e574b1c0a224cc0ad66e6da"
+core_sha256 = "70ec78b934e0b9298ab87cb3bc5b66900ac6a76e2caeeab6e714699f2a94a7fc"
+coverage = "4096 core calls;5577 compiler scopes; all passes invalid0, unknown0; eight slow calls; compiler frame maximum128300us"
+culling = { matched_slow_mean_us = 17681, frame_max_us = 41324 }
+assembly = { matched_slow_mean_us = 14721, frame_max_us = 34036 }
+allocation = { matched_slow_mean_us = 7971, frame_max_us = 18654 }
+cache = { matched_slow_mean_us = 639, frame_max_us = 1408, scopes = 8316, successful_tail_flushes = 0, ctr_intersection = 0, ctr_union = 0 }
+limits = "Maxima may be different calls; cache overlaps other passes, never add. Individual-scope durations separately cap4096. Tail repair not exercised; no cache tuning or hitch/historical-incident cure. A late black capture was followed by a rendered pre-Pause scene"
+return = "COMPLETED/returned=true; actual service945s; normal Stop/native join, protected ordinary/cards/untouched profile, exact prefs/IDs/source installation and physicalOFF verified; no NTX hold/recovery"
+report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6618617072"
+
+[n64_culling_repair]
+implementation = "Replace two immutable29-register entry-map membership scans with exact two-word membership and missing-host-register masks; retain exclusion/signed-byte semantics, final hr and downstream operations"
+validation = "Actual helper vs retained native getter for all signed-byte codes/slots, duplicates, selected and in-range exclusions,25000 changing map pairs/read-only aliasing; normal/UBSan trap. Exact compiler remainder/eight-patch/source/ABI fixtures,119 library and remaining host tests, host all-targets/ARM64 warnings-denied lints pass"
+core_sha256 = "9d36c6d547e02cb21f95948515cb2e9f624996a2cd2a3214b9163f70ae254244"
+limits = "One-unit native build and full host tests pass; package/target effect pending. No incoming-branch index, blanket optimizer/block-limit change or new compiler yield"
