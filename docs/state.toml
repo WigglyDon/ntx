@@ -27,7 +27,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Verify lazy live-query counts in the measured register-culling pass. First immutable-map substitutions gave no material title-window timing gain; preserve exact semantics/progress and use actual capacity/custody"
+next_step = "Narrow remaining compiler function/line costs after observed lazy-query culling improvement. Optional unprivileged app-only profiler capability requires prepared finite cleanup and normal custody; refusal grants no security change"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 hitches: prior same-installation cache pair24 to7 slow calls. New package trace has8 slow CPU-heavy calls, shader-bearing startup946.435ms/residual132.936ms. Exact routine unqualified", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Single pre-Pause gray field in latest bounded title check: duration/cause unknown; normal Pause and Stop followed", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -352,4 +352,18 @@ implementation = "Initialize one count per queried live map lazily at its origin
 core_sha256 = "583496282b87993665657fbea23d495939ef9150a8bef766d05cd3ee2f944e0f"
 validation = "Actual native helper vs retained getter through over1million changing-map steps per mode, normal/UBSan trap; declared compiler-body remainder, nine-patch/source/ABI fixtures and one-unit native build pass"
 validation_host = "119 Rust library tests and host all-targets/ARM64 warnings-denied lints pass"
-limits = "Package and target effect pending; no incoming-branch index, SIMD or blanket optimizer/block-limit/yield change"
+limits = "Installed and observed below; no incoming-branch index, SIMD or blanket optimizer/block-limit/yield change"
+
+[n64_culling_query_observation]
+source = "73699d648fcf6bfe9b2d07891e4ccc5923729ae7"
+apk_sha256 = "42111b77bba5f04dd272d3ed79ee9607e02f26c65f6f5a973c75cb4e1b0765df"
+coverage = "4096 calls/5577 compiler scopes; invalid0/unknown0. All11 phases complete. Individual-scope duration cap4096 is separate from scope count"
+culling_frame = { mean_us = 43, max_us = 28821, above40ms = 0 }
+compiler_frame = { mean_us = 186, max_us = 119095, above40ms = 5 }
+assembly_frame = { mean_us = 56, max_us = 35211 }
+allocation_frame_max_us = 19600
+cache = { scopes = 8316, frame_max_us = 1484, tail_completions = 0, idc_dic_intersection = 0, idc_dic_union = 0 }
+conclusion = "Culling maximum about30% lower than41056us; mean43us vs64us. Targeted bounded improvement, not controlled thermal/load benchmark or whole-game hitch cure; five compiler totals above40ms and seven outer slow calls remain. Nested maxima are not summed"
+return = "COMPLETED/returned=true; self-contained122s work. All five images opened; initial/late/pre-Pause scenes rendered then actual Pause menu. Normal Stop/native join, protected ordinary/cards/untouched profile, exact prefs/IDs/source/OFF verify; no NTX hold/recovery"
+limits = "No gameplay input/Save/Restore. No new audible/display-rate proof or historical renderer/lifecycle cure. Old cores/APKs/symbols/scenes retained"
+report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6620204747"
