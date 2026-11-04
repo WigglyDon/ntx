@@ -26,7 +26,9 @@ geometry has model coverage. Sibling owners were informed, never modified here.
 
 GameCube now also has source-level healthy-RAM storage refusal handling after
 verified native capture/ordinary commit, with explicit fatal native/acknowledgement
-guards.140 library tests and relevant lints pass; package/target remain pending.
+guards.140 library tests and relevant lints pass; signed candidate6829b98b/
+sourceaf0230e/core2426 has checked source/raw symbols/original signer and is
+preserved. Target verification remains pending.
 Prepared candidate6b8567d2/sourcec05bcab/core2426 is the preceding budget+observer
 build, signed and preserved with source/raw debug inputs, uninstalled. It does
 not contain this latest GameCube continuation. The existing N64 warning task remains queued normally; no second implementation

@@ -441,3 +441,9 @@ source = "c05bcab43ee2795869fff5f6a987522079e9a894"
 apk_sha256 = "6b8567d2b679f235ef76416daff3cc916f984e0dcbd8918f8d1b15d139086cf7"
 mupen_core_sha256 = "2426bddb80e57891c17b58f0ab057973a2089388086e76aacc6bbc83249026b0"
 qualification = "Signed package/resource/ABI checks and exact corresponding-source preservation pass; all four raw native inputs match retained debug copies. Uninstalled, no performance result"
+
+[prepared_storage_continuation_candidate]
+source = "af0230ef0e6f3b80c3f6716a2bfced8901bf5223"
+apk_sha256 = "6829b98b146ec85d1222171d9cbc1d796277bf5549c15adceeaa4ee0dd4ff71a"
+mupen_core_sha256 = "2426bddb80e57891c17b58f0ab057973a2089388086e76aacc6bbc83249026b0"
+qualification = "Signed package/resource/ABI checks and exact corresponding-source preservation pass; original certificate verified and all four raw native inputs match retained debug copies.140-test source; uninstalled and no new runtime/performance result"
