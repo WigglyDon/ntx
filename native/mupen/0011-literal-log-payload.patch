@@ -1,0 +1,18 @@
+NTX mechanical varargs logging correction; original pin/licenses retained.
+
+--- a/libretro/libretro.c
++++ b/libretro/libretro.c
+@@ -1,3 +1,4 @@
++/* Modified by ntx 2026-11-03: pass formatted debug payload as literal text to the varargs logger. */
+ /* Modified by ntx on 2026-10-29: checked state results/buffers, logger fallback, owned directories and coroutine retirement. */
+ /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  *   Mupen64plus-Next - libretro.c                                         *
+@@ -266,7 +267,7 @@
+     char buffer[1024];
+     snprintf(buffer, 1024, CORE_NAME ": %s\n", aMessage);
+     if (log_cb)
+-        log_cb(RETRO_LOG_INFO, buffer);
++        log_cb(RETRO_LOG_INFO, "%s", buffer);
+ }
+ 
+ extern m64p_rom_header ROM_HEADER;

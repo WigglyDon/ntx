@@ -126,7 +126,17 @@ original searches through283350 changing-value queries per mode, including
 shrinking/growing blocks, empty/dense destinations and address wraparound, in
 normal and UBSan trap runs. Exact comparisons cover the provisional function and
 the remainder of the compiler. No new yield, block limit or persistence format;
-target timing effect remains pending.
+target comparison shows no material title-window allocation gain (31us mean,
+19.779ms maximum versus31us/19.600ms). The exact-output/linear analysis bound
+remains; no hitch cure is advertised.
+
+The debug bridge passes its already-formatted message to the optional varargs
+logger using a literal `%s` format. Percent directives inside the payload remain
+text, including after bounded truncation. The actual callback fixture checks
+percent-bearing and long messages plus an absent logger, and rejects the original
+bridge before executing unsafe formatting. Normal/UBSan trap checks cover this
+mechanical ABI repair; no severity policy or performance change is claimed.
+
 
 ## Actual backend boundaries
 

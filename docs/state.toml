@@ -27,7 +27,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Finish incoming-branch index native/package and affected-boundary verification in the measured allocation pass. Optional function-level profiling is unavailable under current constraints; no privileged/security retry or target timing claim"
+next_step = "Literal debug-payload bridge source/host fixture next; native/package deferred for coordinated host capacity. Incoming-index title observation shows no material timing gain. Further performance changes need narrower evidence; no privileged profiling retry"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 hitches: prior same-installation cache pair24 to7 slow calls. New package trace has8 slow CPU-heavy calls, shader-bearing startup946.435ms/residual132.936ms. Exact routine unqualified", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Single pre-Pause gray field in latest bounded title check: duration/cause unknown; normal Pause and Stop followed", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -373,5 +373,22 @@ implementation = "Index immutable decoded branch destinations once per block in 
 validation = "Actual helpers versus four original searches through283350 changing-value queries per mode, shrinking/growing blocks, sparse/dense destinations and address wrap; normal/UBSan trap. Exact provisional/compiler remainder and ten-patch reproduction pass"
 core_sha256 = "e2999fbd80f173c0fccae8e837a42012035ce310759e21de2b614737048e96d8"
 validation_build = "2275-file exact source graph; one native unit plus link; xtask all-targets warnings-denied lint and formatting pass"
-limits = "Package/target verification pending; no new yield, block limit or persistence format. No target timing benefit claimed"
+limits = "Package/target title verification complete below; no new yield, block limit or persistence format. No material title timing benefit observed"
 optional_profile = "Function-level profiling unavailable under current operating constraints; no samples, new timing evidence or authorization for privileged/property/security changes"
+
+[n64_incoming_branch_observation]
+source = "3b225d46bae9e46322b62f4b951fc9c04145a545"
+apk_sha256 = "8d25fd6da4c4021bb4b00ab843cf82a06939bd1b637e8872560a953985d472cf"
+coverage = "First4096 calls/5577 compiler scopes; all11 phases complete, invalid0/unknown0. First4096 individual-scope duration cap is separate"
+allocation_frame = { mean_us = 31, max_us = 19779 }
+compiler_frame = { mean_us = 185, max_us = 120742, above40ms = 4 }
+assembly_frame = { mean_us = 56, max_us = 36001 }
+conclusion = "No material allocation gain versus31us/19600us; total compiler maximum120742us vs119095us. Four compiler totals above40ms vs5, outer slow calls6 vs7 are not attributed; threshold cohorts differ. Exact-output/linear analysis bound retained"
+visual = "Initial/late/pre-Pause title-attract pictures render, followed by actual Pause menu. No new gameplay/save/scene campaign or historical cure"
+limits = "Not whole-game/FPS/audio proof or controlled thermal/load benchmark; historical incidents remain open"
+report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6621210896"
+
+[n64_literal_log_source]
+implementation = "Pass already-formatted core debug payload through a literal percent-s varargs format, preserving content/bounds/absent sink"
+validation = "Actual callback versus exact original; literal percent directives,1023-byte clipped output and null sink covered in normal/UBSan-trap fixture; old callback rejected before unsafe format interpretation"
+limits = "Native/package pending coordinated host capacity; installed playable source remains3b225d4. No performance or new target claim"

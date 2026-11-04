@@ -232,6 +232,7 @@ pub fn prepare(root: &Path, source: &Path) -> Result<()> {
         "0008-cull-register-membership.patch",
         "0009-cull-query-counts.patch",
         "0010-incoming-branch-index.patch",
+        "0011-literal-log-payload.patch",
     ] {
         copy(
             &root.join("native/mupen").join(name),

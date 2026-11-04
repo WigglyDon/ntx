@@ -24,13 +24,18 @@ geometry has model coverage. Sibling owners were informed, never modified here.
 
 ## Current installed result and next repair
 
-Installed source73699d648fcf6bfe9b2d07891e4ccc5923729ae7,
-APK42111b77bba5f04dd272d3ed79ee9607e02f26c65f6f5a973c75cb4e1b0765df,
-core583496282b87993665657fbea23d495939ef9150a8bef766d05cd3ee2f944e0f.
+Installed source3b225d46bae9e46322b62f4b951fc9c04145a545,
+APK8d25fd6da4c4021bb4b00ab843cf82a06939bd1b637e8872560a953985d472cf,
+coree2999fbd80f173c0fccae8e837a42012035ce310759e21de2b614737048e96d8.
 Original signer and exact corresponding source/symbols are retained privately.
 
-First4096 calls produced5577 compiler scopes, zero invalid/unknown events and
-complete coverage of all11 phases. Patch9 lazy query counts reduce culling frame
+Latest first4096 calls produce5577 compiler scopes, zero invalid/unknown events
+and complete coverage of all11 phases. Patch10 shows no material allocation gain:
+mean31us/max19.779ms versus31us/19.600ms. Compiler mean185us/max120.742ms,
+four totals above40ms; six outer slow calls are not attributed to the change.
+Assembly mean56us/max36.001ms. Exact-output/linear analysis bound is retained.
+
+The preceding patch9 lazy query counts reduced culling frame
 mean64us to43us and maximum41.056ms to28.821ms (about30%); culling frames above40ms
 fall1 to0. Total compiler mean203us to186us, maximum126.801ms to119.095ms, but
 five compiler totals above40ms and seven outer slow calls remain. This is a
@@ -57,7 +62,12 @@ original forward-branch provisional reset rule. Actual helpers match four
 retained searches through283350 changing-value queries per mode, normal/UBSan
 trap. Exact provisional/compiler comparisons and ten-patch reproduction pass.
 One-unit native build/coree2999fbd and xtask warnings-denied lint pass.
-Finish package/affected-boundary verification before claiming benefit.
+Package/title verification is complete; no material timing benefit is claimed.
+Patch11 fixes a concrete varargs bridge issue: already-formatted debug text is
+passed through literal percent-s, preserving percent-bearing messages as text.
+The actual callback fixture covers percent directives, bounded truncation and
+absent sink under normal/UBSan trap. Native/package work waits through the
+coordinated host capacity window; no new target result is claimed for patch11.
 
 Next narrow actual function/line CPU costs before more compiler optimization.
 Optional app-only Simpleperf is unavailable under current operating constraints;
@@ -65,14 +75,14 @@ it supplied no function-level samples or new performance result. No privileged
 retry or global property/security change is authorized by that refusal. Continue
 the measured-pass work off-device; no profiling overhead is treated as speed proof.
 
-The self-contained title check used122s of work and completed actual return.
+The latest self-contained title check used116s of work and completed actual return.
 All five images are opened: initial, late and pre-Pause scenes rendered, followed
 by the actual Pause menu. Normal Stop/native join, protected ordinary/cards/
 untouched profile, exact preferences, IDs/source installation and physicalOFF
 passed; custodian completed/returned=true. No NTX request/hold/recovery remains.
 No gameplay input, Save or Restore occurred. Preserve earlier black/gray captures
 and historical reports; no sustained freeze or historical cure was established.
-[Latest outcome](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6620204747).
+[Latest outcome](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6621210896).
 
 ## Preservation and admission
 
