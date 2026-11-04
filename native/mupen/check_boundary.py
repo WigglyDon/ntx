@@ -7,6 +7,7 @@ it does not claim console execution, a GPU, or successful game-state restore.
 """
 from pathlib import Path
 import subprocess
+import sys
 import tarfile
 import hashlib
 import tempfile
@@ -110,7 +111,7 @@ with tarfile.open(ROOT / '.local/source-archives/mupen64plus-next-15bada85.tar.g
         destination = patch_root / name
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(archive.extractfile(member).read())
-for name in ['0001-checked-state-result.patch', '0002-coherent-state-boundary.patch', '0003-host-shader-dispatch.patch', '0004-profile-shader-cache.patch', '0005-compile-observer.patch', '0006-compiler-phase-observer.patch', '0007-complete-cache-batch.patch', '0008-cull-register-membership.patch', '0009-cull-query-counts.patch', '0010-incoming-branch-index.patch', '0011-literal-log-payload.patch']:
+for name in ['0001-checked-state-result.patch', '0002-coherent-state-boundary.patch', '0003-host-shader-dispatch.patch', '0004-profile-shader-cache.patch', '0005-compile-observer.patch', '0006-compiler-phase-observer.patch', '0007-complete-cache-batch.patch', '0008-cull-register-membership.patch', '0009-cull-query-counts.patch', '0010-incoming-branch-index.patch', '0011-literal-log-payload.patch', '0012-assembly-child-scopes.patch']:
     subprocess.run(['git', 'apply', '--no-index', str(ROOT / 'native/mupen' / name)], cwd=patch_root, check=True)
 for name in ['libretro/libretro.c', 'mupen64plus-core/src/main/savestates.c', 'GLideN64/src/Graphics/OpenGLContext/GLFunctions.cpp', 'custom/GLideN64/mupenplus/CommonAPIImpl_mupenplus.cpp', 'mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c', 'mupen64plus-core/src/device/r4300/new_dynarec/arm64/assem_arm64.c']:
     assert hashlib.sha256((patch_root / name).read_bytes()).digest() == hashlib.sha256((SOURCE / name).read_bytes()).digest()
@@ -130,7 +131,7 @@ active_body = compiler[compiler.index('static int ntx_recompile_block(int addr)\
 from check_register_membership import declared_body as declared_membership
 from check_culling_queries import declared_body as declared_queries
 from check_incoming_branches import declared_body as declared_incoming
-assert declared_incoming(declared_queries(declared_membership(original_body))) == ''.join(line for line in active_body.splitlines(True) if not line.strip().startswith('NTX_PHASE_EVENT(')).strip()
+assert declared_incoming(declared_queries(declared_membership(original_body))) == ''.join(line for line in active_body.splitlines(True) if not line.strip().startswith(('NTX_PHASE_EVENT(', 'NTX_ASM_EVENT('))).strip()
 bridge_start = libretro.index('typedef void (*ntx_compile_observer_t)')
 bridge_end = libretro.index('static bool ntx_shutdown_complete', bridge_start)
 compile_fixture = r"""
@@ -179,3 +180,5 @@ subprocess.run(['python3', str(ROOT / 'native/mupen/check_culling_queries.py')],
 subprocess.run(['python3', str(ROOT / 'native/mupen/check_incoming_branches.py')], check=True)
 
 subprocess.run(['python3', str(ROOT / 'native/mupen/check_log_payload.py')], check=True)
+
+subprocess.run([sys.executable, str(ROOT / "native/mupen/check_assembly_scopes.py")], check=True)

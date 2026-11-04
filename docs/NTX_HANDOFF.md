@@ -24,6 +24,15 @@ geometry has model coverage. Sibling owners were informed, never modified here.
 
 ## Current installed result and next repair
 
+Source now also protects GC interrupted same-identity writes (133 library tests)
+and preserves all raw native debug inputs automatically; those are independent
+from the prepared storage-warning target candidate. A new observer-only Mupen
+patch12 splits the assembly parent into four bounded child scopes: native source
+reproduction/fixtures, one-unit build/core2426bddb and134 library tests pass.
+No compiler algorithm/cache/barrier/SIMD/block-limit change or speed result.
+Do not install this changed core over a live N64 session; keep core76 and its
+source/symbols/scenes. Package/target observations remain separate work.
+
 Continuation source now separates checkpoint-only storage refusal from fatal
 native/save failure: retain a verified healthy paused runtime and offer Resume,
 with an explicit RAM-only warning; do not clear quarantine or claim durable

@@ -167,3 +167,18 @@ change notices and exact corresponding source accompany the combined candidate.
 Original first-party Rust remains MIT and borrowed files retain their terms.
 No cartridge, firmware, save, texture pack, copied branding or private device
 content is bundled. Public binary/store/legal commitments remain separately gated.
+
+## Bounded assembly child observations
+
+Patch12 adds only eight scope notifications per compiled block, splitting the
+existing assembly parent into setup, instruction emission, fallthrough handling
+and stub emission. No instruction-generation, register, cache, barrier, SIMD or
+block-limit policy changes. Rust keeps the same first4096-core-call and per-scope
+sampling caps and retires the observer when those caps finish. Children overlap
+the parent and must not be added to it as independent work.
+
+The actual source locations/macros are checked in active/disabled normal/UBSan
+trap fixtures; the complete compiler body still matches upstream plus declared
+analysis substitutions after removing only maintained notification lines. This
+adds elapsed observations, not CPU/GPU attribution or a hitch-cure claim. Native
+build/package/target results must be recorded separately.

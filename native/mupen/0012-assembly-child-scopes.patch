@@ -1,0 +1,62 @@
+NTX bounded assembly-child observations only; compiler emission/order unchanged.
+Upstream15bada85906593376e8fd697f1b0b3af3a20f512; original licenses retained.
+
+--- a/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
++++ b/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
+@@ -26,10 +26,13 @@
+ #ifdef __LIBRETRO__
+ extern void retro_ntx_compile_event(unsigned event);
+ #define NTX_PHASE_EVENT(phase, entering) retro_ntx_compile_event(16u + 2u * (phase) + (entering))
++/* Modified by ntx 2026-11-04: bounded assembly child scopes; emission unchanged. */
++#define NTX_ASM_EVENT(phase, entering) retro_ntx_compile_event(42u + 2u * (phase) + (entering))
+ #define NTX_CACHE_BEGIN(ctr) retro_ntx_compile_event(37u | ((((ctr) >> 28) & 3u) << 8))
+ #define NTX_CACHE_TAIL() retro_ntx_compile_event(40u)
+ #else
+ #define NTX_PHASE_EVENT(phase, entering) ((void)0)
++#define NTX_ASM_EVENT(phase, entering) ((void)0)
+ #define NTX_CACHE_BEGIN(ctr) ((void)0)
+ #define NTX_CACHE_TAIL() ((void)0)
+ #endif
+@@ -11639,6 +11642,7 @@
+   NTX_PHASE_EVENT(6, 0);
+   NTX_PHASE_EVENT(7, 1);
+   /* Pass 8 - Assembly */
++  NTX_ASM_EVENT(0, 1);
+   linkcount=0;stubcount=0;
+   ds=0;is_delayslot=0;
+   cop1_usable=0;
+@@ -11661,6 +11665,8 @@
+     ds=1;
+     pagespan_ds();
+   }
++  NTX_ASM_EVENT(0, 0);
++  NTX_ASM_EVENT(1, 1);
+   for(i=0;i<slen;i++)
+   {
+ #if ASSEM_DEBUG
+@@ -11786,6 +11792,8 @@
+         literal_pool_jumpover(256);
+     }
+   }
++  NTX_ASM_EVENT(1, 0);
++  NTX_ASM_EVENT(2, 1);
+   //assert(itype[i-2]==UJUMP||itype[i-2]==RJUMP||(source[i-2]>>16)==0x1000);
+   // If the block did not end with an unconditional branch,
+   // add a jump to the next instruction.
+@@ -11825,6 +11833,8 @@
+     emit_jmp(0);
+   }
+ 
++  NTX_ASM_EVENT(2, 0);
++  NTX_ASM_EVENT(3, 1);
+   // TODO: delay slot stubs?
+   // Stubs
+   for(i=0;i<stubcount;i++)
+@@ -11861,6 +11871,7 @@
+     }
+   }
+ 
++  NTX_ASM_EVENT(3, 0);
+   NTX_PHASE_EVENT(7, 0);
+   NTX_PHASE_EVENT(8, 1);
+   /* Pass 9 - Linker */

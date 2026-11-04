@@ -6,7 +6,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-pub const PHASES: [&str; 11] = [
+pub const PHASES: [&str; 15] = [
     "decode",
     "dependencies",
     "allocation",
@@ -18,13 +18,18 @@ pub const PHASES: [&str; 11] = [
     "link",
     "expiration",
     "cache",
+    "assembly_setup",
+    "assembly_emit",
+    "assembly_tail",
+    "assembly_stubs",
 ];
 /// Actual duplication of the same bounded scope policy across the selected
 /// compiler's ten passes and nested instruction-cache maintenance. Cache time
-/// overlaps link/expiration; never sum it with its enclosing pass.
+/// overlaps link/expiration; assembly children overlap their enclosing assembly
+/// pass. Never add nested observations to their parent as independent work.
 #[derive(Default)]
 pub struct CompilerPhases {
-    phases: [CompileProbe; 11],
+    phases: [CompileProbe; PHASES.len()],
     unknown_events: u32,
     cache_features: Option<(u32, u32)>,
     cache_tail_flushes: u32,
@@ -44,6 +49,17 @@ impl CompilerPhases {
         }
     }
     pub fn event(&mut self, tag: u32) {
+        if (42..50).contains(&tag) {
+            if !self.phases[7].active {
+                return;
+            }
+            if self.phases[7].start.is_none() {
+                self.unknown_events = self.unknown_events.saturating_add(1);
+                return;
+            }
+            self.phases[11 + ((tag - 42) / 2) as usize].event(tag & 1);
+            return;
+        }
         if tag == 40 {
             if self.phases[10].active {
                 self.cache_tail_flushes = self.cache_tail_flushes.saturating_add(1);
@@ -201,6 +217,42 @@ impl fmt::Display for CompileProbe {
 mod tests {
     use super::*;
     #[test]
+    fn assembly_children_require_their_own_active_parent_and_keep_sampling_bounds() {
+        let mut p = CompilerPhases::default();
+        p.event(43); // outside an observed core call
+        assert_eq!(p.unknown_events, 0);
+        p.begin_frame();
+        p.event(43); // in a call but outside assembly
+        assert_eq!(p.unknown_events, 1);
+        p.event(31); // assembly parent
+        for stage in 0..4 {
+            p.event(43 + 2 * stage);
+            p.event(42 + 2 * stage);
+        }
+        p.event(30);
+        p.end_frame(Duration::from_secs(1));
+        for stage in 11..15 {
+            assert_eq!(p.phases[stage].scopes, 1);
+            assert_eq!(p.phases[stage].invalid_frames, 0);
+        }
+        assert_eq!(p.phases[7].scopes, 1);
+        p.event(43 | (1 << 8)); // no flags in the child ABI
+        assert_eq!(p.unknown_events, 2);
+        for _ in 1..DurationStats::LIMIT {
+            p.begin_frame();
+            p.end_frame(Duration::ZERO);
+        }
+        let frozen = p.summaries();
+        p.begin_frame();
+        p.event(31);
+        p.event(43);
+        p.event(42);
+        p.event(30);
+        p.end_frame(Duration::from_secs(1));
+        assert_eq!(p.summaries(), frozen);
+        assert_eq!(p.unknown_events, 2);
+    }
+    #[test]
     fn compiler_phases_route_nested_cache_separately_and_bound_feature_metadata() {
         let mut p = CompilerPhases::default();
         p.begin_frame();
@@ -217,7 +269,7 @@ mod tests {
         assert_eq!(p.cache_features, Some((1, 3)));
         assert_eq!(p.cache_tail_flushes, 1);
         assert!(p.phases.iter().all(|phase| phase.invalid_frames == 0));
-        assert_eq!(p.summaries().len(), 11);
+        assert_eq!(p.summaries().len(), 15);
         p.event(17 | (1 << 8)); // Flags belong only to cache begin.
         p.event(255);
         assert_eq!(p.unknown_events, 2);

@@ -414,3 +414,9 @@ limits = "Storage boundary only; no new gameplay, in-game Save, cold restore, au
 implementation = "Checkpoint-only storage/query/write failure after successful capture and verified ordinary commit retains healthy live RAM and offers Resume; fatal capture/save or uncertain collection-publication failure keeps recovery handling"
 identity = "GameId and runtime epoch scoped warning; never clear an existing quarantine or advertise RAM as durable process-death recovery"
 validation = "131 library tests and warnings-denied host all-targets/ARM64 Rust lints pass; focused warning/Resume target boundary pending"
+
+[n64_assembly_child_source]
+implementation = "Eight observation calls per compiler block: setup/emission/fallthrough/stub scopes nested inside retained assembly parent; no compiler, register, cache/barrier, SIMD or block-limit policy change"
+validation = "134 Rust library tests; active/disabled actual macro/site normal/UBSan-trap fixtures and complete twelve-patch/compiler-body reproduction; one native unit plus link pass. Relevant host/ARM64 lints and package/target recorded separately"
+core_sha256 = "2426bddb80e57891c17b58f0ab057973a2089388086e76aacc6bbc83249026b0"
+limits = "Uninstalled observer build; no measured stage result or performance improvement claimed. Child elapsed times overlap parent; original first4096 core-call and per-scope caps retained"
