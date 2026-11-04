@@ -169,3 +169,10 @@ admits the N64 retry. The held writer, selected identity, live session metadata,
 current ordinary generation and unknown sparse recovery candidate remain intact.
 This exercises release while another game is resident without instantiating two
 native cores. The prepared package's production code is unchanged by this test.
+
+The target review found Close could sit below the visible landscape confirmation
+area. The next UI-only correction pins Keep and Close beside each other in the
+existing fixed decision footer. Keep is primary and Close uses danger text;
+ordinary storage navigation stays in the scrolling menu. Confirmation identities,
+profile locking and publication/deletion ordering do not change. Menu-contract
+and host/ARM64 lint checks pass; packaging/affected footer observation are pending.

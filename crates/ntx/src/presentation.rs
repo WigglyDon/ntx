@@ -23,11 +23,18 @@ pub fn stick_visual(area: crate::touch::Area, origin: Option<(f32, f32)>) -> (f3
     )
 }
 
-/// Keep departure controls outside scrollable library/menu content. An error
-/// replaces Resume with Restart; it must never displace Stop from the footer.
-pub fn menu_footer_action(editing: bool, stop_available: bool, action: i32) -> bool {
+/// Keep decisions outside scrollable content. An error may replace Resume with
+/// Restart; a stored-place confirmation must keep cancellation beside Close.
+pub fn menu_footer_action(
+    editing: bool,
+    stop_available: bool,
+    confirming_place: bool,
+    action: i32,
+) -> bool {
     if editing {
         matches!(action, 10 | 11)
+    } else if confirming_place {
+        matches!(action, 18 | 41)
     } else {
         stop_available && matches!(action, 2..=4)
     }
@@ -122,20 +129,29 @@ mod tests {
             let fixed: Vec<_> = actions
                 .iter()
                 .copied()
-                .filter(|a| menu_footer_action(false, true, *a))
+                .filter(|a| menu_footer_action(false, true, false, *a))
                 .collect();
             assert!(fixed.contains(&4));
             assert_eq!(fixed.len(), 2);
             assert!(fixed.contains(&3) || fixed.contains(&2));
         }
         // An unloaded game's Play/Restart and the editor retain their own flow.
-        assert!(!menu_footer_action(false, false, 2));
-        assert!(!menu_footer_action(false, false, 5));
+        assert!(!menu_footer_action(false, false, false, 2));
+        assert!(!menu_footer_action(false, false, false, 5));
         let editor: Vec<_> = [20, 21, 23, 24, 25, 22, 10, 11]
             .into_iter()
-            .filter(|a| menu_footer_action(true, false, *a))
+            .filter(|a| menu_footer_action(true, false, false, *a))
             .collect();
         assert_eq!(editor, [10, 11]);
+        for stop_available in [false, true] {
+            let confirmation: Vec<_> = [2, 3, 4, 6, 8, 18, 41, 100]
+                .into_iter()
+                .filter(|a| menu_footer_action(false, stop_available, true, *a))
+                .collect();
+            assert_eq!(confirmation, [18, 41]);
+        }
+        // The same action opens storage elsewhere; it is not globally pinned.
+        assert!(!menu_footer_action(false, false, false, 18));
     }
     #[test]
     fn library_names_keep_disc_and_subtitle_but_drop_known_file_metadata() {

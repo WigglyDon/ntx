@@ -1361,7 +1361,8 @@ fn render_menu_with_games(
                     )?;
                 }
                 let stop_available = actions.iter().any(|(action, _)| *action == 4);
-                let fixed_footer = editing || stop_available;
+                let confirming_place = actions.iter().any(|(action, _)| *action == 41);
+                let fixed_footer = editing || stop_available || confirming_place;
                 let footer = if fixed_footer {
                     let row = env.new_object(
                         "android/widget/LinearLayout",
@@ -1410,8 +1411,9 @@ fn render_menu_with_games(
                         env.call_method(&button, "setAllCaps", "(Z)V", &[JValue::Bool(0)])?;
                         env.call_method(&button, "setTextSize", "(F)V", &[JValue::Float(16.0)])?;
                         env.call_method(&button, "setMinHeight", "(I)V", &[JValue::Int(dp(56.0))])?;
-                        let primary =
-                            matches!(action, Some(3 | 5 | 10)) || (first_add && action == Some(1));
+                        let primary = matches!(action, Some(3 | 5 | 10))
+                            || (first_add && action == Some(1))
+                            || (confirming_place && action == Some(18));
                         let color = if primary {
                             ntx::presentation::ACCENT
                         } else {
@@ -1419,7 +1421,7 @@ fn render_menu_with_games(
                         };
                         let ink = if primary {
                             ntx::presentation::INK
-                        } else if action == Some(4) {
+                        } else if action == Some(4) || (confirming_place && action == Some(41)) {
                             ntx::presentation::DANGER
                         } else {
                             ntx::presentation::TEXT
@@ -1451,7 +1453,12 @@ fn render_menu_with_games(
                         )?;
                         menu_background(env, &button, color, density)?;
                         let footer_action = action.is_some_and(|action| {
-                            ntx::presentation::menu_footer_action(editing, stop_available, action)
+                            ntx::presentation::menu_footer_action(
+                                editing,
+                                stop_available,
+                                confirming_place,
+                                action,
+                            )
                         });
                         let params = if footer_action {
                             env.new_object(

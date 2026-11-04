@@ -521,3 +521,9 @@ result = "Normal OOT capture/joined departure, GC capture/normal joined Stop; Li
 preservation = "All15new captures opened; current cards/N64 ordinary/TP/source/preferences/IDs/media kept, normal WW SRAM/generation updates retained; actual OFF/clients/stock return verified,137.15s work"
 limits = "GC8s image controls over black, not new visible-game evidence. No newmedia/diskfill/gameplay/Save/restore/audio/performance/cure; global saturation and recovery edge cases have151-test host coverage. Unknown candidates kept, no general purge"
 report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6642574184"
+
+[storage_confirmation_footer_source]
+problem = "Reviewed landscape storage confirmation clips Close below scrollable content"
+implementation = "Keep and Close share the existing fixed decision footer; Keep has primary styling and Close danger text. Storage navigation elsewhere remains ordinary; exact confirmation/session/data policy unchanged"
+validation = "Affected menu-contract fixture, host all-targets and ARM64 warnings-denied Rust lints pass; existing151-test persistence boundary retains its exact bounds"
+limits = "Source only, not yet packaged/observed. Installed1bb storage flow passes with scrolling; no new native/Save/timing campaign required"
