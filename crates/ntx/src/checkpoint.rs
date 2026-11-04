@@ -18,6 +18,53 @@ const HEADER_LIMIT: usize = 65536;
 // Safety ceiling for this private format, not a promised device allocation.
 // Record actual native payload sizes; an oversized capture retains the runtime.
 pub const PAYLOAD_LIMIT: usize = 256 * 1024 * 1024;
+/// Include incomplete and unknown recovery candidates; never evict one to fit.
+pub const MAX_RETAINED_FILES: usize = 3;
+pub const FREE_SPACE_RESERVE: u64 = 64 * 1024 * 1024;
+const FILE_LIMIT: u64 = PAYLOAD_LIMIT as u64 + HEADER_LIMIT as u64 + 12;
+
+/// Admission is an observation, not reserved space. Ordinary cards have already
+/// flushed before native capture calls the writer; publication may still fail.
+pub fn admit_capture(profile: &Path, payload_bytes: usize, available: u64) -> io::Result<()> {
+    if payload_bytes == 0 || payload_bytes > PAYLOAD_LIMIT {
+        return Err(io::Error::other("invalid GameCube scene size"));
+    }
+    let needed = payload_bytes as u64 + HEADER_LIMIT as u64 + 12;
+    if available < needed + FREE_SPACE_RESERVE {
+        return Err(io::Error::other(
+            "Not enough free space to keep your current place. In-game saves and previous recovery data are kept.",
+        ));
+    }
+    let entries = match fs::read_dir(directory(profile)?) {
+        Ok(entries) => entries,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(()),
+        Err(error) => return Err(error),
+    };
+    let mut count = 0;
+    let mut bytes = 0u64;
+    for entry in entries {
+        let info = entry?.path().symlink_metadata()?;
+        if !info.is_file() {
+            return Err(io::Error::other(
+                "Unrecognized GameCube recovery entry; original data retained",
+            ));
+        }
+        count += 1;
+        bytes = bytes
+            .checked_add(info.len())
+            .ok_or_else(|| io::Error::other("GameCube resume storage exceeds its budget"))?;
+        if count >= MAX_RETAINED_FILES
+            || bytes
+                .checked_add(needed)
+                .is_none_or(|total| total > MAX_RETAINED_FILES as u64 * FILE_LIMIT)
+        {
+            return Err(io::Error::other(
+                "Resume recovery storage is full. In-game saves and existing recovery data are kept; free space before retrying.",
+            ));
+        }
+    }
+    Ok(())
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Binding {
@@ -118,11 +165,17 @@ pub fn media_digest(mut file: impl Read) -> io::Result<String> {
 /// Serialize this call with all native lifecycle work; retain callbacks, profile
 /// ownership and native runtime until it returns.
 #[cfg(feature = "native-engine")]
-pub unsafe fn capture(profile: &Path, binding: &Binding, paused: bool) -> io::Result<String> {
+pub unsafe fn capture(
+    profile: &Path,
+    binding: &Binding,
+    paused: bool,
+    available: fn(&Path) -> io::Result<u64>,
+) -> io::Result<String> {
     struct Writer<'a> {
         profile: &'a Path,
         binding: &'a Binding,
         paused: bool,
+        available: fn(&Path) -> io::Result<u64>,
         result: Option<io::Result<String>>,
     }
     unsafe extern "C" fn write(
@@ -136,8 +189,14 @@ pub unsafe fn capture(profile: &Path, binding: &Binding, paused: bool) -> io::Re
         // SAFETY: synchronous callback; native lends its complete bounded buffer
         // and the stack context remains live until capture returns.
         let writer = unsafe { &mut *context.cast::<Writer<'_>>() };
-        let result = publish(writer.profile, writer.binding, writer.paused, unsafe {
-            std::slice::from_raw_parts(bytes, length)
+        let result = (writer.available)(writer.profile).and_then(|space| {
+            publish(
+                writer.profile,
+                writer.binding,
+                writer.paused,
+                unsafe { std::slice::from_raw_parts(bytes, length) },
+                space,
+            )
         });
         let ok = result.is_ok();
         writer.result = Some(result);
@@ -147,6 +206,7 @@ pub unsafe fn capture(profile: &Path, binding: &Binding, paused: bool) -> io::Re
         profile,
         binding,
         paused,
+        available,
         result: None,
     };
     // SAFETY: public engine lifecycle is serialized by the host, and the bridge
@@ -177,6 +237,7 @@ pub fn publish(
     binding: &Binding,
     paused: bool,
     payload: &[u8],
+    available: u64,
 ) -> io::Result<String> {
     binding.validate()?;
     if payload.is_empty() || payload.len() > PAYLOAD_LIMIT {
@@ -221,6 +282,9 @@ pub fn publish(
         Err(error) if error.kind() == io::ErrorKind::NotFound => {}
         Err(error) => return Err(error),
     }
+    // Reusing verified identical bytes above needs no new allocation. Every new
+    // publication, including retries with recovery files, passes the same bounds.
+    admit_capture(profile, payload.len(), available)?;
     storage::publish_immutable_parts(&destination, &parts)?;
     // The complete expected container is still borrowed from the paused core.
     // Compare every persisted byte without allocating/restoring another machine
@@ -441,7 +505,7 @@ mod tests {
     fn legacy_container_reader_keeps_exact_binding_and_never_rewrites_bytes() {
         let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
         let (root, lock, writer, binding) = setup("legacy-reader");
-        let current = publish(&root, &binding, true, b"original fixture scene").unwrap();
+        let current = publish(&root, &binding, true, b"original fixture scene", u64::MAX).unwrap();
         let mut bytes = fs::read(path(&root, &current).unwrap()).unwrap();
         bytes[..8].copy_from_slice(crate::legacy::CHECKPOINT_MAGIC);
         let legacy = storage::digest(&bytes);
@@ -474,7 +538,7 @@ mod tests {
         let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
         let (root, lock, writer, binding) = setup("streamed-readback");
         let payload = vec![0x37; 131_081]; // cross both part and 64KiB boundaries
-        let id = publish(&root, &binding, true, &payload).unwrap();
+        let id = publish(&root, &binding, true, &payload, u64::MAX).unwrap();
         let checkpoint = path(&root, &id).unwrap();
         let original = fs::read(&checkpoint).unwrap();
         let generation = storage::save_generation(&root).unwrap();
@@ -549,7 +613,14 @@ mod tests {
     fn complete_generation_and_pause_intent_survive_reopen_but_newer_saves_refuse_restore() {
         let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
         let (root, lock, writer, binding) = setup("roundtrip");
-        let id = publish(&root, &binding, true, b"original complete-machine fixture").unwrap();
+        let id = publish(
+            &root,
+            &binding,
+            true,
+            b"original complete-machine fixture",
+            u64::MAX,
+        )
+        .unwrap();
         drop(writer);
         let writer = CardStore::bind(&root).unwrap();
         let restored = load(&root, &id, &binding).unwrap();
@@ -575,20 +646,20 @@ mod tests {
     fn failed_payload_or_session_publication_keeps_the_previous_reachable_checkpoint() {
         let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
         let (root, lock, writer, binding) = setup("publication");
-        let old = publish(&root, &binding, true, b"earlier machine").unwrap();
+        let old = publish(&root, &binding, true, b"earlier machine", u64::MAX).unwrap();
         let old_bytes = fs::read(path(&root, &old).unwrap()).unwrap();
         let pending = directory(&root)
             .unwrap()
             .join(format!("{old}.ntx.ntx-pending"));
         fs::create_dir(&pending).unwrap();
         assert_eq!(
-            publish(&root, &binding, true, b"earlier machine").unwrap(),
+            publish(&root, &binding, true, b"earlier machine", u64::MAX).unwrap(),
             old
         );
         assert!(pending.is_dir());
         assert_eq!(fs::read(path(&root, &old).unwrap()).unwrap(), old_bytes);
         fs::remove_dir(pending).unwrap();
-        let new = publish(&root, &binding, false, b"later complete machine").unwrap();
+        let new = publish(&root, &binding, false, b"later complete machine", u64::MAX).unwrap();
         let session = root.join("session-fixture.json");
         storage::atomic_replace(&session, old.as_bytes()).unwrap();
         let blocked = root.join("session-fixture.json.ntx-pending");
@@ -616,7 +687,7 @@ mod tests {
     fn retirement_keeps_changed_or_unsafe_recovery_bytes_and_accepts_verified_legacy() {
         let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
         let (root, lock, writer, binding) = setup("retirement-integrity");
-        let id = publish(&root, &binding, true, b"acknowledged scene").unwrap();
+        let id = publish(&root, &binding, true, b"acknowledged scene", u64::MAX).unwrap();
         let selected = path(&root, &id).unwrap();
         let original = fs::read(&selected).unwrap();
         let mut changed = original.clone();
@@ -660,14 +731,14 @@ mod tests {
     fn incomplete_same_identity_retry_is_retained_and_does_not_rewrite_complete_data() {
         let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
         let (root, lock, writer, binding) = setup("incomplete-retry");
-        let old = publish(&root, &binding, true, b"current complete scene").unwrap();
-        let next = publish(&root, &binding, true, b"new complete scene").unwrap();
+        let old = publish(&root, &binding, true, b"current complete scene", u64::MAX).unwrap();
+        let next = publish(&root, &binding, true, b"new complete scene", u64::MAX).unwrap();
         let destination = path(&root, &next).unwrap();
         let complete = fs::read(&destination).unwrap();
         fs::remove_file(&destination).unwrap();
         let pending = destination.with_file_name(format!("{next}.ntx.ntx-pending"));
         fs::write(&pending, b"original partial attempt").unwrap();
-        assert!(publish(&root, &binding, true, b"new complete scene").is_err());
+        assert!(publish(&root, &binding, true, b"new complete scene", u64::MAX).is_err());
         assert_eq!(fs::read(&pending).unwrap(), b"original partial attempt");
         assert!(!destination.exists());
         assert_eq!(
@@ -677,7 +748,7 @@ mod tests {
         fs::write(&destination, &complete).unwrap();
         let before = fs::metadata(&destination).unwrap().modified().unwrap();
         assert_eq!(
-            publish(&root, &binding, true, b"new complete scene").unwrap(),
+            publish(&root, &binding, true, b"new complete scene", u64::MAX).unwrap(),
             next
         );
         assert_eq!(
@@ -691,10 +762,100 @@ mod tests {
         fs::remove_dir_all(root).unwrap();
     }
     #[test]
+    fn recovery_budget_refuses_new_scenes_but_keeps_current_saves_and_identical_reuse() {
+        let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
+        let (root, lock, writer, binding) = setup("recovery-budget");
+        let old = publish(&root, &binding, true, b"current", u64::MAX).unwrap();
+        let retained = directory(&root).unwrap().join("uncertain.ntx-pending");
+        let unknown = directory(&root).unwrap().join("unknown.gcxstate");
+        fs::write(&retained, b"incomplete original bytes").unwrap();
+        fs::write(&unknown, b"unknown legacy bytes").unwrap();
+        let generation = storage::save_generation(&root).unwrap();
+        assert!(publish(&root, &binding, true, b"new", u64::MAX).is_err());
+        assert_eq!(publish(&root, &binding, true, b"current", 0).unwrap(), old);
+        assert_eq!(fs::read(&retained).unwrap(), b"incomplete original bytes");
+        assert_eq!(fs::read(&unknown).unwrap(), b"unknown legacy bytes");
+        assert_eq!(load(&root, &old, &binding).unwrap().payload, b"current");
+        assert_eq!(storage::save_generation(&root).unwrap(), generation);
+        assert!(ProfileLock::acquire(&root).is_err());
+        // Only this fixture's known file is removed, never an application sweep.
+        fs::remove_file(unknown).unwrap();
+        let new = publish(&root, &binding, true, b"new", u64::MAX).unwrap();
+        retire_previous(&root, &old, &new).unwrap();
+        assert_eq!(fs::read(retained).unwrap(), b"incomplete original bytes");
+        assert_eq!(load(&root, &new, &binding).unwrap().payload, b"new");
+        drop(writer);
+        drop(lock);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn space_byte_and_entry_bounds_never_modify_saves_or_recovery_candidates() {
+        let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
+        let (root, lock, writer, binding) = setup("space-budget");
+        let old = publish(&root, &binding, true, b"current", u64::MAX).unwrap();
+        let generation = storage::save_generation(&root).unwrap();
+        let needed = 3 + HEADER_LIMIT as u64 + 12 + FREE_SPACE_RESERVE;
+        assert!(publish(&root, &binding, true, b"new", needed - 1).is_err());
+        assert_eq!(fs::read_dir(directory(&root).unwrap()).unwrap().count(), 1);
+        let candidate = directory(&root).unwrap().join("oversized.ntx-pending");
+        // Sparse fixture exercises total bytes without allocating a giant image.
+        File::create(&candidate)
+            .unwrap()
+            .set_len(MAX_RETAINED_FILES as u64 * FILE_LIMIT)
+            .unwrap();
+        assert!(publish(&root, &binding, true, b"new", u64::MAX).is_err());
+        assert_eq!(fs::metadata(&candidate).unwrap().len(), 3 * FILE_LIMIT);
+        fs::remove_file(&candidate).unwrap();
+        fs::create_dir(&candidate).unwrap();
+        assert!(publish(&root, &binding, true, b"new", u64::MAX).is_err());
+        fs::remove_dir(&candidate).unwrap();
+        #[cfg(unix)]
+        {
+            std::os::unix::fs::symlink(path(&root, &old).unwrap(), &candidate).unwrap();
+            assert!(publish(&root, &binding, true, b"new", u64::MAX).is_err());
+            assert!(
+                candidate
+                    .symlink_metadata()
+                    .unwrap()
+                    .file_type()
+                    .is_symlink()
+            );
+            fs::remove_file(&candidate).unwrap();
+        }
+        let new = publish(&root, &binding, true, b"new", needed).unwrap();
+        assert_eq!(load(&root, &old, &binding).unwrap().payload, b"current");
+        assert_eq!(load(&root, &new, &binding).unwrap().payload, b"new");
+        assert_eq!(storage::save_generation(&root).unwrap(), generation);
+        drop(writer);
+        drop(lock);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn acknowledged_replacements_stay_bounded_without_changing_other_game_data() {
+        let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
+        let (root, lock, writer, binding) = setup("replacement-budget");
+        let other = root.join("other-game-retained");
+        fs::write(&other, b"independent progress and unsaved place").unwrap();
+        let mut previous = publish(&root, &binding, true, b"initial", u64::MAX).unwrap();
+        for frame in 0u8..40 {
+            let next = publish(&root, &binding, true, &[frame], u64::MAX).unwrap();
+            retire_previous(&root, &previous, &next).unwrap();
+            assert_eq!(fs::read_dir(directory(&root).unwrap()).unwrap().count(), 1);
+            previous = next;
+        }
+        assert_eq!(
+            fs::read(other).unwrap(),
+            b"independent progress and unsaved place"
+        );
+        drop(writer);
+        drop(lock);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
     fn incompatible_inputs_and_corruption_retain_the_payload_and_current_saves() {
         let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
         let (root, lock, writer, binding) = setup("rejection");
-        let id = publish(&root, &binding, false, b"machine fixture").unwrap();
+        let id = publish(&root, &binding, false, b"machine fixture", u64::MAX).unwrap();
         let original = fs::read(path(&root, &id).unwrap()).unwrap();
         let mut alternatives = vec![binding.clone(); 6];
         alternatives[0].engine = "e".repeat(64);

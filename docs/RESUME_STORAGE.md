@@ -49,9 +49,17 @@ verification on Pixel4 observes four distinct16MiB title publications retaining
 one current scene each; normal joined Stop retires the accepted scene. Protected
 ordinary progress stays unchanged. Installed-build bounds remain in [state](state.toml).
 
-These N64 source limits do not claim a finished storage-management UI or a global
-quota for every backend. GameCube's existing successful-retirement ordering is
-retained; broader recovery budgets/free-space admission remain separate work.
+These source limits do not claim a finished storage-management UI or a global
+quota for the collection. GameCube now also bounds new scene writes to three
+directory files including incomplete/unknown candidates, with a total budget
+derived from its existing256MiB payload ceiling. It checks the captured payload,
+bounded header and64MiB free-space reserve after the native card/SRAM flush.
+The Android platform adapter supplies filesystem availability for both backends;
+portable Rust owns each backend's admission policy. A verified identical complete
+GameCube scene needs no new write and can be reused even under storage pressure.
+Existing oversized histories are retained and block new writes, never swept.
+GameCube storage errors retain their existing recovery handling; this change does
+not claim the N64-specific healthy-RAM Resume behavior for Dolphin.
 Routine storage pressure must offer a clear decision while preserving current
 progress, rather than silently evicting another game's unsaved scene.
 
@@ -84,5 +92,8 @@ GameCube scene publication also exclusively creates incomplete files, using
 borrowed payload segments so no second full machine image is allocated. A
 verified identical complete generation is reused without rewriting it; an
 incomplete same-identity attempt stays untouched. The portable suite now has
-133 passing library tests. This follow-up is source-verified and is separate
+133 passing library tests at that change. Subsequent recovery/space admission
+coverage brings the suite to137: forty acknowledged GameCube replacements stay
+at one file; low space, excessive recovery bytes/files and unsafe entries refuse
+without changing ordinary data or existing scenes. These changes are source-verified and separate
 from the earlier prepared target candidate.

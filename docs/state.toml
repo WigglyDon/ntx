@@ -425,3 +425,8 @@ limits = "Uninstalled observer build; no measured stage result or performance im
 implementation = "Unique private temporary JSON; flush and file fsync before replacement, parent directory fsync afterward; propagate persistence failures"
 validation = "102 offline packet tests pass, including failed file sync preserving prior receipt and reported parent-sync failure. No power-loss guarantee inferred from fault injection"
 incident = "Host restart interrupted the storage-warning target task; empty operator records preserved. Cleanup-only recovery verified actual installation, unchanged protected progress and return without fabricating the lost test outcome"
+
+[gamecube_resume_storage_source]
+implementation = "Three-file recovery ceiling including incomplete/unknown entries; total budget derived from retained256MiB payload ceiling. Captured payload+bounded header+64MiB free reserve observed after card/SRAM flush. Verified identical complete generation reuses bytes without new write"
+validation = "137 portable library tests; forty acknowledged replacements, exact low-space threshold, excessive bytes/files, unsafe entries, writer exclusion, ordinary/current scene preservation and identical reuse. Host all-targets/ARM64 warnings-denied Rust lints pass"
+limits = "Source only, uninstalled; native capture behavior and affected target boundary not requalified. Existing GameCube recovery handling retained; no N64-specific RAM-Resume claim or collection-wide quota/UI"

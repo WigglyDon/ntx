@@ -33,7 +33,8 @@ check is still needed. Local JSON receipt publication now syncs both file and
 directory;102 offline packet tests cover persistence failures. The installation
 paragraph below describes the preceding fully qualified retention result.
 
-Source now also protects GC interrupted same-identity writes (133 library tests)
+Source now also protects GC interrupted same-identity writes and adds per-profile
+recovery-file/byte and free-space admission (137 library tests; host/ARM64 lints pass)
 and preserves all raw native debug inputs automatically; those are independent
 from the prepared storage-warning target candidate. A new observer-only Mupen
 patch12 splits the assembly parent into four bounded child scopes: native source

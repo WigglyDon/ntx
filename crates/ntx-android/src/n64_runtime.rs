@@ -222,8 +222,7 @@ impl Runtime {
         // machine resume cannot fit. Retained scenes still pin their old images.
         self.store.commit(&image).map_err(|e| e.to_string())?;
         self.retire_ordinary_history();
-        let available =
-            crate::n64_host::available_storage(&self.path).map_err(std::io::Error::other);
+        let available = crate::platform::available_storage(&self.path);
         n64_checkpoint::publish_captured(
             &self.path,
             &self.binding,

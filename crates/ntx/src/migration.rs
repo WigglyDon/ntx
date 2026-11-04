@@ -491,8 +491,14 @@ mod tests {
         };
         let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
         let native_store = storage::CardStore::bind(&profile).unwrap();
-        let id = crate::checkpoint::publish(&profile, &binding, true, b"unsaved test-only scene")
-            .unwrap();
+        let id = crate::checkpoint::publish(
+            &profile,
+            &binding,
+            true,
+            b"unsaved test-only scene",
+            u64::MAX,
+        )
+        .unwrap();
         drop(native_store);
         let mut value: serde_json::Value =
             serde_json::from_slice(&fs::read(f.source.join("collection.json")).unwrap()).unwrap();

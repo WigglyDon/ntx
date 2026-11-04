@@ -24,6 +24,24 @@ mod controls_ui;
 unsafe extern "C" {
     fn __android_log_write(priority: i32, tag: *const c_char, text: *const c_char) -> i32;
 }
+/// Android owns the filesystem observation; portable resume policy receives bytes.
+pub fn available_storage(path: &std::path::Path) -> std::io::Result<u64> {
+    use std::{ffi::CString, mem::MaybeUninit, os::unix::ffi::OsStrExt};
+    let path = CString::new(path.as_os_str().as_bytes()).map_err(std::io::Error::other)?;
+    let mut info = MaybeUninit::<libc::statvfs>::uninit();
+    // SAFETY: path is NUL-terminated and info is writable for this synchronous call.
+    if unsafe { libc::statvfs(path.as_ptr(), info.as_mut_ptr()) } != 0 {
+        return Err(std::io::Error::other(format!(
+            "Could not check resume storage: {}",
+            std::io::Error::last_os_error()
+        )));
+    }
+    // SAFETY: successful statvfs initialized the complete structure.
+    let info = unsafe { info.assume_init() };
+    u64::try_from(u128::from(info.f_bavail) * u128::from(info.f_frsize))
+        .map_err(|_| std::io::Error::other("Resume storage size is out of range"))
+}
+
 /// NDK motion timestamps use System.nanoTime's CLOCK_MONOTONIC time base.
 /// This is foreground event age, not physical touch or display latency.
 pub fn motion_age(event_nanos: i64) -> Option<std::time::Duration> {

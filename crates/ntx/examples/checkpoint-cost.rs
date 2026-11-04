@@ -52,7 +52,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         chunk.copy_from_slice(&state.to_le_bytes());
     }
     let start = Instant::now();
-    let id = checkpoint::publish(root, &binding, true, &payload)?;
+    let id = checkpoint::publish(root, &binding, true, &payload, u64::MAX)?;
     let micros = start.elapsed().as_micros();
     // Observe the publisher before a genuine restore allocates its payload.
     let high_water = fs::read_to_string("/proc/self/status")?

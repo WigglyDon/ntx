@@ -399,6 +399,7 @@ fn save_dolphin_checkpoint(
             &active._profile.path,
             &active.binding,
             collection.entries[index].paused,
+            platform::available_storage,
         )
     };
     platform::trace_current(

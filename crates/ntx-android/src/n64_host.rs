@@ -21,23 +21,6 @@ use std::{
     time::Instant,
 };
 type Result<T> = std::result::Result<T, String>;
-/// Android owns the filesystem observation; portable resume policy receives bytes.
-pub fn available_storage(path: &std::path::Path) -> Result<u64> {
-    use std::{ffi::CString, mem::MaybeUninit, os::unix::ffi::OsStrExt};
-    let path = CString::new(path.as_os_str().as_bytes()).map_err(|e| e.to_string())?;
-    let mut info = MaybeUninit::<libc::statvfs>::uninit();
-    // SAFETY: path is NUL-terminated and info is writable for this synchronous call.
-    if unsafe { libc::statvfs(path.as_ptr(), info.as_mut_ptr()) } != 0 {
-        return Err(format!(
-            "Could not check resume storage: {}",
-            std::io::Error::last_os_error()
-        ));
-    }
-    // SAFETY: successful statvfs initialized the complete structure.
-    let info = unsafe { info.assume_init() };
-    u64::try_from(u128::from(info.f_bavail) * u128::from(info.f_frsize))
-        .map_err(|_| "Resume storage size is out of range".into())
-}
 
 type Handle = *mut c_void;
 #[link(name = "EGL")]
