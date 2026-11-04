@@ -407,7 +407,7 @@ policy = "docs/RESUME_STORAGE.md"
 source = "af0230ef0e6f3b80c3f6716a2bfced8901bf5223"
 apk_sha256 = "6829b98b146ec85d1222171d9cbc1d796277bf5549c15adceeaa4ee0dd4ff71a"
 mupen_core_sha256 = "2426bddb80e57891c17b58f0ab057973a2089388086e76aacc6bbc83249026b0"
-qualification = "Bounded15-phase title observer installed/observed; all5new images opened, rendered intro/title/attract then normal Pause/Stop/native join. Current ordinary/cards/independent profile/preferences/source/IDs and actual physical OFF/return verified. Earlier N64 storage-warning pass remains at036/core76; affected GameCube storage warning is still pending"
+qualification = "Bounded15-phase title observer installed/observed; all5new images opened, rendered intro/title/attract then normal Pause/Stop/native join. Current ordinary/cards/independent profile/preferences/source/IDs and actual physical OFF/return verified. Earlier N64 storage-warning pass remains at036/core76; affected GameCube storage-warning check now passes with eight new images, normal joined Stop, preserved cards/independent data/source/preferences/IDs and verified actual return"
 limits = "Storage boundary only; no new gameplay, in-game Save, cold restore, audio or timing campaign. Earlier results retain original build bounds; hitches and historical incidents remain open. No collection-wide quota/storage-management UI claim"
 
 [checkpoint_storage_continuation_source]
@@ -434,7 +434,7 @@ limits = "Source only, uninstalled; native capture behavior and affected target 
 [gamecube_storage_continuation_source]
 implementation = "After native writer callback proves complete capture/card-SRAM flush, verify exact committed ordinary generation before and after scene-storage failure. Use existing exact-game/runtime RAM-only Resume warning, never alter accepted scene on refusal"
 validation = "140 library tests and warnings-denied host all-targets/ARM64 lints. Newer committed ordinary data survives storage/query/pending-write refusal; stale scene cannot restore; retry/reuse works. Native flags, missing capture and mismatched acknowledgements override storage classification"
-limits = "Installed as part of observer6829 but affected GameCube storage-warning target boundary remains unqualified. Native/save/restore and collection-publication failures keep recovery. Earlier6b8567d2/sourcec05bcab remains separately retained"
+limits = "Installed6829 now passes affected GameCube storage-warning target boundary below. Native/save/restore and collection-publication failures keep recovery. Earlier6b8567d2/sourcec05bcab remains separately retained"
 
 [prepared_assembly_storage_candidate]
 source = "c05bcab43ee2795869fff5f6a987522079e9a894"
@@ -476,3 +476,11 @@ implementation = "Use reg&63 for upper-half mask only; retain forward scan endpo
 validation = "126208 actual-function cases per mode, all register codes/slots, scan breaks and4096-instruction run, normal/UBSan trap; thirteen-patch exact source/ABI/helper fixtures, one native unit plus link and xtask warnings-denied lint pass"
 core_sha256 = "15d2a0307754aaae8d7b7d18148c6991b897b6f430b57d21824581af7003a2fe"
 limits = "Retained native build only; unpackaged/uninstalled. No speed or target hitch cure claim; installed6829/core2426 and source/symbols/scenes remain preserved"
+
+[gamecube_storage_continuation_observation]
+source = "af0230ef0e6f3b80c3f6716a2bfced8901bf5223"
+apk_sha256 = "6829b98b146ec85d1222171d9cbc1d796277bf5549c15adceeaa4ee0dd4ff71a"
+result = "Existing WW canonical game-ID link; two quota refusals retain same-process Resume, native join/process absence before exact three-fixture retirement. Fresh title normal publication, final Stop0 scenes"
+return = "Actual completed/returned96.68s, all8new images opened. Cards/N64 ordinary/untouched TP/source/preferences/IDs preserved; normal backend-owned WW SRAM/generation updates retained; own clients absent/physical OFF verified"
+limits = "No install/N64 execution, media addition, disk fill, gameplay, Save/restore, timing or historical-cure qualification. New native core15d2 remains off-device"
+report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6639950810"

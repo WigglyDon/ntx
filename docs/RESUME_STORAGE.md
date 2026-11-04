@@ -111,5 +111,10 @@ acknowledgements require recovery. Collection-reference publication remains a
 separate fatal boundary. No accepted scene reference is changed by a refused
 write. The shared GameId/runtime-scoped UI can offer Resume while retaining
 writer ownership and all prior recovery files; RAM is not process-death recovery.
-140 library tests and relevant host/ARM64 lints pass. This later source is separate
-from prepared candidate6b8567d2 and is not yet target-qualified.
+140 library tests and relevant host/ARM64 lints pass. Installed6829 now passes
+the affected GameCube boundary: two quota refusals keep same-process Resume,
+normal native join/process absence precedes exact fixture removal, and a fresh
+title publishes normally before Stop retires it. Eight new captures were reviewed;
+cards and independent ordinary/profile data stayed protected, with normal native
+SRAM updates retained and actual return verified. No gameplay/save/restore/timing
+campaign or historical-cure qualification follows.

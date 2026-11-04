@@ -50,15 +50,23 @@ native build/core15d2a030 pass. It is retained but uninstalled/unpackaged. This 
 result or cure. Keep installed core2426/source/symbols/scenes until a new checked
 candidate and explicit already-stopped boundary are ready.
 
-Separately qualify the installed GameCube checkpoint-only storage warning using
-existing Wind Waker, with current cards and independent profiles protected. Its
-Rust implementation has140 library tests and host/ARM64 warnings-denied lints;
-no affected GameCube target pass is claimed yet. Native/save/restore/uncertain
-collection-publication errors retain recovery. The N64 warning path already
-passes at036/core76: two quota refusals keep same-process Resume, native join
-precedes exact tagged-fixture removal, then normal publication/Stop leaves zero.
-Nine new images opened, protected data and actual return verified.
-[Storage report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6638969957).
+The installed GameCube storage-warning boundary now also passes with existing
+Wind Waker: two quota refusals keep same-process Resume, normal native join and
+process absence precede exact fixture removal, then a fresh title publishes a
+normal scene and Stop leaves zero. Eight new captures opened; cards/N64 ordinary/
+untouched TP/preferences/source/three identities preserved. Normal backend-owned
+WW SRAM updates retained. No gameplay/Save/restore/timing campaign. Actual return
+verified, with no NTX hold/recovery. Its Rust source has140 library tests and
+host/ARM64 warnings-denied lints. N64's corresponding result remains at036/core76
+with nine reviewed captures and independent data/return verification.
+[GameCube storage report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6639950810),
+[N64 storage report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6638969957).
+
+Next prepare the checked upper-mask correction as a signed source/binary pair,
+then a finite affected N64 check using existing OOT and its current ordinary data.
+Current WW SRAM/generation legitimately advanced during its native boundary;
+future protection must use actual current bytes, never reapply the earlier hash
+as a restoration target. Keep immutable cards/source/recovery candidates protected.
 
 Per-game scene/recovery limits now cover N64 and GameCube. Identical complete
 GameCube scenes reuse verified bytes; pending/unknown candidates stay. A global
