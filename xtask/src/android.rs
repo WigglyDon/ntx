@@ -263,6 +263,7 @@ pub fn prepare(root: &Path, source: &Path) -> Result<()> {
         "0011-literal-log-payload.patch",
         "0012-assembly-child-scopes.patch",
         "0013-upper-constant-mask.patch",
+        "0014-full-emission-width-mask.patch",
     ] {
         copy(
             &root.join("native/mupen").join(name),

@@ -484,3 +484,10 @@ result = "Existing WW canonical game-ID link; two quota refusals retain same-pro
 return = "Actual completed/returned96.68s, all8new images opened. Cards/N64 ordinary/untouched TP/source/preferences/IDs preserved; normal backend-owned WW SRAM/generation updates retained; own clients absent/physical OFF verified"
 limits = "No install/N64 execution, media addition, disk fill, gameplay, Save/restore, timing or historical-cure qualification. New native core15d2 remains off-device"
 report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6639950810"
+
+[n64_emission_width_mask_source]
+problem = "Three static emission loaders narrow64-bit regstat width flags to int; HI/LO flags32/33 are lost and upper-mask shifts exceed int width. All three retained functions trap under UBSan for register32"
+implementation = "Use uint64_t mask parameters only in load_regs/load_consts/load_all_consts; preserve exact function bodies and emitted-operation decisions"
+validation = "135198 actual emitted-operation cases per normal/UBSan-trap mode, full flags1..63/all host slots, other-bit patterns, zero/signed constants, missing/duplicate low mapping and unchanged admission gates. Fourteen-patch source/ABI/helper fixtures, xtask warnings-denied lint and one native unit plus link pass"
+core_sha256 = "1a2273cbbc5158030abfc89ce458dc4ddd45429680f85f312c739863d31617d9"
+limits = "Retained native build only, unpackaged/uninstalled. Prior13-only db3b08b6 candidate/sourceb1afb88/core15d2 is preserved PREPARED ONLY, never requested. Installed6829/core2426 and earned target bounds remain; no speed or hitch-cure claim"

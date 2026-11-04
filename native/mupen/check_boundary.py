@@ -111,7 +111,7 @@ with tarfile.open(ROOT / '.local/source-archives/mupen64plus-next-15bada85.tar.g
         destination = patch_root / name
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(archive.extractfile(member).read())
-for name in ['0001-checked-state-result.patch', '0002-coherent-state-boundary.patch', '0003-host-shader-dispatch.patch', '0004-profile-shader-cache.patch', '0005-compile-observer.patch', '0006-compiler-phase-observer.patch', '0007-complete-cache-batch.patch', '0008-cull-register-membership.patch', '0009-cull-query-counts.patch', '0010-incoming-branch-index.patch', '0011-literal-log-payload.patch', '0012-assembly-child-scopes.patch', '0013-upper-constant-mask.patch']:
+for name in ['0001-checked-state-result.patch', '0002-coherent-state-boundary.patch', '0003-host-shader-dispatch.patch', '0004-profile-shader-cache.patch', '0005-compile-observer.patch', '0006-compiler-phase-observer.patch', '0007-complete-cache-batch.patch', '0008-cull-register-membership.patch', '0009-cull-query-counts.patch', '0010-incoming-branch-index.patch', '0011-literal-log-payload.patch', '0012-assembly-child-scopes.patch', '0013-upper-constant-mask.patch', '0014-full-emission-width-mask.patch']:
     subprocess.run(['git', 'apply', '--no-index', str(ROOT / 'native/mupen' / name)], cwd=patch_root, check=True)
 for name in ['libretro/libretro.c', 'mupen64plus-core/src/main/savestates.c', 'GLideN64/src/Graphics/OpenGLContext/GLFunctions.cpp', 'custom/GLideN64/mupenplus/CommonAPIImpl_mupenplus.cpp', 'mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c', 'mupen64plus-core/src/device/r4300/new_dynarec/arm64/assem_arm64.c']:
     assert hashlib.sha256((patch_root / name).read_bytes()).digest() == hashlib.sha256((SOURCE / name).read_bytes()).digest()
@@ -185,3 +185,6 @@ subprocess.run([sys.executable, str(ROOT / "native/mupen/check_assembly_scopes.p
 
 subprocess.run([sys.executable, str(ROOT / "native/mupen/check_final_constant.py"), "--original"], check=True)
 subprocess.run([sys.executable, str(ROOT / "native/mupen/check_final_constant.py")], check=True)
+
+subprocess.run([sys.executable, str(ROOT / "native/mupen/check_emission_masks.py"), "--original"], check=True)
+subprocess.run([sys.executable, str(ROOT / "native/mupen/check_emission_masks.py")], check=True)

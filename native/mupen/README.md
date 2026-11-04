@@ -192,3 +192,12 @@ including all register slots/codes, branch/target/constant/map boundaries and a
 remain unchanged. This is defined-behavior repair, not an assembly speed result.
 Keep older core fingerprints/source/symbols/scenes; new native build/package and
 actual target observations have independent bounds.
+
+Patch14 preserves the64-bit guest-width mask in load_regs, load_consts and
+load_all_consts. Their previous int parameters truncate HI/LO flags32/33 and
+permit invalid int shifts; each actual retained function traps under UBSan for
+register32. Only the parameter type changes. The actual emitted-operation fixture
+covers135198 cases per normal/UBSan-trap mode, all guest flag bits1..63/host slots,
+other mask bits, zero/signed constants, missing/duplicate low mappings and unchanged
+dirty/constant/continuity gates. Fourteen patches reproduce active source. No
+register allocation, emitter algorithm, cache/barrier, block-limit or speed claim.

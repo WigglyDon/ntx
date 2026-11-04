@@ -41,14 +41,18 @@ Ordinary/cards/independent profile/preferences/source/IDs and actual OFF return
 verified. No NTX hold/recovery remains at that result.
 [Observer report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6639297000).
 
-Continue the measured emission path, not another broad timing campaign. Its
-actual constant reader has an upper-half mask shift by a register number>=64.
-The retained original traps under UBSan. Patch13 masks that bit index to0..63;
-126208 actual-function value/scan/branch cases pass normal and UBSan-trap modes.
-Thirteen-patch source/ABI/helper fixtures, relevant xtask lint and one-unit
-native build/core15d2a030 pass. It is retained but uninstalled/unpackaged. This is a defined-behavior correction, not a speed
-result or cure. Keep installed core2426/source/symbols/scenes until a new checked
-candidate and explicit already-stopped boundary are ready.
+The measured emission path exposed two defined-behavior defects. Patch13 fixes
+an upper-half liveness-mask shift>=64 (126208 actual-function cases per mode).
+Patch14 keeps64-bit guest-width flags through three loaders that accepted int;
+the original functions trap for HI/register32. All135198 emitted-operation cases
+per normal/UBSan-trap mode pass, including all flag bits/host slots, constants,
+missing/duplicate mappings and unchanged admission gates. Fourteen-patch exact
+source/ABI/helper fixtures, xtask lint and one-unit native build pass. New core
+1a2273cbbc5158030abfc89ce458dc4ddd45429680f85f312c739863d31617d9 is retained, uninstalled.
+The preceding13-only sourceb1afb88/APKdb3b08b6/core15d2 is checked and preserved
+but PREPARED ONLY, never requested. Package the combined correction, preserving
+installed6829/sourceaf/core2426 and old sources/symbols/scenes. No speed or hitch
+cure is established. Narrow actual function costs before more optimization.
 
 The installed GameCube storage-warning boundary now also passes with existing
 Wind Waker: two quota refusals keep same-process Resume, normal native join and
@@ -62,7 +66,7 @@ with nine reviewed captures and independent data/return verification.
 [GameCube storage report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6639950810),
 [N64 storage report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6638969957).
 
-Next prepare the checked upper-mask correction as a signed source/binary pair,
+Next prepare the combined checked mask corrections as a signed source/binary pair,
 then a finite affected N64 check using existing OOT and its current ordinary data.
 Current WW SRAM/generation legitimately advanced during its native boundary;
 future protection must use actual current bytes, never reapply the earlier hash

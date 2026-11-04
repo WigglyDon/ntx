@@ -1,0 +1,32 @@
+NTX2026-11-04: preserve full guest-width flags through three emission loaders.
+Upstream15bada85906593376e8fd697f1b0b3af3a20f512; original licenses retained.
+
+--- a/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
++++ b/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
+@@ -4173,7 +4173,7 @@
+ // Load the specified registers
+ // This only loads the registers given as arguments because
+ // we don't want to load things that will be overwritten
+-static void load_regs(signed char entry[],signed char regmap[],int is32,int rs1,int rs2)
++static void load_regs(signed char entry[],signed char regmap[],uint64_t is32,int rs1,int rs2)
+ {
+   int hr;
+   // Load 32-bit regs
+@@ -4218,7 +4218,7 @@
+ }
+ 
+ // Load registers with known constants
+-static void load_consts(signed char pre[],signed char regmap[],int is32,int i)
++static void load_consts(signed char pre[],signed char regmap[],uint64_t is32,int i)
+ {
+   int hr;
+   // Load 32-bit regs
+@@ -4269,7 +4269,7 @@
+   }
+ }
+ 
+-static void load_all_consts(signed char regmap[],int is32,u_int dirty,u_int isconst,int i)
++static void load_all_consts(signed char regmap[],uint64_t is32,u_int dirty,u_int isconst,int i)
+ {
+   int hr;
+   // Load 32-bit regs
