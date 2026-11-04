@@ -1,6 +1,6 @@
 schema_version = 1
 product = "ntx"
-classification = "NTX5_N64_BOUNDED_RESUME_STORAGE_VERIFIED"
+classification = "NTX5_COLLECTION_RESUME_STORAGE_AND_CONFIRMATION_VERIFIED"
 repository = "WigglyDon/ntx"
 repository_id = 1429193278
 branch = "main"
@@ -27,7 +27,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Bounded N64 retention and focused target verification complete. Collection-wide storage quota/UI and broader GameCube recovery-space bounds remain separate unfinished product work; retain progress/recovery material and minimal lab media. Historical hitches/lifecycle incidents stay open; no closed campaign or privileged profiling retry"
+next_step = "Collection-wide quota, explicit storage release and fixed confirmation footer implemented/target verified. Preserve minimal WW+OOT lab media, progress and recovery material. Acceptance review and historical hitches/lifecycle incidents remain open; use affected evidence before further repairs, no closed campaign or privileged profiling retry"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 hitches: prior same-installation cache pair24 to7 slow calls. New package trace has8 slow CPU-heavy calls, shader-bearing startup946.435ms/residual132.936ms. Exact routine unqualified", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Single pre-Pause gray field in latest bounded title check: duration/cause unknown; normal Pause and Stop followed", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -404,10 +404,10 @@ policy = "docs/RESUME_STORAGE.md"
 
 [current_installation]
 # Older per-feature installed_* fields retain their exact observation bounds.
-source = "a78415a6c008cd0e5a7fb5be2725aeaf6052711c"
-apk_sha256 = "1bb628aa222559cd117c83f858947d9f8c489136bfac4f06bdc322162d4aba41"
+source = "8f71852118fc0e9acdfc520eb459ece56e3d32db"
+apk_sha256 = "107f2640c67a7b650ae97ecf11b60a687c1144614c546830b41c9b6a959a46de"
 mupen_core_sha256 = "1a2273cbbc5158030abfc89ce458dc4ddd45429680f85f312c739863d31617d9"
-qualification = "Storage UI affected check completed/returned137.15s;15new images reviewed. Both capture/join paths, Library/no-runtime storage16.0MiB, Keep exact ref/file/ordinary, confirmed Close ->0.0MiB/final0 scenes. Current cards/N64 ordinary/TP/source/preferences/IDs preserved, legitimate WW SRAM updates kept; actual OFF/client/stock return verified"
+qualification = "Fixed confirmation check completed/returned152.22s;15new images reviewed. Keep/Close fully visible in same fixed row outside scroll, Keep primary/Close danger. Both capture/join paths, Library/no-runtime16.0MiB, Keep exact ref/file/ordinary, confirmed Close durable before known-file retirement ->0.0MiB/final0 scenes. Current cards/N64 ordinary/TP/source/preferences/IDs/media retained, normal WW SRAM updates kept; actual OFF/client/stock return verified"
 limits = "Global saturation/unsafe-file/failure-ordering and held-writer retry remain host-fixture verified; no phone disk fill, newmedia/gameplay/Save/restore/audio/performance or historical-cure claim. Eight-second GC sample was controls over black, so no new GC visible-game qualification. Earlier earned results retain their exact bounds"
 
 [checkpoint_storage_continuation_source]
@@ -490,7 +490,7 @@ problem = "Three static emission loaders narrow64-bit regstat width flags to int
 implementation = "Use uint64_t mask parameters only in load_regs/load_consts/load_all_consts; preserve exact function bodies and emitted-operation decisions"
 validation = "135198 actual emitted-operation cases per normal/UBSan-trap mode, full flags1..63/all host slots, other-bit patterns, zero/signed constants, missing/duplicate low mapping and unchanged admission gates. Fourteen-patch source/ABI/helper fixtures, xtask warnings-denied lint and one native unit plus link pass"
 core_sha256 = "1a2273cbbc5158030abfc89ce458dc4ddd45429680f85f312c739863d31617d9"
-limits = "Signed combined d926/sourcecf84 installed, rendered title and cleanup return verified; original private checker failure remains unqualified and fresh no-install affected check queued. Prior13-only db3b08b6/sourceb1afb88/core15d2 remains PREPARED ONLY, never requested; older earned bounds and rollback retained, no speed or hitch-cure claim"
+limits = "Signed combined d926/sourcecf84 installed; fresh no-install affected title/Pause/one-scene/normal Stop/join check completed with verified return and five reviewed images. Original private checker failure stays failed independently. Prior13-only db3b08b6/sourceb1afb88/core15d2 remains PREPARED ONLY, never requested; older earned bounds and rollback retained, no speed or hitch-cure claim"
 
 [collection_resume_storage_source]
 implementation = "Shared1GiB logical machine-file budget across all profiles/GC+N64 directories, counting orphan/pending/unknown/legacy regular files; bounded no-symlink inventory. Separate host availability and machine allowance after ordinary commit, preserve identical reuse/full histories and existing per-game/reserve guards"
@@ -526,11 +526,19 @@ report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6642574184"
 problem = "Reviewed landscape storage confirmation clips Close below scrollable content"
 implementation = "Keep and Close share the existing fixed decision footer; Keep has primary styling and Close danger text. Storage navigation elsewhere remains ordinary; exact confirmation/session/data policy unchanged"
 validation = "Affected menu-contract fixture, host all-targets and ARM64 warnings-denied Rust lints pass; existing151-test persistence boundary retains its exact bounds"
-limits = "Signed candidate107f2640/source8f71852 checked/preserved with original signer/source/raw4; footer observation queued normally from actual1bb return. Installed1bb storage flow passes with scrolling; no new native/Save/timing campaign qualification"
+limits = "Signed107f2640/source8f71852 installed with original signer/source/raw4 preserved; affected footer observation passes below. No new native/Save/timing campaign qualification"
 
 [prepared_storage_footer_candidate]
 source = "8f71852118fc0e9acdfc520eb459ece56e3d32db"
 apk_sha256 = "107f2640c67a7b650ae97ecf11b60a687c1144614c546830b41c9b6a959a46de"
 core_sha256 = "1a2273cbbc5158030abfc89ce458dc4ddd45429680f85f312c739863d31617d9"
 validation = "Menu-contract and host/ARM64 warnings-denied checks, signed package/ELF/source pair, original signer/all4 raw inputs verified. Focused footer checker rejects scrolling/clipped/overlapping/missing-Keep and changed-focus layouts before decisions"
-limits = "Queued affected UI-only observation, no target footer pass yet; data/native policy unchanged and existing two-game media set retained"
+limits = "Installed and affected UI-only observation passes below; data/native policy unchanged and existing two-game media set retained"
+
+[storage_confirmation_footer_observation]
+source = "8f71852118fc0e9acdfc520eb459ece56e3d32db"
+apk_sha256 = "107f2640c67a7b650ae97ecf11b60a687c1144614c546830b41c9b6a959a46de"
+result = "Keep and Close fully visible in same fixed row outside ScrollView; both confirmations pass current display/ancestor bounds before decision. Keep primary and Close danger text observed in reviewed images. Keep exact scene/reference/ordinary; confirmed Close durable before exact file retirement ->0.0MiB/final0 both"
+preservation = "All15new captures opened; both native publication/join paths, current ordinary/cards/TP/source/preferences/IDs/media preserved, normal WW SRAM retained. Actual OFF/clients/stock return verified;152.22s work, no NTX hold/recovery/pending request"
+limits = "No newmedia/diskfill/gameplay/Save/restore/audio/performance or historical-cure claim. GC8s controls over black, no new visible-game qualification. Global saturation and recovery edges retain host-fixture bounds"
+report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6643491388"

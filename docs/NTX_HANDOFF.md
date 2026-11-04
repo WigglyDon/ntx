@@ -22,18 +22,26 @@ width in portrait), then place controls in unused space without overlap. Both
 renderers have Pixel4 observations. Android still requests landscape; portrait
 geometry has model coverage. Sibling owners were informed, never modified here.
 
-## Current installed result and next repair
+## Current installed result
 
-Installed sourcea78415a6c008cd0e5a7fb5be2725aeaf6052711c,
-APK1bb628aa222559cd117c83f858947d9f8c489136bfac4f06bdc322162d4aba41,
+Installed source8f71852118fc0e9acdfc520eb459ece56e3d32db,
+APK107f2640c67a7b650ae97ecf11b60a687c1144614c546830b41c9b6a959a46de,
 core1a2273cbbc5158030abfc89ce458dc4ddd45429680f85f312c739863d31617d9.
-The storage-page check completed/returned137.15s. All15new captures opened;
-Library/no-runtime usage16.0MiB, Keep exact scene/reference/ordinary, confirmed
-Close ->0.0MiB and final0 scenes. Both native capture/join paths passed. Cards,
-N64 ordinary, untouched TP, source/preferences/IDs kept; normal WW SRAM updates
-retained. Actual OFF/client/stock return verified. No NTX lease/recovery remains.
-GC's eight-second image was controls over black: no new GC visible-game claim.
-[Storage report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6642574184).
+The fixed storage confirmation check completed/returned152.22s. All15new captures
+opened: Keep and Close are fully visible in one fixed row outside scrolling
+content, with primary Keep and danger-text Close. Both actual confirmation states
+passed display/ancestor bounds and no-scroll checks before decisions. Library with
+no runtime shows16.0MiB; Keep preserves the exact place/reference/ordinary data,
+then confirmed Close durably clears the reference before retiring only that file.
+Usage becomes0.0MiB and both tested profiles finish with zero scenes. Both native
+capture/join paths passed. Cards, N64 ordinary, untouched TP, source/preferences/
+IDs/media kept; normal WW SRAM updates retained. Actual OFF/client/stock return
+verified. No NTX lease/recovery/pending phone request remains. GC's eight-second
+image was controls over black: no new GC visible-game claim. No newmedia/diskfill/
+gameplay/Save/restore/audio/performance or historical-cure qualification.
+[Footer report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6643491388).
+The preceding storage-page result at sourcea784/APK1bb retains its original bounds
+in [storage report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6642574184).
 
 The separate native14 check passed at sourcecf84/d926 with five reviewed images,
 normal OOT title/Pause one-scene/Stop0 and verified protection/return. Its original
@@ -97,12 +105,11 @@ with the original signer, native14 core and all four exact raw inputs retained.
 It is now installed and its affected storage UI passes as above. The new global
 saturation and recovery-edge conditions remain host-fixture qualified; there was
 no phone disk fill. Review found the landscape confirmation can clip its Close
-button below the visible area. Keep/Close are now pinned in source into the existing fixed footer,
-preserving exact confirmation/data policy. Source8f71852/APK107f2640 is signed and
-checked with source/raw4/original signer preserved. Menu-contract/host/ARM64 checks
-pass. Its affected footer observation is queued normally from actual1bb return,
-requiring both decisions fully inside current bounds and outside scrolling content. Do not restart
-closed gameplay/save/timing campaigns or add media.
+button below the visible area. Keep/Close are now pinned into the existing fixed
+footer, preserving exact confirmation/data policy. Source8f71852/APK107f2640 is
+installed with source/raw4/original signer preserved. Menu-contract/host/ARM64
+checks and the affected footer observation pass as above. Do not restart closed
+gameplay/save/timing campaigns or add media.
 
 Current WW SRAM/generation legitimately advanced during its native boundary;
 future protection must use actual current bytes, never reapply earlier hashes as

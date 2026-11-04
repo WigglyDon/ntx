@@ -171,8 +171,16 @@ This exercises release while another game is resident without instantiating two
 native cores. The prepared package's production code is unchanged by this test.
 
 The target review found Close could sit below the visible landscape confirmation
-area. The next UI-only correction pins Keep and Close beside each other in the
+area. The UI-only correction pins Keep and Close beside each other in the
 existing fixed decision footer. Keep is primary and Close uses danger text;
 ordinary storage navigation stays in the scrolling menu. Confirmation identities,
 profile locking and publication/deletion ordering do not change. Menu-contract
-and host/ARM64 lint checks pass; packaging/affected footer observation are pending.
+and host/ARM64 lint checks pass. Signed source8f71852/APK107f2640 is now installed.
+The affected check completed with actual return in152.22s: both decisions passed
+current bounds/same-fixed-row/no-scroll-ancestor checks, and all15new captures were
+reviewed. Keep is fully visible and primary; Close fully visible with danger text.
+Keep preserves exact bytes/reference; confirmed Close gives0.0MiB/final0 scenes,
+with current ordinary/cards/independent progress/source/preferences/IDs/media kept.
+Both publication/join paths and actual OFF/client/stock return passed. No extra
+media or disk fill; the short GC sample remains controls over black, with no new
+visible-game claim. [Footer result](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6643491388).
