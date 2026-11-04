@@ -398,6 +398,6 @@ limits = "One native unit plus link/eleven-patch fixtures complete; package/targ
 problem = "New N64 scene generations lacked post-publication retirement and explicit Stop cleanup"
 implementation = "Retire only acknowledged predecessor after durable replacement; explicit Stop after native join+durable metadata. Current/retained scenes pin ordinary images; only writer-known acknowledged ordinary history may retire"
 limits = "Three scene-directory files including pending/recovery,64MiB payload ceiling and64MiB free-space reserve; separate16-image ordinary recovery ceiling. Unknown/damaged/incompatible candidates stay; no forced restore or cross-backend compatibility"
-validation = "125 Rust library tests including40 changing-progress replacements, retained recovery/image pinning, quotas, low-space refusal and unknown-candidate preservation; host all-targets and ARM64 warnings-denied lint, formatting pass"
+validation = "127 Rust library tests including40 changing-progress replacements, retained recovery/image pinning, quotas, low-space refusal and unknown-candidate preservation; host all-targets and ARM64 warnings-denied lint, formatting pass"
 package = "Pending; installed source remains3b225d4. No new target/runtime claim from source tests"
 policy = "docs/RESUME_STORAGE.md"

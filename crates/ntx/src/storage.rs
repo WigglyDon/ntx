@@ -363,6 +363,40 @@ impl Drop for CardStore {
 pub fn atomic_replace(path: &Path, bytes: &[u8]) -> io::Result<()> {
     atomic_replace_parts(path, &[bytes])
 }
+/// Publish a new immutable generation under the caller's exclusive profile
+/// writer. Preserve any incomplete prior attempt rather than truncating it.
+pub(crate) fn publish_immutable(path: &Path, bytes: &[u8]) -> io::Result<()> {
+    let parent = path
+        .parent()
+        .ok_or_else(|| io::Error::other("missing storage parent"))?;
+    match path.symlink_metadata() {
+        Ok(_) => return Err(io::Error::other("immutable generation already exists")),
+        Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+        Err(error) => return Err(error),
+    }
+    let mut name = path
+        .file_name()
+        .ok_or_else(|| io::Error::other("missing storage name"))?
+        .to_os_string();
+    name.push(".ntx-pending");
+    let temporary = parent.join(name);
+    let mut file = OpenOptions::new()
+        .create_new(true)
+        .write(true)
+        .open(&temporary)
+        .map_err(|error| {
+            if error.kind() == io::ErrorKind::AlreadyExists {
+                io::Error::other("An incomplete save or resume write is retained for recovery")
+            } else {
+                error
+            }
+        })?;
+    file.write_all(bytes)?;
+    file.sync_all()?;
+    drop(file);
+    std::fs::rename(temporary, path)?;
+    File::open(parent)?.sync_all()
+}
 pub(crate) fn atomic_replace_parts(path: &Path, parts: &[&[u8]]) -> io::Result<()> {
     let parent = path
         .parent()

@@ -220,7 +220,7 @@ impl SaveStore {
                     "Save recovery storage is full. The current ordinary save and paused runtime are retained; free space before saving again.",
                 ));
             }
-            storage::atomic_replace(&path, bytes)?;
+            storage::publish_immutable(&path, bytes)?;
         }
         if read_image(&self.directory, &generation)? != bytes {
             return Err(error("N64 ordinary image readback failed"));
@@ -274,6 +274,25 @@ mod tests {
         assert!(unacknowledged.exists());
         assert_eq!(fs::read(unacknowledged).unwrap()[0x800], 2);
         assert_eq!(store.load().unwrap().unwrap(), bytes);
+        drop(store);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn retry_preserves_an_existing_incomplete_ordinary_image() {
+        let root = root("same-pending");
+        let mut store = SaveStore::open(&root).unwrap();
+        let mut bytes = vec![0; crate::n64::SAVE_IMAGE_BYTES];
+        let original = bytes.clone();
+        let current = store.commit(&bytes).unwrap();
+        bytes[0x800] = 1;
+        let hash = storage::digest(&bytes);
+        let pending = root.join("N64").join(format!("{hash}.m64ram.ntx-pending"));
+        fs::write(&pending, b"uncertain ordinary bytes").unwrap();
+        assert!(store.commit(&bytes).is_err());
+        assert_eq!(fs::read(&pending).unwrap(), b"uncertain ordinary bytes");
+        assert_eq!(store.generation(), Some(&current));
+        assert_eq!(store.load().unwrap().unwrap(), original);
+        assert!(!root.join("N64").join(format!("{hash}.m64ram")).exists());
         drop(store);
         fs::remove_dir_all(root).unwrap();
     }

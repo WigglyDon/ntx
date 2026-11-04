@@ -173,7 +173,7 @@ pub fn publish(
     } else {
         admit_capture(profile, payload.len(), available)?;
         fs::create_dir_all(destination.parent().unwrap())?;
-        storage::atomic_replace(&destination, &bytes)?;
+        storage::publish_immutable(&destination, &bytes)?;
     }
     if fs::read(&destination)? != bytes {
         return Err(error("N64 scene readback differs"));
@@ -366,6 +366,23 @@ mod tests {
         drop(b_store);
         fs::remove_dir_all(a).unwrap();
         fs::remove_dir_all(b).unwrap();
+    }
+    #[test]
+    fn retry_preserves_an_existing_incomplete_scene_with_the_same_identity() {
+        let (root, store, binding) = setup("same-pending");
+        let current = publish(&root, &binding, &store, b"current", u64::MAX).unwrap();
+        let next = publish(&root, &binding, &store, b"next", u64::MAX).unwrap();
+        let destination = path(&root, &next).unwrap();
+        fs::remove_file(&destination).unwrap();
+        let pending = destination.with_file_name(format!("{next}.ntx.ntx-pending"));
+        fs::write(&pending, b"uncertain original attempt").unwrap();
+        assert!(publish(&root, &binding, &store, b"next", u64::MAX).is_err());
+        assert_eq!(fs::read(&pending).unwrap(), b"uncertain original attempt");
+        assert!(!destination.exists());
+        load(&root, &current, &binding, &store).unwrap();
+        assert_eq!(count(&root), 2);
+        drop(store);
+        fs::remove_dir_all(root).unwrap();
     }
     #[test]
     fn successful_replacement_and_stop_bound_storage_without_sweeping_recovery() {

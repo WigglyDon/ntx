@@ -32,6 +32,8 @@ a full machine resume cannot fit. A retained scene pins its referenced ordinary
 image; current ordinary data always stays protected. Only previous ordinary images
 that this writer actually observed acknowledged, and that no retained scene pins,
 are retired. Unknown files from an uncertain commit or earlier process stay.
+Immutable scene/image publication exclusively creates its pending file, so a retry
+also refuses to overwrite an existing incomplete attempt with the same identity.
 A separate sixteen-image recovery ceiling prevents uncertain ordinary history
 from growing indefinitely; refusal retains the last committed image and paused
 runtime. No checkpoint fingerprint is rewritten, and newer saves are never
@@ -41,7 +43,8 @@ cold start when ordinary progress has advanced.
 Host tests exercise forty replacements with changing ordinary data, retained
 recovery candidates, identical-generation reuse, missing/damaged replacements,
 ordinary-image pinning, incomplete candidates, insufficient space and hard budgets.
-They distinguish acknowledged retirement from broad directory cleanup. Target
+Same-identity retry tests also preserve incomplete scene and ordinary-image
+bytes exactly. Tests distinguish acknowledged retirement from broad directory cleanup. Target
 verification and installed-build bounds remain in [state](state.toml).
 
 These N64 source limits do not claim a finished storage-management UI or a global

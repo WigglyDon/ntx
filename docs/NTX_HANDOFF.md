@@ -32,7 +32,7 @@ Do not rehydrate retired test history. Existing owners coordinate their own area
 The N64 resume writer lacked successful-generation retirement. The Rust repair
 adds post-acknowledgement/Stop cleanup, host-supplied free-space admission, bounded
 recovery files and scene-pinned ordinary-history retirement. See
-[storage policy](RESUME_STORAGE.md).125 library tests and warnings-denied host/ARM64
+[storage policy](RESUME_STORAGE.md).127 library tests and warnings-denied host/ARM64
 checks pass. Core76c4621a includes the previously pending literal-log patch; its
 one-unit build/eleven-patch/ABI fixtures pass. Package and changed-boundary
 retention verification remain pending; installed source below stays its earned
