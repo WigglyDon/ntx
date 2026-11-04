@@ -58,8 +58,9 @@ The Android platform adapter supplies filesystem availability for both backends;
 portable Rust owns each backend's admission policy. A verified identical complete
 GameCube scene needs no new write and can be reused even under storage pressure.
 Existing oversized histories are retained and block new writes, never swept.
-GameCube storage errors retain their existing recovery handling; this change does
-not claim the N64-specific healthy-RAM Resume behavior for Dolphin.
+The initial budget change retained GameCube recovery handling. The subsequent
+source continuation below separates verified checkpoint-only refusal from native
+or ordinary-data failure.
 Routine storage pressure must offer a clear decision while preserving current
 progress, rather than silently evicting another game's unsaved scene.
 
@@ -97,3 +98,15 @@ coverage brings the suite to137: forty acknowledged GameCube replacements stay
 at one file; low space, excessive recovery bytes/files and unsafe entries refuse
 without changing ordinary data or existing scenes. These changes are source-verified and separate
 from the earlier prepared target candidate.
+
+The subsequent GameCube continuation now uses the shared healthy-RAM warning
+only after the native callback supplies a complete capture, after its successful
+card/SRAM flush. The exact committed ordinary generation must verify both before
+publication and after any scene error. Native recovery flags, absent callbacks,
+invalid payload/binding, changed saves and disagreement between native and writer
+acknowledgements require recovery. Collection-reference publication remains a
+separate fatal boundary. No accepted scene reference is changed by a refused
+write. The shared GameId/runtime-scoped UI can offer Resume while retaining
+writer ownership and all prior recovery files; RAM is not process-death recovery.
+140 library tests and relevant host/ARM64 lints pass. This later source is separate
+from prepared candidate6b8567d2 and is not yet target-qualified.

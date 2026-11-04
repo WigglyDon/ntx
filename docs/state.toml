@@ -430,3 +430,14 @@ incident = "Host restart interrupted the storage-warning target task; empty oper
 implementation = "Three-file recovery ceiling including incomplete/unknown entries; total budget derived from retained256MiB payload ceiling. Captured payload+bounded header+64MiB free reserve observed after card/SRAM flush. Verified identical complete generation reuses bytes without new write"
 validation = "137 portable library tests; forty acknowledged replacements, exact low-space threshold, excessive bytes/files, unsafe entries, writer exclusion, ordinary/current scene preservation and identical reuse. Host all-targets/ARM64 warnings-denied Rust lints pass"
 limits = "Source only, uninstalled; native capture behavior and affected target boundary not requalified. Existing GameCube recovery handling retained; no N64-specific RAM-Resume claim or collection-wide quota/UI"
+
+[gamecube_storage_continuation_source]
+implementation = "After native writer callback proves complete capture/card-SRAM flush, verify exact committed ordinary generation before and after scene-storage failure. Use existing exact-game/runtime RAM-only Resume warning, never alter accepted scene on refusal"
+validation = "140 library tests and warnings-denied host all-targets/ARM64 lints. Newer committed ordinary data survives storage/query/pending-write refusal; stale scene cannot restore; retry/reuse works. Native flags, missing capture and mismatched acknowledgements override storage classification"
+limits = "Source only, uninstalled and not target-qualified. Native/save/restore and collection-publication failures keep recovery. Candidate6b8567d2/sourcec05bcab contains budget guards plus observer, before this continuation"
+
+[prepared_assembly_storage_candidate]
+source = "c05bcab43ee2795869fff5f6a987522079e9a894"
+apk_sha256 = "6b8567d2b679f235ef76416daff3cc916f984e0dcbd8918f8d1b15d139086cf7"
+mupen_core_sha256 = "2426bddb80e57891c17b58f0ab057973a2089388086e76aacc6bbc83249026b0"
+qualification = "Signed package/resource/ABI checks and exact corresponding-source preservation pass; all four raw native inputs match retained debug copies. Uninstalled, no performance result"

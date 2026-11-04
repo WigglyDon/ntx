@@ -158,6 +158,52 @@ pub fn media_digest(mut file: impl Read) -> io::Result<String> {
     }
     Ok(format!("{:x}", hash.finalize()))
 }
+/// Native invokes its writer only after complete capture and card/SRAM flush.
+/// A storage-only refusal is resumable while that exact committed generation
+/// still verifies. This does not acknowledge a durable session reference.
+pub fn publish_captured(
+    profile: &Path,
+    binding: &Binding,
+    paused: bool,
+    payload: &[u8],
+    available: io::Result<u64>,
+) -> Result<String, crate::lifecycle::CheckpointError> {
+    use crate::lifecycle::CheckpointError;
+    binding.validate()?;
+    if payload.is_empty() || payload.len() > PAYLOAD_LIMIT {
+        return Err(CheckpointError::RecoveryRequired(
+            "GameCube capture has no valid complete machine payload".into(),
+        ));
+    }
+    let generation = storage::save_generation(profile)?;
+    validate_generation(&generation)?;
+    match available.and_then(|space| publish(profile, binding, paused, payload, space)) {
+        Ok(id) => Ok(id),
+        Err(error) => {
+            generation.verify(profile)?;
+            if storage::save_generation(profile)? != generation {
+                return Err(CheckpointError::RecoveryRequired(
+                    "GameCube ordinary generation changed during capture; current saves retained"
+                        .into(),
+                ));
+            }
+            Err(CheckpointError::StorageUnavailable(error.to_string()))
+        }
+    }
+}
+fn validate_generation(generation: &SaveGeneration) -> io::Result<()> {
+    if !generation.images.contains_key("GC/SRAM.raw")
+        || !generation
+            .images
+            .keys()
+            .any(|name| name.starts_with("GC/MemoryCardA."))
+    {
+        return Err(io::Error::other(
+            "checkpoint requires acknowledged card and console data",
+        ));
+    }
+    Ok(())
+}
 /// Synchronous native capture directly into the durable Rust container. The
 /// caller owns the initialized, paused engine and its ProfileLock throughout.
 ///
@@ -170,13 +216,13 @@ pub unsafe fn capture(
     binding: &Binding,
     paused: bool,
     available: fn(&Path) -> io::Result<u64>,
-) -> io::Result<String> {
+) -> Result<String, crate::lifecycle::CheckpointError> {
     struct Writer<'a> {
         profile: &'a Path,
         binding: &'a Binding,
         paused: bool,
         available: fn(&Path) -> io::Result<u64>,
-        result: Option<io::Result<String>>,
+        result: Option<Result<String, crate::lifecycle::CheckpointError>>,
     }
     unsafe extern "C" fn write(
         context: *mut std::ffi::c_void,
@@ -189,15 +235,13 @@ pub unsafe fn capture(
         // SAFETY: synchronous callback; native lends its complete bounded buffer
         // and the stack context remains live until capture returns.
         let writer = unsafe { &mut *context.cast::<Writer<'_>>() };
-        let result = (writer.available)(writer.profile).and_then(|space| {
-            publish(
-                writer.profile,
-                writer.binding,
-                writer.paused,
-                unsafe { std::slice::from_raw_parts(bytes, length) },
-                space,
-            )
-        });
+        let result = publish_captured(
+            writer.profile,
+            writer.binding,
+            writer.paused,
+            unsafe { std::slice::from_raw_parts(bytes, length) },
+            (writer.available)(writer.profile),
+        );
         let ok = result.is_ok();
         writer.result = Some(result);
         i32::from(ok)
@@ -218,14 +262,35 @@ pub unsafe fn capture(
             std::ptr::from_mut(&mut writer).cast(),
         )
     };
-    let result = writer.result.unwrap_or_else(|| {
-        Err(io::Error::other(
-            "native checkpoint capture refused; paused runtime and prior checkpoint retained",
-        ))
-    });
-    if acknowledged == 0 && result.is_ok() {
-        return Err(io::Error::other(
-            "native checkpoint did not acknowledge completion",
+    // CaptureNtx returns the writer result directly. An intentional storage
+    // refusal therefore returns zero; native recovery flags still take priority.
+    finish_capture(
+        acknowledged,
+        unsafe { crate::backend::dolphin::ntx_engine_recovery_required() } != 0,
+        writer.result,
+    )
+}
+#[cfg(any(feature = "native-engine", test))]
+fn finish_capture(
+    acknowledged: i32,
+    native_failed: bool,
+    result: Option<Result<String, crate::lifecycle::CheckpointError>>,
+) -> Result<String, crate::lifecycle::CheckpointError> {
+    use crate::lifecycle::CheckpointError;
+    if native_failed {
+        return Err(crate::lifecycle::CheckpointError::RecoveryRequired(
+            "native GameCube persistence requires recovery; current saves retained".into(),
+        ));
+    }
+    let result = result.ok_or_else(|| {
+        CheckpointError::RecoveryRequired(
+            "native checkpoint capture refused; paused runtime and prior checkpoint retained"
+                .into(),
+        )
+    })?;
+    if acknowledged != i32::from(result.is_ok()) {
+        return Err(crate::lifecycle::CheckpointError::RecoveryRequired(
+            "native checkpoint did not acknowledge completion".into(),
         ));
     }
     result
@@ -246,16 +311,7 @@ pub fn publish(
         ));
     }
     let generation = storage::save_generation(profile)?;
-    if !generation.images.contains_key("GC/SRAM.raw")
-        || !generation
-            .images
-            .keys()
-            .any(|name| name.starts_with("GC/MemoryCardA."))
-    {
-        return Err(io::Error::other(
-            "checkpoint requires acknowledged card and console data",
-        ));
-    }
+    validate_generation(&generation)?;
     let record = Metadata {
         binding: binding.clone(),
         generation,
@@ -850,6 +906,130 @@ mod tests {
         drop(writer);
         drop(lock);
         fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn captured_storage_refusal_keeps_newer_ordinary_data_and_allows_retry() {
+        use crate::lifecycle::CheckpointError;
+        let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
+        let (root, lock, writer, binding) = setup("captured-storage");
+        let old = publish(&root, &binding, true, b"older scene", u64::MAX).unwrap();
+        let old_bytes = fs::read(path(&root, &old).unwrap()).unwrap();
+        write(
+            &root.join("GC/MemoryCardA.fixture.raw"),
+            b"newer committed progress",
+        );
+        for available in [Ok(0), Err(io::Error::other("space query failed"))] {
+            assert!(matches!(
+                publish_captured(&root, &binding, true, b"latest complete capture", available),
+                Err(CheckpointError::StorageUnavailable(_))
+            ));
+            assert_eq!(fs::read(path(&root, &old).unwrap()).unwrap(), old_bytes);
+            assert_eq!(
+                fs::read(root.join("GC/MemoryCardA.fixture.raw")).unwrap(),
+                b"newer committed progress"
+            );
+            assert!(load(&root, &old, &binding).is_err());
+            assert!(ProfileLock::acquire(&root).is_err());
+        }
+        // Failed new write leaves its owned pending candidate, never truncates it.
+        let next = publish_captured(
+            &root,
+            &binding,
+            true,
+            b"latest complete capture",
+            Ok(u64::MAX),
+        )
+        .unwrap();
+        let complete = path(&root, &next).unwrap();
+        let bytes = fs::read(&complete).unwrap();
+        fs::remove_file(&complete).unwrap();
+        let pending = complete.with_file_name(format!("{next}.ntx.ntx-pending"));
+        fs::write(&pending, b"interrupted new write").unwrap();
+        assert!(matches!(
+            publish_captured(
+                &root,
+                &binding,
+                true,
+                b"latest complete capture",
+                Ok(u64::MAX)
+            ),
+            Err(CheckpointError::StorageUnavailable(_))
+        ));
+        assert_eq!(fs::read(&pending).unwrap(), b"interrupted new write");
+        fs::write(&complete, bytes).unwrap();
+        assert_eq!(
+            publish_captured(&root, &binding, true, b"latest complete capture", Ok(0)).unwrap(),
+            next
+        );
+        assert_eq!(
+            load(&root, &next, &binding).unwrap().payload,
+            b"latest complete capture"
+        );
+        drop(writer);
+        drop(lock);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn failed_capture_or_unverified_ordinary_data_never_becomes_a_storage_warning() {
+        use crate::lifecycle::CheckpointError;
+        let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
+        let (root, lock, writer, binding) = setup("captured-fatal");
+        assert!(matches!(
+            publish_captured(&root, &binding, true, b"", Ok(0)),
+            Err(CheckpointError::RecoveryRequired(_))
+        ));
+        let mut invalid = binding.clone();
+        invalid.state_abi = 2;
+        assert!(matches!(
+            publish_captured(&root, &invalid, true, b"complete", Ok(0)),
+            Err(CheckpointError::RecoveryRequired(_))
+        ));
+        fs::write(root.join("GC/SRAM.raw"), b"unacknowledged external change").unwrap();
+        assert!(matches!(
+            publish_captured(&root, &binding, true, b"complete", Ok(0)),
+            Err(CheckpointError::RecoveryRequired(_))
+        ));
+        assert_eq!(
+            fs::read(root.join("GC/SRAM.raw")).unwrap(),
+            b"unacknowledged external change"
+        );
+        drop(writer);
+        drop(lock);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn native_failure_or_acknowledgement_mismatch_overrides_storage_classification() {
+        use crate::lifecycle::CheckpointError::{RecoveryRequired, StorageUnavailable};
+        for acknowledged in [0, 1, 2] {
+            assert!(matches!(
+                finish_capture(acknowledged, false, None),
+                Err(RecoveryRequired(_))
+            ));
+            assert!(matches!(
+                finish_capture(
+                    acknowledged,
+                    true,
+                    Some(Err(StorageUnavailable("disk".into())))
+                ),
+                Err(RecoveryRequired(_))
+            ));
+        }
+        assert!(matches!(
+            finish_capture(0, false, Some(Err(StorageUnavailable("disk".into())))),
+            Err(StorageUnavailable(_))
+        ));
+        assert!(matches!(
+            finish_capture(1, false, Some(Err(StorageUnavailable("disk".into())))),
+            Err(RecoveryRequired(_))
+        ));
+        assert!(matches!(
+            finish_capture(0, false, Some(Ok("scene".into()))),
+            Err(RecoveryRequired(_))
+        ));
+        assert_eq!(
+            finish_capture(1, false, Some(Ok("scene".into()))).unwrap(),
+            "scene"
+        );
     }
     #[test]
     fn incompatible_inputs_and_corruption_retain_the_payload_and_current_saves() {

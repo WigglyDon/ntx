@@ -24,6 +24,14 @@ geometry has model coverage. Sibling owners were informed, never modified here.
 
 ## Current installed result and next repair
 
+GameCube now also has source-level healthy-RAM storage refusal handling after
+verified native capture/ordinary commit, with explicit fatal native/acknowledgement
+guards.140 library tests and relevant lints pass; package/target remain pending.
+Prepared candidate6b8567d2/sourcec05bcab/core2426 is the preceding budget+observer
+build, signed and preserved with source/raw debug inputs, uninstalled. It does
+not contain this latest GameCube continuation. The existing N64 warning task remains queued normally; no second implementation
+worker.
+
 A host restart interrupted the storage-warning target check. Cleanup-only recovery
 now verifies APK036f9827/source06d2b33/core76 installed, all three entries stopped,
 owned processes absent, protected data/source/preferences/collection unchanged
