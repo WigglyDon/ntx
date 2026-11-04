@@ -1,0 +1,134 @@
+NTX targeted incoming-branch index in measured allocation pass; original pin/licenses retained.
+
+--- a/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
++++ b/mupen64plus-core/src/device/r4300/new_dynarec/new_dynarec.c
+@@ -1,3 +1,4 @@
++/* Modified by ntx 2026-11-03: index immutable incoming branch destinations; retain live register-analysis values. */
+ /* Modified by ntx 2026-11-03: preserve exact live-map query counts through register-culling erases. */
+ /* Modified by ntx 2026-11-03: exact immutable entry-map membership in register culling; original exclusion and downstream operations retained. */
+ /* Modified by ntx 2026-11-03: optional host observer around the unchanged compiler implementation. */
+@@ -990,12 +991,39 @@
+   }
+ }
+ 
++/* ntx: index immutable branch destinations once per decoded block. Analysis
++ * values remain live; in particular future p32 and earlier branch_regs differ. */
++static int ntx_incoming_head[MAXBLOCK], ntx_incoming_next[MAXBLOCK];
++static void ntx_index_incoming(void)
++{
++  int t,j;
++  for(t=0;t<slen;t++) ntx_incoming_head[t]=-1;
++  for(j=slen-1;j>=0;j--) {
++    uint32_t offset=(uint32_t)ba[j]-start;
++    if(!(offset&3u) && (offset>>2)<(uint32_t)slen) {
++      t=(int)(offset>>2);
++      ntx_incoming_next[j]=ntx_incoming_head[t];
++      ntx_incoming_head[t]=j;
++    }
++  }
++}
++static uint64_t ntx_incoming_is32(int target,int cutoff,uint64_t value,int provisional)
++{
++  int j;
++  for(j=ntx_incoming_head[target];j>=0;j=ntx_incoming_next[j]) {
++    if(j<cutoff) value&=provisional?p32[j]:branch_regs[j].is32;
++    else if(provisional) value=1;
++    else value&=p32[j];
++  }
++  return value;
++}
++
+ // Identify registers which are likely to contain 32-bit values
+ // This is used to predict whether any branches will jump to a
+ // location with 64-bit values in registers.
+ static void provisional_32bit(void)
+ {
+-  int i,j;
++  int i;
+   uint64_t is32=1;
+   uint64_t lastbranch=1;
+ 
+@@ -1033,17 +1061,7 @@
+     if(bt[i])
+     {
+       uint64_t temp_is32=is32;
+-      for(j=i-1;j>=0;j--)
+-      {
+-        if(ba[j]==start+i*4)
+-          //temp_is32&=branch_regs[j].is32;
+-          temp_is32&=p32[j];
+-      }
+-      for(j=i;j<slen;j++)
+-      {
+-        if(ba[j]==start+i*4)
+-          temp_is32=1;
+-      }
++      temp_is32=ntx_incoming_is32(i,i,temp_is32,1);
+       is32=temp_is32;
+     }
+     int type=itype[i];
+@@ -9531,6 +9549,7 @@
+   NTX_PHASE_EVENT(1, 0);
+   NTX_PHASE_EVENT(2, 1);
+   /* Pass 3 - Register allocation */
++  ntx_index_incoming();
+ 
+   struct regstat current; // Current register allocations/status
+   current.is32=1;
+@@ -9595,17 +9614,7 @@
+     if(bt[i])
+     {
+       uint64_t temp_is32=current.is32;
+-      for(j=i-1;j>=0;j--)
+-      {
+-        if(ba[j]==start+i*4)
+-          temp_is32&=branch_regs[j].is32;
+-      }
+-      for(j=i;j<slen;j++)
+-      {
+-        if(ba[j]==start+i*4)
+-          //temp_is32=1;
+-          temp_is32&=p32[j];
+-      }
++      temp_is32=ntx_incoming_is32(i+0,i,temp_is32,0);
+       if(temp_is32!=current.is32) {
+         //DebugMessage(M64MSG_VERBOSE, "dumping 32-bit regs (%x)",start+i*4);
+         #ifndef DESTRUCTIVE_WRITEBACK
+@@ -9634,17 +9643,7 @@
+     if(i<slen-1&&bt[i+1]&&itype[i-1]!=UJUMP&&itype[i-1]!=CJUMP&&itype[i-1]!=SJUMP&&itype[i-1]!=RJUMP&&itype[i-1]!=FJUMP)
+     {
+       uint64_t temp_is32=current.is32;
+-      for(j=i-1;j>=0;j--)
+-      {
+-        if(ba[j]==start+i*4+4)
+-          temp_is32&=branch_regs[j].is32;
+-      }
+-      for(j=i;j<slen;j++)
+-      {
+-        if(ba[j]==start+i*4+4)
+-          //temp_is32=1;
+-          temp_is32&=p32[j];
+-      }
++      temp_is32=ntx_incoming_is32(i+1,i,temp_is32,0);
+       if(temp_is32!=current.is32) {
+         //DebugMessage(M64MSG_VERBOSE, "pre-dumping 32-bit regs (%x)",start+i*4);
+         for(hr=0;hr<HOST_REGS;hr++)
+@@ -9671,17 +9670,7 @@
+     else if(i<slen-2&&bt[i+2]&&(source[i-1]>>16)!=0x1000&&(itype[i]==CJUMP||itype[i]==SJUMP||itype[i]==FJUMP))
+     {
+       uint64_t temp_is32=current.is32;
+-      for(j=i-1;j>=0;j--)
+-      {
+-        if(ba[j]==start+i*4+8)
+-          temp_is32&=branch_regs[j].is32;
+-      }
+-      for(j=i;j<slen;j++)
+-      {
+-        if(ba[j]==start+i*4+8)
+-          //temp_is32=1;
+-          temp_is32&=p32[j];
+-      }
++      temp_is32=ntx_incoming_is32(i+2,i,temp_is32,0);
+       if(temp_is32!=current.is32) {
+         //DebugMessage(M64MSG_VERBOSE, "pre-dumping 32-bit regs (%x)",start+i*4);
+         for(hr=0;hr<HOST_REGS;hr++)

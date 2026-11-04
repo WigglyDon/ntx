@@ -113,7 +113,20 @@ Actual helpers are checked against the unchanged getter through over1million
 changing-map steps per mode, with pre-query erases, short-circuit lookup and
 negative/free/duplicate/excluded values in normal and UBSan trap mode. Compiler
 remainder comparison checks the declared call sites and every map erase; no
-compiler yield or persistence format is changed. Target effect remains pending.
+compiler yield or persistence format is changed. Its bounded title comparison
+reduces culling maximum41.056ms to28.821ms; five compiler calls still exceed40ms.
+This is a targeted improvement, not a whole-game hitch cure.
+
+The incoming-branch index targets the separately measured allocation pass. It
+indexes immutable decoded destinations once per block in two4096-entry arrays
+(32KiB), then reads provisional and allocated register-analysis values live.
+Forward branches retain the original provisional reset-to-one rule; other queries
+retain their original cutoff and AND behavior. The actual helpers match all four
+original searches through283350 changing-value queries per mode, including
+shrinking/growing blocks, empty/dense destinations and address wraparound, in
+normal and UBSan trap runs. Exact comparisons cover the provisional function and
+the remainder of the compiler. No new yield, block limit or persistence format;
+target timing effect remains pending.
 
 ## Actual backend boundaries
 

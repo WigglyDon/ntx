@@ -50,14 +50,20 @@ over1million changing-map steps per mode, normal/UBSan trap. Nine patches reprod
 active source; exact compiler-body checks permit only declared substitutions and
 notifications. One-unit native build,119 library tests and warnings-denied
 host/ARM64 lints pass. No new compiler yield, SIMD or block-limit change.
-The private incoming-branch prototype remains unintegrated.
+Patch10 now integrates the incoming-branch destination index in the separately
+measured allocation pass (previous frame maximum19.600ms). Two4096-entry arrays
+index destinations once per block; analysis values remain live, including the
+original forward-branch provisional reset rule. Actual helpers match four
+retained searches through283350 changing-value queries per mode, normal/UBSan
+trap. Exact provisional/compiler comparisons and ten-patch reproduction pass.
+One-unit native build/coree2999fbd and xtask warnings-denied lint pass.
+Finish package/affected-boundary verification before claiming benefit.
 
 Next narrow actual function/line CPU costs before more compiler optimization.
-The retained NDK includes Simpleperf but is not runtime-qualified. Any optional
-capability/profile check must use normal admission, prepared finite owned staging
-and cleanup, exact installed source/symbols and unprivileged app-only user-space
-sampling. Refusal is a recorded limit, never authority for root, global properties,
-security changes or a high-level launcher. Profiling overhead is not speed proof.
+Optional app-only Simpleperf is unavailable under current operating constraints;
+it supplied no function-level samples or new performance result. No privileged
+retry or global property/security change is authorized by that refusal. Continue
+the measured-pass work off-device; no profiling overhead is treated as speed proof.
 
 The self-contained title check used122s of work and completed actual return.
 All five images are opened: initial, late and pre-Pause scenes rendered, followed

@@ -27,7 +27,7 @@ dolphin_revision = "cf5cb7ef81c3e8e7af5c9d566334219ffda9f68b"
 dolphin_engine_sha256 = "d419cc59abbe5fc41c343946d244e17c8d0c041a8a338b2fe8986e6994602e40"
 legacy_resources_sha256 = "9dd2e4e0e1ad8201bf525e5fc959c93f9794618497d5bc14382197b689bb4327"
 legacy_patch_sha256 = "7ea94c3526b4e3f5ccd623a3edce28e806d310850110e891507f669fe2d5d2c2"
-next_step = "Narrow remaining compiler function/line costs after observed lazy-query culling improvement. Optional unprivileged app-only profiler capability requires prepared finite cleanup and normal custody; refusal grants no security change"
+next_step = "Finish incoming-branch index native/package and affected-boundary verification in the measured allocation pass. Optional function-level profiling is unavailable under current constraints; no privileged/security retry or target timing claim"
 completed_do_not_repeat = "GameCube boot/native slice, current ordinary-save/cold-menu reload, earlier build-bound scene/library returns, matched stationary Home timing, post-cleanup storage/retained-input checks"
 retired_objective = "Speedrunner/quest automation and repetitive qualification loop"
 open_defects = ["Backend GL0502 observed at in-game pause; host error attribution repair passes the affected menu/Save route, no renderer fix claimed", "N64 hitches: prior same-installation cache pair24 to7 slow calls. New package trace has8 slow CPU-heavy calls, shader-bearing startup946.435ms/residual132.936ms. Exact routine unqualified", "Foreground departure with native process retained: cause unqualified; foreground-player window awake flag added, awaiting device check", "Single pre-Pause gray field in latest bounded title check: duration/cause unknown; normal Pause and Stop followed", "Pixel later-play Pause/reentry freeze: undetermined", "Separate Fold Home-return process loss/lag/layout/haptics: unresolved"]
@@ -367,3 +367,11 @@ conclusion = "Culling maximum about30% lower than41056us; mean43us vs64us. Targe
 return = "COMPLETED/returned=true; self-contained122s work. All five images opened; initial/late/pre-Pause scenes rendered then actual Pause menu. Normal Stop/native join, protected ordinary/cards/untouched profile, exact prefs/IDs/source/OFF verify; no NTX hold/recovery"
 limits = "No gameplay input/Save/Restore. No new audible/display-rate proof or historical renderer/lifecycle cure. Old cores/APKs/symbols/scenes retained"
 report = "https://github.com/WigglyDon/ntx/issues/5#issuecomment-6620204747"
+
+[n64_incoming_branch_source]
+implementation = "Index immutable decoded branch destinations once per block in two4096-entry arrays (32KiB); read provisional/allocated analysis values live, preserving forward-reset and cutoff/AND behavior"
+validation = "Actual helpers versus four original searches through283350 changing-value queries per mode, shrinking/growing blocks, sparse/dense destinations and address wrap; normal/UBSan trap. Exact provisional/compiler remainder and ten-patch reproduction pass"
+core_sha256 = "e2999fbd80f173c0fccae8e837a42012035ce310759e21de2b614737048e96d8"
+validation_build = "2275-file exact source graph; one native unit plus link; xtask all-targets warnings-denied lint and formatting pass"
+limits = "Package/target verification pending; no new yield, block limit or persistence format. No target timing benefit claimed"
+optional_profile = "Function-level profiling unavailable under current operating constraints; no samples, new timing evidence or authorization for privileged/property/security changes"
