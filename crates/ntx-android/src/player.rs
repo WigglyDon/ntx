@@ -421,7 +421,9 @@ fn save_dolphin_checkpoint(
     if let Some(old) = active.accepted_checkpoint.replace(id.clone())
         && let Err(error) = checkpoint::retire_previous(&active._profile.path, &old, &id)
     {
-        platform::diagnostic(&format!("Prior successful checkpoint retained: {error}"));
+        platform::diagnostic(&format!(
+            "Could not verify prior GameCube checkpoint cleanup: {error}"
+        ));
     }
     platform::diagnostic("Checkpoint complete: native paused, saves and session reference durable");
     Ok(())
@@ -475,7 +477,7 @@ impl StopRuntime for DolphinRuntime {
             && let Err(error) = checkpoint::discard_successful(&self._profile.path, id)
         {
             platform::diagnostic(&format!(
-                "Stopped checkpoint retained after cleanup error: {error}"
+                "Could not verify stopped GameCube checkpoint cleanup: {error}"
             ));
         }
     }

@@ -72,3 +72,10 @@ pending restore and uncertain collection publication retain recovery handling.
 Warnings are scoped to the exact live game/runtime and never clear an existing
 quarantine. Portable tests pass; package and affected target warning/Resume
 verification remain pending for this continuation.
+
+GameCube retirement now also verifies a bounded regular file, recognized current
+or legacy container magic and its complete content identity before deletion.
+Damaged files and symlinks remain for recovery. Healthy and legacy successful
+retirement and missing-file retries retain their existing behavior. This portable
+file-boundary repair has host regression coverage; it adds no native-execution
+or historical lifecycle qualification.

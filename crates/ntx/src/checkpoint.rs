@@ -371,6 +371,23 @@ pub fn retire_previous(profile: &Path, old: &str, current: &str) -> io::Result<(
 /// rejected or unacknowledged checkpoint. Caller retains the profile lock.
 pub fn discard_successful(profile: &Path, id: &str) -> io::Result<()> {
     let old = existing_path(profile, id)?;
+    let info = match old.symlink_metadata() {
+        Ok(info) => info,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(()),
+        Err(error) => return Err(error),
+    };
+    let limit = PAYLOAD_LIMIT as u64 + HEADER_LIMIT as u64 + 12;
+    if !info.is_file() || info.len() < 12 || info.len() > limit {
+        return Err(io::Error::other("unsafe checkpoint retained for recovery"));
+    }
+    let mut source = File::open(&old)?;
+    let mut magic = [0; 8];
+    source.read_exact(&mut magic)?;
+    if (&magic != MAGIC && &magic != crate::legacy::CHECKPOINT_MAGIC)
+        || media_digest(magic.as_slice().chain(source.take(limit + 1 - 8)))? != id
+    {
+        return Err(io::Error::other("changed checkpoint retained for recovery"));
+    }
     match fs::remove_file(old) {
         Ok(()) => File::open(directory(profile)?)?.sync_all(),
         Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(()),
@@ -576,6 +593,50 @@ mod tests {
         retire_previous(&root, &old, &new).unwrap();
         assert!(!path(&root, &old).unwrap().exists());
         assert!(!load(&root, &new, &binding).unwrap().paused);
+        drop(writer);
+        drop(lock);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn retirement_keeps_changed_or_unsafe_recovery_bytes_and_accepts_verified_legacy() {
+        let _serial = storage::STORE_TEST_LOCK.lock().unwrap();
+        let (root, lock, writer, binding) = setup("retirement-integrity");
+        let id = publish(&root, &binding, true, b"acknowledged scene").unwrap();
+        let selected = path(&root, &id).unwrap();
+        let original = fs::read(&selected).unwrap();
+        let mut changed = original.clone();
+        *changed.last_mut().unwrap() ^= 1;
+        fs::write(&selected, &changed).unwrap();
+        assert!(discard_successful(&root, &id).is_err());
+        assert_eq!(fs::read(&selected).unwrap(), changed);
+        fs::remove_file(&selected).unwrap();
+        #[cfg(unix)]
+        {
+            let retained = root.join("unique-recovery.bin");
+            fs::write(&retained, &original).unwrap();
+            std::os::unix::fs::symlink(&retained, &selected).unwrap();
+            assert!(discard_successful(&root, &id).is_err());
+            assert_eq!(fs::read(&retained).unwrap(), original);
+            assert!(
+                selected
+                    .symlink_metadata()
+                    .unwrap()
+                    .file_type()
+                    .is_symlink()
+            );
+            fs::remove_file(&selected).unwrap();
+        }
+        let mut legacy = original;
+        legacy[..8].copy_from_slice(crate::legacy::CHECKPOINT_MAGIC);
+        let legacy_id = storage::digest(&legacy);
+        let legacy_path = directory(&root).unwrap().join(format!(
+            "{legacy_id}.{}",
+            crate::legacy::CHECKPOINT_EXTENSION
+        ));
+        fs::write(&legacy_path, &legacy).unwrap();
+        discard_successful(&root, &legacy_id).unwrap();
+        discard_successful(&root, &legacy_id).unwrap();
+        assert!(!legacy_path.exists());
         drop(writer);
         drop(lock);
         fs::remove_dir_all(root).unwrap();
