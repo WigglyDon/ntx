@@ -78,7 +78,10 @@ complete files reuse bytes when full. The page explicitly closes only a confirme
 unloaded stored place, under its profile lock and after durable reference clearing.
 It keeps newer ordinary data, identities, errors and unknown recovery candidates.
 Live games still require normal Stop/join. See [storage policy](RESUME_STORAGE.md).
-Finish source review, then package/preserve this change and observe
+The sourcecd8ff3f package7a0e8f61 is checked/preserved but PREPARED ONLY, never
+requested: source review caught the storage action missing from Library. The
+reviewed correction adds it to Library and unloaded/start menus as well as Pause.
+Package/preserve that correction before observing
 the affected storage UI using the existing demos. Do not infer target qualification
 from host fixtures or the separately queued native14 check.
 

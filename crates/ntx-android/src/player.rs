@@ -248,7 +248,7 @@ fn show_resume_storage(
     match ntx::resume_storage::inventory(root) {
         Ok(usage) => {
             text.push_str(&format!(
-                "{:.1} of {} MiB used for stored places and retained recovery data.\n\nIn-game saves and game files are separate. Closing a stored place loses its unsaved position; your in-game saves stay. Existing places are never automatically deleted to fit another game.\n",
+                "{:.1} of {} MiB used for stored places and recovery data.\n\nClose a stored place to free space. Its unsaved position will be lost; your in-game saves and game files stay. Existing places are never automatically deleted.\n",
                 usage.bytes as f64 / 1_048_576., ntx::resume_storage::COLLECTION_BUDGET / 1_048_576,
             ));
             for entry in &collection.entries {
@@ -263,7 +263,7 @@ fn show_resume_storage(
                     choices.push((place, title));
                 }
             }
-            text.push_str("\n\nRecovery files that cannot be safely identified are kept for review. Stop the current game normally to close its live place.");
+            text.push_str("\n\nUncertain recovery files are kept for review. For a live game, use Stop to close its current place.");
         }
         Err(_) => text.push_str("Resume storage could not be safely measured. All existing places and in-game saves are kept. Recovery data needs review before more places can be stored."),
     }
@@ -1743,7 +1743,7 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
                         platform::storage_menu(
                             app,
                             format!(
-                                "Close stored place?\n\n{title}\n\nYou will lose this stored unsaved position. Your game stays in the collection and will start with its current in-game saves. Other games and retained recovery files stay. This cannot be undone."
+                                "Close stored place?\n\n{title}\n\nYou will lose this unsaved position. Next play starts with your current in-game saves. Your game, other places and recovery files stay. This cannot be undone."
                             ),
                             vec![
                                 (18, "Keep stored place".into()),

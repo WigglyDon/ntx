@@ -878,6 +878,7 @@ pub fn menu(app: &AndroidApp, show: bool, message: Option<String>) {
     actions.push((6, "Library".to_owned()));
     actions.push((1, "Add game".to_owned()));
     actions.push((8, "Touch controls".to_owned()));
+    actions.push((18, "Resume storage".to_owned()));
     actions.push((9, "About ntx".to_owned()));
     render_menu(
         app,
@@ -943,6 +944,7 @@ pub fn unloaded_menu(app: &AndroidApp, title: &str, error: Option<String>) {
             (6, "Library".into()),
             (1, "Add game".into()),
             (8, "Touch controls".into()),
+            (18, "Resume storage".into()),
         ],
         0,
     );
@@ -1139,6 +1141,7 @@ pub fn library_menu(
 ) {
     let mut actions = Vec::new();
     actions.push((8, "Touch controls".into()));
+    actions.push((18, "Resume storage".into()));
     actions.push((9, "About ntx".into()));
     if let Some(epoch) = runtime {
         if can_resume {
