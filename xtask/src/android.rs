@@ -509,39 +509,15 @@ pub fn package(root: &Path, source: &Path, signed: bool) -> Result<()> {
         return Err("build the pinned N64 core before packaging".into());
     }
     let mupen_hash = crate::receipt::digest(&mupen)?;
-    let core_debug = root
-        .join(".local/symbols")
-        .join(format!("{mupen_hash}.libntx_mupen64plus_next.so"));
-    if !core_debug.exists() {
-        copy(&mupen, &core_debug)?;
-    }
-    if crate::receipt::digest(&core_debug)? != mupen_hash {
-        return Err("retained N64 debug input differs".into());
-    }
     if !engine.is_file() {
         return Err("build the pinned Android native engine first".into());
     }
-    // Preserve this exact debug image before a later native link replaces it.
-    // The package receipt records its content hash beside the stripped copy.
-    let engine_hash = crate::receipt::digest(&engine)?;
     let symbols = root.join(".local/symbols");
     fs::create_dir_all(&symbols)?;
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         fs::set_permissions(&symbols, fs::Permissions::from_mode(0o700))?;
-    }
-    let debug = symbols.join(format!("{engine_hash}.libntx_engine.so"));
-    if !debug.exists() {
-        copy(&engine, &debug)?;
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            fs::set_permissions(&debug, fs::Permissions::from_mode(0o600))?;
-        }
-    }
-    if crate::receipt::digest(&debug)? != engine_hash {
-        return Err("retained native debug image differs from the package input".into());
     }
     prepare(root, source)?;
     let linker =
