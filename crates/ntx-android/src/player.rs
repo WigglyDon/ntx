@@ -232,6 +232,48 @@ impl StopRuntime for LiveRuntime {
         }
     }
 }
+fn resume_capacity(root: &Path, profile: &Path) -> std::io::Result<ntx::resume_storage::Capacity> {
+    ntx::resume_storage::Capacity::observe(root, platform::available_storage(profile)?)
+}
+type StorageChoice = (ntx::resume_storage::StoredPlace, String);
+fn show_resume_storage(
+    app: &AndroidApp,
+    root: &Path,
+    collection: &Collection,
+    runtime: Option<&LiveRuntime>,
+) -> Vec<StorageChoice> {
+    let mut actions = Vec::new();
+    let mut choices = Vec::new();
+    let mut text = "Resume storage\n\n".to_owned();
+    match ntx::resume_storage::inventory(root) {
+        Ok(usage) => {
+            text.push_str(&format!(
+                "{:.1} of {} MiB used for stored places and retained recovery data.\n\nIn-game saves and game files are separate. Closing a stored place loses its unsaved position; your in-game saves stay. Existing places are never automatically deleted to fit another game.\n",
+                usage.bytes as f64 / 1_048_576., ntx::resume_storage::COLLECTION_BUDGET / 1_048_576,
+            ));
+            for entry in &collection.entries {
+                let bytes = usage.profiles.iter().find(|p| p.name == entry.profile_id.0.as_str()).map_or(0, |p| p.bytes);
+                if bytes == 0 { continue; }
+                let title = ntx::presentation::game_title(&entry.title);
+                text.push_str(&format!("\n{title}: {:.1} MiB", bytes as f64 / 1_048_576.));
+                if let Some(place) = ntx::resume_storage::StoredPlace::for_entry(entry)
+                    && runtime.is_none_or(|r| r.events.game_id != entry.game_id.0)
+                {
+                    actions.push((100 + choices.len() as i32, format!("Close stored place · {title}")));
+                    choices.push((place, title));
+                }
+            }
+            text.push_str("\n\nRecovery files that cannot be safely identified are kept for review. Stop the current game normally to close its live place.");
+        }
+        Err(_) => text.push_str("Resume storage could not be safely measured. All existing places and in-game saves are kept. Recovery data needs review before more places can be stored."),
+    }
+    if runtime.is_some() {
+        actions.push((4, "Stop current game".into()));
+    }
+    actions.push((6, "Back to your games".into()));
+    platform::storage_menu(app, text, actions, runtime.map_or(0, |r| r.events.epoch));
+    choices
+}
 fn save_checkpoint(
     active: &mut LiveRuntime,
     root: &Path,
@@ -241,7 +283,7 @@ fn save_checkpoint(
     match active {
         LiveRuntime::Dolphin(r) => save_dolphin_checkpoint(r, root, collection, index),
         LiveRuntime::N64(r) => {
-            let id = r.capture()?;
+            let id = r.capture(|path| resume_capacity(root, path))?;
             let earlier = collection.entries[index].checkpoint.replace(id.clone());
             if let Err(e) = save_collection(root, collection) {
                 collection.entries[index].checkpoint = earlier;
@@ -399,7 +441,7 @@ fn save_dolphin_checkpoint(
             &active._profile.path,
             &active.binding,
             collection.entries[index].paused,
-            platform::available_storage,
+            &mut |path| resume_capacity(root, path),
         )
     };
     platform::trace_current(
@@ -1113,6 +1155,8 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
     let mut hidden = false;
     let mut picker_pending = false;
     let mut media_confirmation: Option<MediaConfirmation> = None;
+    let mut storage_choices: Vec<StorageChoice> = Vec::new();
+    let mut storage_confirmation: Option<StorageChoice> = None;
     let mut native_paused = None;
     let mut surface_pending = false;
     let mut surface_traced = false;
@@ -1644,6 +1688,69 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
                 Command::About(menu) => {
                     if platform::menu_current(menu) {
                         platform::about_menu(app);
+                    }
+                }
+                Command::Storage(menu) => {
+                    if !platform::menu_current(menu) {
+                        continue;
+                    }
+                    hidden = false;
+                    if let Some(index) = selected.filter(|_| runtime.is_some()) {
+                        collection.entries[index].paused = true;
+                    }
+                    pause_for_background(
+                        &root,
+                        &mut runtime,
+                        &mut collection,
+                        selected,
+                        &mut native_paused,
+                    );
+                    storage_confirmation = None;
+                    storage_choices =
+                        show_resume_storage(app, &root, &collection, runtime.as_ref());
+                }
+                Command::StorageAction(menu, action) => {
+                    if !platform::menu_current(menu) {
+                        continue;
+                    }
+                    if action == 41 {
+                        let Some((place, _)) = storage_confirmation.take() else {
+                            continue;
+                        };
+                        let result = ntx::resume_storage::release_place(
+                            &root,
+                            &mut collection,
+                            &place,
+                            |value| {
+                                save_collection(&root, value)
+                                    .map_err(|error| std::io::Error::other(error.to_string()))
+                            },
+                        );
+                        storage_choices =
+                            show_resume_storage(app, &root, &collection, runtime.as_ref());
+                        let message = match result {
+                            Ok(None) => "Stored place closed. Your game and in-game saves are kept.".to_owned(),
+                            Ok(Some(warning)) => warning,
+                            Err(_) => "Could not confirm closing that stored place. Its recovery data and in-game saves are kept. Review Resume storage again.".to_owned(),
+                        };
+                        platform::notice(app, message);
+                    } else if let Some((place, title)) = usize::try_from(action - 100)
+                        .ok()
+                        .and_then(|index| storage_choices.get(index))
+                        .cloned()
+                    {
+                        storage_confirmation = Some((place, title.clone()));
+                        platform::storage_menu(
+                            app,
+                            format!(
+                                "Close stored place?\n\n{title}\n\nYou will lose this stored unsaved position. Your game stays in the collection and will start with its current in-game saves. Other games and retained recovery files stay. This cannot be undone."
+                            ),
+                            vec![
+                                (18, "Keep stored place".into()),
+                                (41, "Close stored place · keep in-game saves".into()),
+                            ],
+                            runtime.as_ref().map_or(0, |r| r.events.epoch),
+                        );
                     }
                 }
                 Command::Library => {

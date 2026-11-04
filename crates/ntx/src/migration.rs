@@ -496,7 +496,10 @@ mod tests {
             &binding,
             true,
             b"unsaved test-only scene",
-            u64::MAX,
+            crate::resume_storage::Capacity {
+                available_bytes: u64::MAX,
+                remaining_resume_bytes: u64::MAX,
+            },
         )
         .unwrap();
         drop(native_store);

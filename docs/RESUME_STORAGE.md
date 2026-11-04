@@ -49,8 +49,7 @@ verification on Pixel4 observes four distinct16MiB title publications retaining
 one current scene each; normal joined Stop retires the accepted scene. Protected
 ordinary progress stays unchanged. Installed-build bounds remain in [state](state.toml).
 
-These source limits do not claim a finished storage-management UI or a global
-quota for the collection. GameCube now also bounds new scene writes to three
+GameCube also bounds new scene writes to three
 directory files including incomplete/unknown candidates, with a total budget
 derived from its existing256MiB payload ceiling. It checks the captured payload,
 bounded header and64MiB free-space reserve after the native card/SRAM flush.
@@ -64,11 +63,37 @@ or ordinary-data failure.
 Routine storage pressure must offer a clear decision while preserving current
 progress, rather than silently evicting another game's unsaved scene.
 
-Per-game bounds do not make an arbitrarily large collection free: each game with
-a retained exact resume still needs space, plus temporary publication headroom.
-A collection-wide budget and clear user choices for releasing resume space while
-keeping ordinary saves remain unfinished. Storage pressure must never silently
-discard another game's unsaved place.
+Portable Rust now additionally admits new machine files against a shared1GiB
+collection budget. It inventories both scene directories under every retained
+profile, including orphaned profiles and incomplete, legacy or unknown regular
+files. Logical file lengths count conservatively; media, ordinary saves and host
+preferences remain separate. Existing over-budget histories stay intact and
+block new writes. A bounded inventory refuses unsafe entries and symlinks instead
+of following them or guessing they are disposable.
+
+Both backend publication boundaries receive the actual host free-space observation
+and the remaining collection allowance separately, after ordinary progress commits.
+A new bounded container must fit both budgets, including overlap with its old
+scene. Verified identical complete files need no new allocation and remain reusable
+when the quota is full. Per-profile file/byte bounds and the64MiB filesystem reserve
+still apply. These observations are not reservations: the current foreground owner
+serializes capture/publication; future simultaneous writers need reservations at
+this boundary without redefining game or save identity.
+
+The library's Resume storage page shows aggregate and per-game machine usage.
+Closing an unloaded stored place requires a separate explicit confirmation that
+its unsaved position will be lost while its game and current in-game saves stay.
+The confirmation names the exact game/profile/media/scene and is invalidated by
+a changed reference or recovery state. Rust acquires the profile writer, validates
+the complete retained container and ownership, then durably clears its session
+reference before unlinking only that file. An uncertain metadata write retains
+the file and restores the prior in-memory reference; cleanup failure after durable
+metadata reports retained recovery bytes without rolling the metadata back.
+Live games use normal Stop/native join. Quarantined, incomplete, damaged and
+unknown candidates remain for review; this page is not a general recovery-data
+purge. Closing an incompatible old place does not load its core, attach newer
+saves to it, or modify ordinary progress. Storage pressure never silently discards
+another game's unsaved place.
 
 Checkpoint storage refusal is now classified separately from native execution,
 ordinary-save and uncertain collection-publication failure. After successful
@@ -118,3 +143,14 @@ title publishes normally before Stop retires it. Eight new captures were reviewe
 cards and independent ordinary/profile data stayed protected, with normal native
 SRAM updates retained and actual return verified. No gameplay/save/restore/timing
 campaign or historical-cure qualification follows.
+
+The collection quota and storage-page source has affected filesystem fixtures for
+cross-system/orphan totals, sparse oversized histories, publication headroom,
+unsafe entries, identical reuse, both ordinary-verified storage refusals and
+explicit close. Tests preserve newer ordinary progress, identities, errors and
+unknown candidates; live locks, stale confirmations, damaged/symlinked containers,
+uncertain metadata and failed retirement retain their safe boundaries. Host and
+ARM64 warnings-denied Rust lints and150 library tests pass. The affected standalone
+N64 inspector fixture passes; existing loopback-only transport tests pass on the
+host after the sandbox refused localhost binding. Packaging and this page's target observation
+remain separate from the older earned backend warning checks above.

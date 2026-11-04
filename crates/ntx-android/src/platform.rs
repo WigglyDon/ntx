@@ -226,6 +226,8 @@ pub enum Command {
     ApplyControls(u64, ntx::controls::Settings),
     ControlsBack(u64),
     About(u64),
+    Storage(u64),
+    StorageAction(u64, i32),
     Game(String),
     PinCurrent,
     Selected(String),
@@ -960,6 +962,7 @@ pub fn player_menu(app: &AndroidApp, runtime: u64, can_resume: bool, error: Opti
     actions.push((7, "Add game to Home screen".into()));
     actions.push((6, "Library".into()));
     actions.push((8, "Touch controls".into()));
+    actions.push((18, "Resume storage".into()));
     render_menu(app, true, text, actions, runtime);
 }
 pub fn menu_current(generation: u64) -> bool {
@@ -1177,6 +1180,9 @@ pub fn controls_menu(
 }
 pub fn about_menu(app: &AndroidApp) {
     render_menu(app,true,"ntx\nAlpha 1 · GameCube + N64\n\nYour games. Open, play, leave, return.\nMade by Machine Rhythm.\n\nBuilt with Dolphin and Mupen64Plus-Next. Original ntx work is MIT. The combined package follows applicable GPLv3 and component terms; no warranty.\nSource and notices: github.com/WigglyDon/ntx".into(),vec![(6,"Back to your games".into())],0);
+}
+pub fn storage_menu(app: &AndroidApp, text: String, actions: Vec<(i32, String)>, runtime: u64) {
+    render_menu(app, true, text, actions, runtime);
 }
 pub fn n64_controls_menu(
     app: &AndroidApp,
@@ -1785,12 +1791,14 @@ extern "system" fn Java_com_machinerhythm_ntx_NtxActivity_uiAction(
         }
         11 => push(Command::ControlsBack(menu as u64)),
         17 => push(Command::ConfirmLegacyMedia(menu as u64)),
+        18 => push(Command::Storage(menu as u64)),
+        41 | 100..=4195 => push(Command::StorageAction(menu as u64, action)),
         20..=40 if controls_ui::action(&mut env, action, menu as u64).is_err() => {
             let _ = env.exception_clear();
         }
         _ => {}
     }
-    if matches!(action, 1..=17 | 20..=40) {
+    if matches!(action, 1..=18 | 20..=41 | 100..=4195) {
         feedback(&mut env, &activity);
     }
 }

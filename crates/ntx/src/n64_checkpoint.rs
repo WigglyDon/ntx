@@ -4,12 +4,14 @@
 use crate::{
     library::valid_id,
     n64_save::{Generation, SaveStore},
+    resume_storage::Capacity,
     storage,
 };
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use std::{
     fs::{self, File},
-    io,
+    io::{self, Read},
     path::{Path, PathBuf},
 };
 const MAGIC: &[u8; 8] = b"NTXN6401";
@@ -28,7 +30,7 @@ pub fn publish_captured(
     binding: &Binding,
     store: &SaveStore,
     payload: &[u8],
-    available: io::Result<u64>,
+    available: io::Result<Capacity>,
 ) -> Result<String, crate::lifecycle::CheckpointError> {
     use crate::lifecycle::CheckpointError;
     binding.validate()?;
@@ -50,16 +52,17 @@ pub fn publish_captured(
 
 /// Host adapters supply their observed free space; policy remains portable.
 /// This is admission, not a reservation: atomic writes must still handle failure.
-pub fn admit_capture(profile: &Path, payload_bytes: usize, available: u64) -> io::Result<()> {
+pub fn admit_capture(profile: &Path, payload_bytes: usize, available: Capacity) -> io::Result<()> {
     if payload_bytes == 0 || payload_bytes as u64 > LIMIT {
         return Err(error("Invalid N64 scene size"));
     }
     let needed = payload_bytes as u64 + 65548 + crate::n64::SAVE_IMAGE_BYTES as u64;
-    if available < needed + FREE_SPACE_RESERVE {
+    if available.available_bytes < needed + FREE_SPACE_RESERVE {
         return Err(error(
             "Not enough free space to keep your current place. In-game saves and previous recovery data are kept.",
         ));
     }
+    available.admit_new_file(payload_bytes as u64 + 65548)?;
     let dir = path(profile, &"0".repeat(64))?
         .parent()
         .unwrap()
@@ -165,7 +168,7 @@ pub fn publish(
     binding: &Binding,
     store: &SaveStore,
     payload: &[u8],
-    available: u64,
+    available: Capacity,
 ) -> io::Result<String> {
     binding.validate()?;
     store.ensure_profile(profile)?;
@@ -247,6 +250,53 @@ pub fn load(
     };
     state.verify_current(store)?;
     Ok(state)
+}
+
+/// Validate retained bytes and their own binding without attaching newer saves
+/// or loading a core. This evidence alone never authorizes a native restore.
+pub fn inspect_retained(profile: &Path, id: &str) -> io::Result<Binding> {
+    let source = path(profile, id)?;
+    let info = source.symlink_metadata()?;
+    if !info.is_file() || info.len() < 12 || info.len() > FILE_LIMIT {
+        return Err(error("Invalid retained N64 scene"));
+    }
+    let mut file = File::open(source)?;
+    let mut header = [0; 12];
+    file.read_exact(&mut header)?;
+    let size = u32::from_le_bytes(header[8..].try_into().unwrap()) as usize;
+    if &header[..8] != MAGIC || size > 65536 {
+        return Err(error("Unknown retained N64 scene format"));
+    }
+    let mut bytes = vec![0; size];
+    file.read_exact(&mut bytes)?;
+    let metadata: Metadata = serde_json::from_slice(&bytes)?;
+    metadata.binding.validate()?;
+    if metadata.schema != 1
+        || metadata.payload_bytes == 0
+        || metadata.payload_bytes as u64 > LIMIT
+        || info.len() != 12 + size as u64 + metadata.payload_bytes as u64
+    {
+        return Err(error("Partial retained N64 scene"));
+    }
+    let mut container = Sha256::new();
+    container.update(header);
+    container.update(bytes);
+    let mut payload = Sha256::new();
+    let mut buffer = [0; 65536];
+    loop {
+        let count = file.read(&mut buffer)?;
+        if count == 0 {
+            break;
+        }
+        container.update(&buffer[..count]);
+        payload.update(&buffer[..count]);
+    }
+    if format!("{:x}", container.finalize()) != id
+        || format!("{:x}", payload.finalize()) != metadata.payload_sha256
+    {
+        return Err(error("Damaged retained N64 scene"));
+    }
+    Ok(metadata.binding)
 }
 /// Retained scenes, including recovery candidates, pin their ordinary images.
 /// Call after an acknowledged ordinary reference while retaining the profile
@@ -357,6 +407,13 @@ pub fn discard_successful(profile: &Path, id: &str) -> io::Result<()> {
 
 #[cfg(test)]
 mod tests {
+    fn space(available_bytes: u64) -> crate::resume_storage::Capacity {
+        crate::resume_storage::Capacity {
+            available_bytes,
+            remaining_resume_bytes: u64::MAX,
+        }
+    }
+
     use super::*;
     fn setup(name: &str) -> (PathBuf, SaveStore, Binding) {
         let root =
@@ -380,11 +437,47 @@ mod tests {
         fs::read_dir(root.join("n64-checkpoints")).unwrap().count()
     }
     #[test]
+    fn collection_quota_refusal_keeps_current_progress_and_reuses_identical_bytes() {
+        use crate::lifecycle::CheckpointError;
+        let (root, store, binding) = setup("collection-quota");
+        let old = publish(&root, &binding, &store, b"current", space(u64::MAX)).unwrap();
+        let ordinary = store.generation().cloned();
+        let full = Capacity {
+            available_bytes: u64::MAX,
+            remaining_resume_bytes: 0,
+        };
+        assert!(matches!(
+            publish_captured(&root, &binding, &store, b"next", Ok(full)),
+            Err(CheckpointError::StorageUnavailable(_))
+        ));
+        assert_eq!(store.generation(), ordinary.as_ref());
+        store.verify_current().unwrap();
+        assert_eq!(
+            load(&root, &old, &binding, &store).unwrap().payload,
+            b"current"
+        );
+        assert_eq!(
+            publish(&root, &binding, &store, b"current", full).unwrap(),
+            old
+        );
+        let exact = Capacity {
+            remaining_resume_bytes: 4 + 65548,
+            ..full
+        };
+        let next = publish(&root, &binding, &store, b"next", exact).unwrap();
+        assert_eq!(
+            load(&root, &next, &binding, &store).unwrap().payload,
+            b"next"
+        );
+        drop(store);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
     fn different_profile_writer_cannot_publish_or_prune_another_games_data() {
         let (a, mut a_store, binding) = setup("writer-a");
         let (b, mut b_store, _) = setup("writer-b");
-        let id = publish(&a, &binding, &a_store, b"a scene", u64::MAX).unwrap();
-        assert!(publish(&a, &binding, &b_store, b"wrong writer", u64::MAX).is_err());
+        let id = publish(&a, &binding, &a_store, b"a scene", space(u64::MAX)).unwrap();
+        assert!(publish(&a, &binding, &b_store, b"wrong writer", space(u64::MAX)).is_err());
         assert!(load(&a, &id, &binding, &b_store).is_err());
         assert!(retire_ordinary_unreferenced(&a, &binding, &mut b_store).is_err());
         assert!(path(&a, &id).unwrap().exists());
@@ -398,13 +491,13 @@ mod tests {
     #[test]
     fn retry_preserves_an_existing_incomplete_scene_with_the_same_identity() {
         let (root, store, binding) = setup("same-pending");
-        let current = publish(&root, &binding, &store, b"current", u64::MAX).unwrap();
-        let next = publish(&root, &binding, &store, b"next", u64::MAX).unwrap();
+        let current = publish(&root, &binding, &store, b"current", space(u64::MAX)).unwrap();
+        let next = publish(&root, &binding, &store, b"next", space(u64::MAX)).unwrap();
         let destination = path(&root, &next).unwrap();
         fs::remove_file(&destination).unwrap();
         let pending = destination.with_file_name(format!("{next}.ntx.ntx-pending"));
         fs::write(&pending, b"uncertain original attempt").unwrap();
-        assert!(publish(&root, &binding, &store, b"next", u64::MAX).is_err());
+        assert!(publish(&root, &binding, &store, b"next", space(u64::MAX)).is_err());
         assert_eq!(fs::read(&pending).unwrap(), b"uncertain original attempt");
         assert!(!destination.exists());
         load(&root, &current, &binding, &store).unwrap();
@@ -416,12 +509,12 @@ mod tests {
     fn committed_capture_space_refusal_keeps_progress_writer_and_retries_without_restart() {
         use crate::lifecycle::CheckpointError;
         let (root, mut store, binding) = setup("live-storage");
-        let old = publish(&root, &binding, &store, b"old", u64::MAX).unwrap();
+        let old = publish(&root, &binding, &store, b"old", space(u64::MAX)).unwrap();
         let mut image = vec![0; crate::n64::SAVE_IMAGE_BYTES];
         image[0x800] = 42;
         let current = store.commit(&image).unwrap();
         assert!(matches!(
-            publish_captured(&root, &binding, &store, b"new", Ok(0)),
+            publish_captured(&root, &binding, &store, b"new", Ok(space(0))),
             Err(CheckpointError::StorageUnavailable(_))
         ));
         assert!(matches!(
@@ -444,7 +537,7 @@ mod tests {
         fs::write(&incomplete, b"preserve incomplete").unwrap();
         fs::write(&other, b"preserve other").unwrap();
         assert!(matches!(
-            publish_captured(&root, &binding, &store, b"new", Ok(u64::MAX)),
+            publish_captured(&root, &binding, &store, b"new", Ok(space(u64::MAX))),
             Err(CheckpointError::StorageUnavailable(_))
         ));
         assert_eq!(fs::read(&incomplete).unwrap(), b"preserve incomplete");
@@ -452,7 +545,7 @@ mod tests {
         // Only this synthetic fixture's independently known files are removed.
         fs::remove_file(incomplete).unwrap();
         fs::remove_file(other).unwrap();
-        let id = publish_captured(&root, &binding, &store, b"new", Ok(u64::MAX)).unwrap();
+        let id = publish_captured(&root, &binding, &store, b"new", Ok(space(u64::MAX))).unwrap();
         retire_previous(&root, &old, &id, &binding, &store).unwrap();
         assert_eq!(count(&root), 1);
         assert_eq!(
@@ -468,7 +561,7 @@ mod tests {
         use crate::lifecycle::CheckpointError;
         let (root, store, binding) = setup("live-quarantine");
         assert!(matches!(
-            publish_captured(&root, &binding, &store, b"", Ok(0)),
+            publish_captured(&root, &binding, &store, b"", Ok(space(0))),
             Err(CheckpointError::RecoveryRequired(_))
         ));
         let image = root.join("N64").join(format!(
@@ -477,7 +570,7 @@ mod tests {
         ));
         fs::write(&image, b"externally changed current image").unwrap();
         assert!(matches!(
-            publish_captured(&root, &binding, &store, b"scene", Ok(0)),
+            publish_captured(&root, &binding, &store, b"scene", Ok(space(0))),
             Err(CheckpointError::RecoveryRequired(_))
         ));
         assert_eq!(
@@ -496,10 +589,10 @@ mod tests {
             &binding,
             &store,
             b"unacknowledged recovery",
-            u64::MAX,
+            space(u64::MAX),
         )
         .unwrap();
-        let mut current = publish(&root, &binding, &store, b"current", u64::MAX).unwrap();
+        let mut current = publish(&root, &binding, &store, b"current", space(u64::MAX)).unwrap();
         let mut ordinary = vec![0; crate::n64::SAVE_IMAGE_BYTES];
         for n in 0..40 {
             ordinary[0x800] = n + 1;
@@ -509,7 +602,7 @@ mod tests {
                 &binding,
                 &store,
                 format!("next {n}").as_bytes(),
-                u64::MAX,
+                space(u64::MAX),
             )
             .unwrap();
             assert_eq!(count(&root), 3); // current, replacement and untouched recovery
@@ -546,15 +639,15 @@ mod tests {
     fn capacity_and_incomplete_candidates_refuse_new_bytes_without_losing_progress() {
         let (root, mut store, binding) = setup("capacity");
         let needed = FREE_SPACE_RESERVE + 65548 + crate::n64::SAVE_IMAGE_BYTES as u64 + 1;
-        assert!(publish(&root, &binding, &store, b"a", needed - 1).is_err());
+        assert!(publish(&root, &binding, &store, b"a", space(needed - 1)).is_err());
         assert!(!root.join("n64-checkpoints").exists());
-        let a = publish(&root, &binding, &store, b"a", needed).unwrap();
-        let b = publish(&root, &binding, &store, b"b", u64::MAX).unwrap();
+        let a = publish(&root, &binding, &store, b"a", space(needed)).unwrap();
+        let b = publish(&root, &binding, &store, b"b", space(u64::MAX)).unwrap();
         let pending = root.join("n64-checkpoints/interrupted.ntx-pending");
         fs::write(&pending, b"keep uncertain bytes").unwrap();
-        assert!(publish(&root, &binding, &store, b"c", u64::MAX).is_err());
+        assert!(publish(&root, &binding, &store, b"c", space(u64::MAX)).is_err());
         assert_eq!(count(&root), 3);
-        assert_eq!(publish(&root, &binding, &store, b"a", 0).unwrap(), a);
+        assert_eq!(publish(&root, &binding, &store, b"a", space(0)).unwrap(), a);
         assert!(retire_ordinary_unreferenced(&root, &binding, &mut store).is_err());
         assert!(path(&root, &a).unwrap().exists() && path(&root, &b).unwrap().exists());
         assert_eq!(fs::read(pending).unwrap(), b"keep uncertain bytes");
@@ -562,7 +655,7 @@ mod tests {
             store.load().unwrap().unwrap(),
             vec![0; crate::n64::SAVE_IMAGE_BYTES]
         );
-        assert!(admit_capture(&root, LIMIT as usize + 1, u64::MAX).is_err());
+        assert!(admit_capture(&root, LIMIT as usize + 1, space(u64::MAX)).is_err());
         drop(store);
         fs::remove_dir_all(root).unwrap();
     }
@@ -570,11 +663,11 @@ mod tests {
     fn retained_scenes_pin_ordinary_history_until_acknowledged_retirement() {
         let (root, mut store, binding) = setup("ordinary");
         let old_generation = store.generation().unwrap().clone();
-        let old = publish(&root, &binding, &store, b"old scene", u64::MAX).unwrap();
+        let old = publish(&root, &binding, &store, b"old scene", space(u64::MAX)).unwrap();
         let mut image = vec![0; crate::n64::SAVE_IMAGE_BYTES];
         image[0x800] = 7;
         let new_generation = store.commit(&image).unwrap();
-        let new = publish(&root, &binding, &store, b"new scene", u64::MAX).unwrap();
+        let new = publish(&root, &binding, &store, b"new scene", space(u64::MAX)).unwrap();
         retire_ordinary_unreferenced(&root, &binding, &mut store).unwrap();
         let old_image = root
             .join("N64")
@@ -608,11 +701,18 @@ mod tests {
             options_sha256: "c".repeat(64),
             architecture: "aarch64-android-gles3-mupen-state1".into(),
         };
-        let id = publish(&root, &binding, &store, b"retained native state", u64::MAX).unwrap();
+        let id = publish(
+            &root,
+            &binding,
+            &store,
+            b"retained native state",
+            space(u64::MAX),
+        )
+        .unwrap();
         let scene = load(&root, &id, &binding, &store).unwrap();
         ordinary[0] = 9;
         store.commit(&ordinary).unwrap();
-        assert!(publish(&root, &binding, &store, b"new scene cannot fit", 0).is_err());
+        assert!(publish(&root, &binding, &store, b"new scene cannot fit", space(0)).is_err());
         assert!(scene.verify_current(&store).is_err());
         assert!(load(&root, &id, &binding, &store).is_err());
         binding.game_id = "b".repeat(32);

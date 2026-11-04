@@ -24,9 +24,15 @@ geometry has model coverage. Sibling owners were informed, never modified here.
 
 ## Current installed result and next repair
 
-Installed sourceaf0230ef0e6f3b80c3f6716a2bfced8901bf5223,
-APK6829b98b146ec85d1222171d9cbc1d796277bf5549c15adceeaa4ee0dd4ff71a,
-core2426bddb80e57891c17b58f0ab057973a2089388086e76aacc6bbc83249026b0.
+Installed sourcecf84b0524b06ff80bb284995f2fd3ee8456d0ce9,
+APKd92614bbe3862e8c64a0086d121d10bf2eda7116dd5be94d22193448d930fd12,
+core1a2273cbbc5158030abfc89ce458dc4ddd45429680f85f312c739863d31617d9.
+The compatible update retained all current data/identities and rendered field/title.
+Its private checker omitted shlex before the scene assertion; that failure remains
+unqualified independently. Normal Stop/native join, protected progress/source/
+preferences and actual return verified. A corrected fresh no-install affected
+check is queued normally. Installed6829/sourceaf/core2426 remains rollback and
+owns the observer and GameCube warning results below; N64's warning bound stays036.
 Original signer, exact corresponding source, all raw native debug inputs and
 previous core76/candidate036 remain retained privately.
 
@@ -48,10 +54,9 @@ the original functions trap for HI/register32. All135198 emitted-operation cases
 per normal/UBSan-trap mode pass, including all flag bits/host slots, constants,
 missing/duplicate mappings and unchanged admission gates. Fourteen-patch exact
 source/ABI/helper fixtures, xtask lint and one-unit native build pass. New core
-1a2273cbbc5158030abfc89ce458dc4ddd45429680f85f312c739863d31617d9 is retained, uninstalled.
+1a2273cbbc5158030abfc89ce458dc4ddd45429680f85f312c739863d31617d9 is now installed at the bound above.
 The preceding13-only sourceb1afb88/APKdb3b08b6/core15d2 is checked and preserved
-but PREPARED ONLY, never requested. Package the combined correction, preserving
-installed6829/sourceaf/core2426 and old sources/symbols/scenes. No speed or hitch
+but PREPARED ONLY, never requested. Preserve6829/sourceaf/core2426 and old sources/symbols/scenes. No speed or hitch
 cure is established. Narrow actual function costs before more optimization.
 
 The installed GameCube storage-warning boundary now also passes with existing
@@ -66,19 +71,23 @@ with nine reviewed captures and independent data/return verification.
 [GameCube storage report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6639950810),
 [N64 storage report](https://github.com/WigglyDon/ntx/issues/5#issuecomment-6638969957).
 
-Next prepare the combined checked mask corrections as a signed source/binary pair,
-then a finite affected N64 check using existing OOT and its current ordinary data.
-Current WW SRAM/generation legitimately advanced during its native boundary;
-future protection must use actual current bytes, never reapply the earlier hash
-as a restoration target. Keep immutable cards/source/recovery candidates protected.
+The collection-wide1GiB machine-resume budget and Resume storage page are now
+implemented in Rust source, with150 library tests and host/ARM64 lints. Both capture paths observe
+host free space and aggregate machine allowance after ordinary commit; identical
+complete files reuse bytes when full. The page explicitly closes only a confirmed
+unloaded stored place, under its profile lock and after durable reference clearing.
+It keeps newer ordinary data, identities, errors and unknown recovery candidates.
+Live games still require normal Stop/join. See [storage policy](RESUME_STORAGE.md).
+Finish source review, then package/preserve this change and observe
+the affected storage UI using the existing demos. Do not infer target qualification
+from host fixtures or the separately queued native14 check.
 
-Per-game scene/recovery limits now cover N64 and GameCube. Identical complete
-GameCube scenes reuse verified bytes; pending/unknown candidates stay. A global
-collection quota and storage-management UI remain unfinished. See
-[storage policy](RESUME_STORAGE.md). Pixel4 keeps WW+OOT only; additional media
-must substitute under explicit scope, never accumulate. The Fold is the permanent
-library. Read .local/storage-cleanup-20261104.txt before old paths/backups; never
-rehydrate retired test history.
+Current WW SRAM/generation legitimately advanced during its native boundary;
+future protection must use actual current bytes, never reapply earlier hashes as
+restoration targets. Pixel4 keeps WW+OOT only; additional media must substitute
+under explicit scope, never accumulate. The Fold is the permanent library. Read
+.local/storage-cleanup-20261104.txt before old paths/backups; never rehydrate
+retired test history.
 
 A host restart interrupted the earlier target task. Its empty operator records
 remain evidence; cleanup-only recovery verified actual state/return, without

@@ -17,8 +17,17 @@ fn protected_copy_inspection_preserves_files_and_rejects_wrong_binding_or_save_b
         options_sha256: "e".repeat(64),
         architecture: "aarch64-android-gles3-mupen-state1".into(),
     };
-    let id =
-        n64_checkpoint::publish(&profile, &binding, &store, b"retained fixture", u64::MAX).unwrap();
+    let id = n64_checkpoint::publish(
+        &profile,
+        &binding,
+        &store,
+        b"retained fixture",
+        ntx::resume_storage::Capacity {
+            available_bytes: u64::MAX,
+            remaining_resume_bytes: u64::MAX,
+        },
+    )
+    .unwrap();
     drop(store);
     let paths = [
         profile.join("writer.lock"),

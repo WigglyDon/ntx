@@ -18,6 +18,7 @@ pub mod n64_controls;
 pub mod n64_save;
 pub mod n64_touch;
 pub mod presentation;
+pub mod resume_storage;
 pub mod scheduling;
 pub mod touch;
 pub mod viewport;
