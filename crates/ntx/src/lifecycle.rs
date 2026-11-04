@@ -3,6 +3,55 @@
 use crate::library::Collection;
 use std::sync::atomic::{AtomicU32, Ordering};
 
+/// Only a healthy, quiescent runtime with independently verified committed
+/// ordinary progress may report StorageUnavailable. Native/save failures remain
+/// recovery-required; storage pressure alone does not invalidate live RAM.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum CheckpointError {
+    StorageUnavailable(String),
+    RecoveryRequired(String),
+}
+impl std::fmt::Display for CheckpointError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::StorageUnavailable(message) | Self::RecoveryRequired(message) => {
+                f.write_str(message)
+            }
+        }
+    }
+}
+impl std::error::Error for CheckpointError {}
+impl From<String> for CheckpointError {
+    fn from(message: String) -> Self {
+        Self::RecoveryRequired(message)
+    }
+}
+impl From<&str> for CheckpointError {
+    fn from(message: &str) -> Self {
+        Self::RecoveryRequired(message.into())
+    }
+}
+impl From<std::io::Error> for CheckpointError {
+    fn from(error: std::io::Error) -> Self {
+        Self::RecoveryRequired(error.to_string())
+    }
+}
+impl CheckpointError {
+    /// Preserve all identities, durable references and any existing quarantine.
+    /// This never advertises process-death recovery from live RAM alone.
+    pub fn retain_live(&self, entry: &mut crate::library::SavedSession) -> bool {
+        let Self::StorageUnavailable(message) = self else {
+            return false;
+        };
+        if entry.stopped || entry.restart_required {
+            return false;
+        }
+        entry.paused = true;
+        entry.last_error = Some(message.chars().take(8192).collect());
+        true
+    }
+}
+
 /// A fixed budget for the narrow lifecycle diagnostic burst, shared by callbacks.
 /// It does not gate player behavior or collect per-frame data.
 pub struct DiagnosticBudget(AtomicU32);
@@ -258,6 +307,41 @@ mod tests {
             profile: None,
             _writer: None,
         })
+    }
+    #[test]
+    fn storage_warning_preserves_live_identity_and_never_clears_quarantine() {
+        let mut c = collection();
+        let before = serde_json::to_value(&c.entries[0]).unwrap();
+        let warning = CheckpointError::StorageUnavailable("resume space unavailable".into());
+        assert!(warning.retain_live(&mut c.entries[0]));
+        let mut expected = before;
+        expected["paused"] = true.into();
+        expected["last_error"] = "resume space unavailable".into();
+        assert_eq!(serde_json::to_value(&c.entries[0]).unwrap(), expected);
+        c.entries[0].fail("native restore failed".into());
+        let quarantined = serde_json::to_value(&c.entries[0]).unwrap();
+        assert!(!warning.retain_live(&mut c.entries[0]));
+        assert!(
+            !CheckpointError::RecoveryRequired("ordinary save changed".into())
+                .retain_live(&mut c.entries[0])
+        );
+        assert_eq!(serde_json::to_value(&c.entries[0]).unwrap(), quarantined);
+        c.entries[0].request_restart();
+        c.entries[0].stopped = true;
+        assert!(!warning.retain_live(&mut c.entries[0]));
+    }
+    #[test]
+    fn storage_warning_does_not_turn_live_ram_into_process_death_recovery() {
+        let mut c = collection();
+        c.entries[0].checkpoint = None;
+        let warning = CheckpointError::StorageUnavailable("no space".into());
+        assert!(warning.retain_live(&mut c.entries[0]));
+        assert!(!c.entries[0].restart_required && c.entries[0].runtime_incomplete);
+        let mut reopened: Collection =
+            serde_json::from_slice(&serde_json::to_vec(&c).unwrap()).unwrap();
+        assert!(reopened.entries[0].recover_interrupted());
+        assert!(reopened.entries[0].restart_required);
+        assert!(reopened.entries[0].checkpoint.is_none());
     }
     #[test]
     fn clean_stop_publishes_before_release_and_does_not_reboot_or_duplicate() {

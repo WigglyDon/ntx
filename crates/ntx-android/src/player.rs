@@ -253,6 +253,19 @@ fn save_checkpoint(
         }
     }
 }
+fn report_checkpoint_error(active: &LiveRuntime, error: Box<dyn std::error::Error>, context: &str) {
+    if let Some(error @ ntx::lifecycle::CheckpointError::StorageUnavailable(_)) =
+        error.downcast_ref::<ntx::lifecycle::CheckpointError>()
+    {
+        platform::push(Command::CheckpointStorage {
+            game_id: active.events.game_id.clone(),
+            epoch: active.events.epoch,
+            error: error.clone(),
+        });
+    } else {
+        platform::push(Command::Error(format!("{context}: {error}")));
+    }
+}
 fn pause_for_background(
     root: &Path,
     runtime: &mut Option<LiveRuntime>,
@@ -277,9 +290,7 @@ fn pause_for_background(
         && !collection.entries[index].restart_required
         && let Err(error) = save_checkpoint(active, root, collection, index)
     {
-        platform::push(Command::Error(format!(
-            "Could not checkpoint the game: {error}. Current saves and paused runtime retained."
-        )));
+        report_checkpoint_error(active, error, "Could not checkpoint the game");
     }
     *native_paused = Some(true);
 }
@@ -1813,9 +1824,11 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
                         let saved = save_checkpoint(active, &root, &mut collection, index);
                         if let Err(error) = saved {
                             native_paused = Some(true);
-                            platform::push(Command::Error(format!(
-                                "Could not leave the current game: {error}"
-                            )));
+                            report_checkpoint_error(
+                                active,
+                                error,
+                                "Could not leave the current game",
+                            );
                             continue;
                         }
                         let joined = active.join().and_then(|()| active.verify_departure());
@@ -1899,6 +1912,45 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
                     }
                 }
                 Command::Canceled => picker_pending = false,
+                Command::CheckpointStorage {
+                    game_id,
+                    epoch,
+                    error,
+                } => {
+                    let Some(index) = selected else { continue };
+                    // A delayed warning must never affect another instance/game
+                    // or undo a native/persistence quarantine raised meanwhile.
+                    if !runtime.as_ref().is_some_and(|active| {
+                        active.events.epoch == epoch
+                            && active.events.game_id == game_id
+                            && !active.failed()
+                            && !active.pending()
+                            && matches!(active.state(), 1 | 2)
+                    }) || collection.entries[index].game_id.0 != game_id
+                        || !error.retain_live(&mut collection.entries[index])
+                    {
+                        continue;
+                    }
+                    if let Ok(mut touch) = UI.lock() {
+                        touch.cancel();
+                    }
+                    runtime.as_mut().unwrap().pause(true);
+                    native_paused = Some(true);
+                    hidden = false;
+                    let persistence = if save_collection(&root, &collection).is_err() {
+                        "\nThis warning could not be recorded on disk."
+                    } else {
+                        ""
+                    };
+                    platform::player_menu(
+                        app,
+                        epoch,
+                        true,
+                        Some(format!(
+                            "A new resume could not be stored. In-game saves are kept. Your current place is held in memory: keep this app open. Resume to continue; pausing again retries storage.\n{error}{persistence}"
+                        )),
+                    );
+                }
                 Command::Error(error) => {
                     picker_pending = false;
                     if runtime.is_some()
@@ -2163,9 +2215,11 @@ fn run_owned(app: &AndroidApp) -> Result<()> {
                             && let Err(error) =
                                 save_checkpoint(active, &root, &mut collection, index)
                         {
-                            platform::push(Command::Error(format!(
-                                "Could not checkpoint the paused game: {error}"
-                            )));
+                            report_checkpoint_error(
+                                active,
+                                error,
+                                "Could not checkpoint the paused game",
+                            );
                         }
                         if save_collection(&root, &collection).is_err() {
                             if let Some(index) = selected {

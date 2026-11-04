@@ -20,6 +20,34 @@ pub const MAX_RETAINED_FILES: usize = 3;
 pub const FREE_SPACE_RESERVE: u64 = 64 * 1024 * 1024;
 const FILE_LIMIT: u64 = LIMIT + 65548;
 
+/// Called only after native capture and an independent ordinary-save commit.
+/// Host space observations are fallible. A checkpoint-only write failure leaves
+/// live RAM resumable only while the exact ordinary generation still verifies.
+pub fn publish_captured(
+    profile: &Path,
+    binding: &Binding,
+    store: &SaveStore,
+    payload: &[u8],
+    available: io::Result<u64>,
+) -> Result<String, crate::lifecycle::CheckpointError> {
+    use crate::lifecycle::CheckpointError;
+    binding.validate()?;
+    store.ensure_profile(profile)?;
+    store.verify_current()?;
+    if store.generation().is_none() || payload.is_empty() || payload.len() as u64 > LIMIT {
+        return Err(CheckpointError::RecoveryRequired(
+            "N64 capture has no valid ordinary generation or machine payload".into(),
+        ));
+    }
+    match available.and_then(|space| publish(profile, binding, store, payload, space)) {
+        Ok(id) => Ok(id),
+        Err(error) => {
+            store.verify_current()?;
+            Err(CheckpointError::StorageUnavailable(error.to_string()))
+        }
+    }
+}
+
 /// Host adapters supply their observed free space; policy remains portable.
 /// This is admission, not a reservation: atomic writes must still handle failure.
 pub fn admit_capture(profile: &Path, payload_bytes: usize, available: u64) -> io::Result<()> {
@@ -381,6 +409,82 @@ mod tests {
         assert!(!destination.exists());
         load(&root, &current, &binding, &store).unwrap();
         assert_eq!(count(&root), 2);
+        drop(store);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn committed_capture_space_refusal_keeps_progress_writer_and_retries_without_restart() {
+        use crate::lifecycle::CheckpointError;
+        let (root, mut store, binding) = setup("live-storage");
+        let old = publish(&root, &binding, &store, b"old", u64::MAX).unwrap();
+        let mut image = vec![0; crate::n64::SAVE_IMAGE_BYTES];
+        image[0x800] = 42;
+        let current = store.commit(&image).unwrap();
+        assert!(matches!(
+            publish_captured(&root, &binding, &store, b"new", Ok(0)),
+            Err(CheckpointError::StorageUnavailable(_))
+        ));
+        assert!(matches!(
+            publish_captured(
+                &root,
+                &binding,
+                &store,
+                b"new",
+                Err(error("space query failed"))
+            ),
+            Err(CheckpointError::StorageUnavailable(_))
+        ));
+        assert_eq!(store.generation(), Some(&current));
+        assert_eq!(store.load().unwrap().unwrap(), image);
+        assert!(crate::ProfileLock::acquire(&root).is_err());
+        assert!(path(&root, &old).unwrap().exists());
+        assert!(load(&root, &old, &binding, &store).is_err()); // old scene cannot flush over new saves
+        let incomplete = root.join("n64-checkpoints/fixture.ntx-pending");
+        let other = root.join("n64-checkpoints/other.ntx-pending");
+        fs::write(&incomplete, b"preserve incomplete").unwrap();
+        fs::write(&other, b"preserve other").unwrap();
+        assert!(matches!(
+            publish_captured(&root, &binding, &store, b"new", Ok(u64::MAX)),
+            Err(CheckpointError::StorageUnavailable(_))
+        ));
+        assert_eq!(fs::read(&incomplete).unwrap(), b"preserve incomplete");
+        assert_eq!(fs::read(&other).unwrap(), b"preserve other");
+        // Only this synthetic fixture's independently known files are removed.
+        fs::remove_file(incomplete).unwrap();
+        fs::remove_file(other).unwrap();
+        let id = publish_captured(&root, &binding, &store, b"new", Ok(u64::MAX)).unwrap();
+        retire_previous(&root, &old, &id, &binding, &store).unwrap();
+        assert_eq!(count(&root), 1);
+        assert_eq!(
+            load(&root, &id, &binding, &store).unwrap().ordinary,
+            current
+        );
+        assert_eq!(store.load().unwrap().unwrap(), image);
+        drop(store);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn malformed_capture_or_changed_ordinary_data_is_not_a_resumable_storage_warning() {
+        use crate::lifecycle::CheckpointError;
+        let (root, store, binding) = setup("live-quarantine");
+        assert!(matches!(
+            publish_captured(&root, &binding, &store, b"", Ok(0)),
+            Err(CheckpointError::RecoveryRequired(_))
+        ));
+        let image = root.join("N64").join(format!(
+            "{}.m64ram",
+            store.generation().unwrap().image_sha256
+        ));
+        fs::write(&image, b"externally changed current image").unwrap();
+        assert!(matches!(
+            publish_captured(&root, &binding, &store, b"scene", Ok(0)),
+            Err(CheckpointError::RecoveryRequired(_))
+        ));
+        assert_eq!(
+            fs::read(image).unwrap(),
+            b"externally changed current image"
+        );
+        assert!(!root.join("n64-checkpoints").exists());
         drop(store);
         fs::remove_dir_all(root).unwrap();
     }

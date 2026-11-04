@@ -216,6 +216,11 @@ pub enum Command {
     Canceled,
     MenuHidden(u64),
     Error(String),
+    CheckpointStorage {
+        game_id: String,
+        epoch: u64,
+        error: ntx::lifecycle::CheckpointError,
+    },
     Notice(String),
 }
 pub fn push(command: Command) {

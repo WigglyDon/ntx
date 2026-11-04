@@ -60,3 +60,15 @@ a retained exact resume still needs space, plus temporary publication headroom.
 A collection-wide budget and clear user choices for releasing resume space while
 keeping ordinary saves remain unfinished. Storage pressure must never silently
 discard another game's unsaved place.
+
+Checkpoint storage refusal is now classified separately from native execution,
+ordinary-save and uncertain collection-publication failure. After successful
+native capture and an independently verified ordinary commit, a checkpoint-only
+space/query/write error retains the healthy paused runtime and offers Resume.
+The warning says that the current place is in memory and requires keeping the
+app open; Resume then Pause retries storage. It never promises process-death
+recovery without a valid durable scene. Changed ordinary data, failed capture,
+pending restore and uncertain collection publication retain recovery handling.
+Warnings are scoped to the exact live game/runtime and never clear an existing
+quarantine. Portable tests pass; package and affected target warning/Resume
+verification remain pending for this continuation.

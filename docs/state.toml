@@ -409,3 +409,8 @@ apk_sha256 = "ef9808fcc06fb7940b0f215cfb509b672f44a6226c8c26255dbc9c66a62f052b"
 mupen_core_sha256 = "76c4621a83861c07558c442403d1f9a68e368e1754be50a7f5f0b27faab1e358"
 qualification = "Pixel4 compatible update and four distinct N64 title Pause publications: one current scene after each,16794066 bytes each; normal joined/durably published Stop leaves zero accepted scenes. All ten images opened. Current ordinary saves/cards/untouched profile/preferences/three identities and source installation preserved; verified return"
 limits = "Storage boundary only; no new gameplay, in-game Save, cold restore, audio or timing campaign. Earlier results retain original build bounds; hitches and historical incidents remain open. No collection-wide quota/storage-management UI claim"
+
+[checkpoint_storage_continuation_source]
+implementation = "Checkpoint-only storage/query/write failure after successful capture and verified ordinary commit retains healthy live RAM and offers Resume; fatal capture/save or uncertain collection-publication failure keeps recovery handling"
+identity = "GameId and runtime epoch scoped warning; never clear an existing quarantine or advertise RAM as durable process-death recovery"
+validation = "131 library tests and warnings-denied host all-targets/ARM64 Rust lints pass; focused warning/Resume target boundary pending"

@@ -24,7 +24,17 @@ geometry has model coverage. Sibling owners were informed, never modified here.
 
 ## Current installed result and next repair
 
-Owner storage request is now the priority: minimal lab media with the Fold as
+Continuation source now separates checkpoint-only storage refusal from fatal
+native/save failure: retain a verified healthy paused runtime and offer Resume,
+with an explicit RAM-only warning; do not clear quarantine or claim durable
+scene recovery. 131 library tests pass; package/target verification is pending.
+Installed source below remains its earned earlier bounds.
+
+Owner storage request is now the priority: Pixel4 has a fixed minimal demo set
+(WW+OOT); further media provisioning must substitute rather than accumulate.
+The Fold remains the permanent library. Engineering uses existing games.
+
+Minimal lab media with the Fold as
 the permanent library, preserving game/profile identities and ordinary progress.
 Read .local/storage-cleanup-20261104.txt before older phone paths or backup recipes.
 Do not rehydrate retired test history. Existing owners coordinate their own areas.

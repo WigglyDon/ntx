@@ -207,7 +207,7 @@ impl Runtime {
         self.retire_ordinary_history();
         Ok(())
     }
-    pub fn capture(&mut self) -> Result<String> {
+    pub fn capture(&mut self) -> std::result::Result<String, ntx::lifecycle::CheckpointError> {
         self.pause(true);
         if self.pending.is_some() {
             return Err("N64 restore is still pending".into());
@@ -222,9 +222,15 @@ impl Runtime {
         // machine resume cannot fit. Retained scenes still pin their old images.
         self.store.commit(&image).map_err(|e| e.to_string())?;
         self.retire_ordinary_history();
-        let available = crate::n64_host::available_storage(&self.path)?;
-        n64_checkpoint::publish(&self.path, &self.binding, &self.store, &payload, available)
-            .map_err(|e| e.to_string())
+        let available =
+            crate::n64_host::available_storage(&self.path).map_err(std::io::Error::other);
+        n64_checkpoint::publish_captured(
+            &self.path,
+            &self.binding,
+            &self.store,
+            &payload,
+            available,
+        )
     }
     /// Called only after the collection's new reference is durable. The paused
     /// native owner and SaveStore writer remain held through retirement.
